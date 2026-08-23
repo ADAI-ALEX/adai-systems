@@ -24,7 +24,7 @@ export function Studio() {
         />
 
         <div className="mt-12 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-          <Reveal className="rounded-2xl border border-rule bg-paper-raised p-7 sm:p-9">
+          <Reveal className="flex flex-col rounded-2xl border border-rule bg-paper-raised p-7 sm:p-9">
             <p className="meta-sm text-ink-faint">Contact</p>
             <a
               href={`mailto:${siteConfig.contactEmail}`}
@@ -32,12 +32,12 @@ export function Studio() {
             >
               {siteConfig.contactEmail}
             </a>
-            <p className="mt-5 max-w-[38ch] text-[0.9375rem] leading-relaxed text-ink-muted">
+            <p className="mb-9 mt-5 max-w-[46ch] text-[0.9375rem] leading-relaxed text-ink-muted">
               For new work, questions about anything in the archive, or support
               for one of the live products. One address, read by a person.
             </p>
 
-            <dl className="mt-9 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-rule pt-7">
+            <dl className="mt-auto grid grid-cols-2 gap-x-6 gap-y-5 border-t border-rule pt-7">
               {facts.map((fact) => (
                 <div key={fact.label}>
                   <dt className="meta-sm text-ink-faint">{fact.label}</dt>
