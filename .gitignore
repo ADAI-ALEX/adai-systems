@@ -55,3 +55,7 @@ next-env.d.ts
 # installed agent skills (third-party code; restore from skills-lock.json)
 /.agents
 /.claude
+
+# large review screenshots: regenerate with scripts/shoot.mjs
+/design/screenshots/*-768.jpg
+/design/screenshots/*-390.jpg
