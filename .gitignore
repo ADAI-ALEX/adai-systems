@@ -39,3 +39,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# private recon notes (this repo is public)
+*.private.md
+
+# reference screenshots of other people's sites: local only
+/references/**/*.png
+/references/**/*.jpg
+/references/**/*.jpeg
+/references/**/*.webp
+
+# playwright output
+/test-results
