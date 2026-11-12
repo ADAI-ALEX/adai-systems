@@ -1,277 +1,76 @@
 @import "tailwindcss";
 
-/* ---------------------------------------------------------------------------
-   ADAI Systems design tokens
-
-   The palette is Lockout's, with the page/card relationship inverted: Lockout
-   is a white product page with grey cards, ADAI is a paper page with white
-   cards lifted off it. Same ink, same hairlines, different ground — the two
-   sites read as one family without the parent looking like a second product.
-
-   There is no accent colour, on purpose. Project status is carried by the
-   shape of a mark rather than by hue (see .node-* below), which keeps the
-   archive readable in monochrome and stops eight statuses turning into eight
-   colours.
---------------------------------------------------------------------------- */
-:root {
-  --paper: #fafafa;
-  --paper-raised: #ffffff;
-  --ink: #18181b;
-  --ink-muted: #52525b;
-  /* zinc-500, not zinc-400: the faint step carries every date, index number and
-     status label on the site, all of it 10-11px uppercase mono. zinc-400 came
-     out at 2.5:1 on paper, which is unreadable small and fails AA outright.
-     This is 4.7:1, so the whole three-step ink scale clears AA. */
-  --ink-faint: #71717a;
-  --rule: #e4e4e7;
-  --rule-strong: #d4d4d8;
-  --surface-dark: #18181b;
-  --ink-inverse: #fafafa;
+/* Shared base only. Each direction scopes its own tokens under its root class. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
-@theme inline {
-  --color-paper: var(--paper);
-  --color-paper-raised: var(--paper-raised);
-  --color-ink: var(--ink);
-  --color-ink-muted: var(--ink-muted);
-  --color-ink-faint: var(--ink-faint);
-  --color-rule: var(--rule);
-  --color-rule-strong: var(--rule-strong);
-  --color-surface-dark: var(--surface-dark);
-  --color-ink-inverse: var(--ink-inverse);
-
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@layer base {
-  * {
-    border-color: var(--rule);
-  }
-
-  html {
-    scroll-behavior: smooth;
-    /* Clears the sticky header when jumping to a section anchor. */
-    scroll-padding-top: 5rem;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  body {
-    background-color: var(--paper);
-    color: var(--ink);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-  }
-
-  :focus-visible {
-    outline: 2px solid var(--ink);
-    outline-offset: 3px;
-    border-radius: 3px;
-  }
-
-  ::selection {
-    background-color: var(--ink);
-    color: var(--paper);
-  }
-
-  img,
-  svg {
-    -webkit-user-drag: none;
-    user-select: none;
-    -webkit-user-select: none;
-  }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
-@layer components {
-  /* -----------------------------------------------------------------------
-     Metadata type
-
-     The small uppercase mono line that carries dates, indices, statuses and
-     section numbers. It is the site's second voice: everything technical is
-     said in it, everything editorial is said in the sans.
-  ----------------------------------------------------------------------- */
-  .meta {
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    line-height: 1.2;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    font-weight: 500;
-  }
-
-  .meta-sm {
-    font-family: var(--font-mono);
-    font-size: 0.625rem;
-    line-height: 1.2;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    font-weight: 500;
-  }
-
-  /* -----------------------------------------------------------------------
-     Status marks
-
-     Six-pixel glyphs that encode a project's status by form: filled for live
-     work, hollow for stopped work, ringed for research, barred for private.
-     Rendered as a span with a border, so they cost nothing and inherit
-     `currentColor` — a mark on a dark section inverts for free.
-  ----------------------------------------------------------------------- */
-  .node {
-    display: inline-block;
-    width: var(--node-size, 0.5rem);
-    height: var(--node-size, 0.5rem);
-    flex: none;
-    border-radius: 9999px;
-    border: 1.5px solid currentColor;
-  }
-
-  /* Active — solid. The only completely filled mark on the page. */
-  .node-active {
-    background-color: currentColor;
-  }
-
-  /* Discontinued — hollow. */
-  .node-discontinued {
-    background-color: transparent;
-  }
-
-  /* On hold — hollow, with the ring thickened so it reads as paused, not gone. */
-  .node-on-hold {
-    background-color: transparent;
-    border-width: 2.5px;
-  }
-
-  /* Research — a dot inside the ring, drawn out of currentColor alone so the
-     mark is correct on paper, on a white card and on the dark section. */
-  .node-research {
-    background-color: transparent;
-    background-image: radial-gradient(
-      circle,
-      currentColor 0 34%,
-      transparent 36%
-    );
-  }
-
-  /* Private — a square, so it is distinguishable without colour or a label. */
-  .node-private {
-    border-radius: 1px;
-    background-color: transparent;
-  }
-
-  /* -----------------------------------------------------------------------
-     Blueprint field
-
-     A one-pixel technical grid, at the opacity of a pencil guide. Used behind
-     the hero and the map so the page reads as drawn on something rather than
-     floating. `--grid` sets the cell size.
-  ----------------------------------------------------------------------- */
-  .grid-field {
-    --grid: 72px;
-    background-image:
-      linear-gradient(to right, var(--rule) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--rule) 1px, transparent 1px);
-    background-size: var(--grid) var(--grid);
-    opacity: 0.55;
-  }
+/* Holding styles for the legal pages until the chosen direction replaces them. */
+.legal {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 3rem 1.25rem 6rem;
+  font: 1.0625rem/1.7 ui-sans-serif, system-ui, sans-serif;
+  color: #16161a;
 }
-
-@layer utilities {
-  /* Scroll reveal. The observer lives in <Reveal>; the motion lives here. */
-  .reveal {
-    opacity: 0;
-    transform: translateY(14px);
-    transition:
-      opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-    transition-delay: var(--reveal-delay, 0ms);
-  }
-
-  .reveal[data-revealed="true"] {
-    opacity: 1;
-    transform: none;
-  }
-
-  /* Load entrance, for the hero only. */
-  .enter {
-    animation: enter 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
-    animation-delay: var(--enter-delay, 0ms);
-  }
-
-  @keyframes enter {
-    from {
-      opacity: 0;
-      transform: translateY(18px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-
-  /* The hero diagram draws itself in: hairlines first, then the nodes. */
-  .draw-line {
-    stroke-dasharray: var(--len, 400);
-    stroke-dashoffset: var(--len, 400);
-    animation: draw 1.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-    animation-delay: var(--enter-delay, 0ms);
-  }
-
-  @keyframes draw {
-    to {
-      stroke-dashoffset: 0;
-    }
-  }
-
-  .fade-node {
-    opacity: 0;
-    animation: fade-node 0.8s ease-out both;
-    animation-delay: var(--enter-delay, 0ms);
-  }
-
-  @keyframes fade-node {
-    to {
-      opacity: 1;
-    }
-  }
-
-  .press {
-    transition: scale 140ms cubic-bezier(0.2, 0, 0.2, 1);
-  }
-
-  .press:active {
-    scale: 0.97;
-  }
+.legal-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: #5b5b66;
+  border-bottom: 1px solid #dcdce2;
+  padding-bottom: 1rem;
 }
-
-/* Honour the OS motion preference: everything simply present, nothing moving. */
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-
-  .reveal {
-    opacity: 1;
-    transform: none;
-  }
-
-  .draw-line {
-    stroke-dashoffset: 0;
-  }
-
-  .fade-node {
-    opacity: 1;
-  }
-
-  .press:active {
-    scale: 1;
-  }
+.legal h1 {
+  font-size: clamp(2.25rem, 6vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin-top: 3rem;
+}
+.legal-intro {
+  margin-top: 1.5rem;
+  font-size: 1.125rem;
+  color: #45454f;
+}
+.legal-body h2 {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #dcdce2;
+  font-size: 1.25rem;
+  font-weight: 650;
+}
+.legal-body p,
+.legal-body ul {
+  margin-top: 1.25rem;
+}
+.legal-body ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+}
+.legal a {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.legal a:focus-visible {
+  outline: 2px solid #16161a;
+  outline-offset: 3px;
 }
