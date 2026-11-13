@@ -1,0 +1,939 @@
+/* Direction C: Orbit.
+   Flat colour fields, discs, and a soft heavy serif. The lineage is a map
+   you can pick up and move. */
+
+.orbit {
+  --blue: #2038ec;
+  --night: #0d1440;
+  --sun: #ffe45c;
+  --hot: #ff5a3c;
+  --mint: #b9f2d0;
+  --cloud: #f2f0ea;
+  --cream: #fff8e8;
+  --ink: #0d1440;
+  --round: 1.5rem;
+  --gutter: clamp(1rem, 3vw, 3rem);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --display: var(--font-serif), Georgia, serif;
+
+  background: var(--blue);
+  color: var(--cream);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  overflow-x: clip;
+}
+
+.orbit ::selection {
+  background: var(--sun);
+  color: var(--ink);
+}
+.orbit :focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+  border-radius: 0.5rem;
+}
+
+.orbit .skip {
+  position: absolute;
+  left: -999px;
+  top: 0.5rem;
+  z-index: 50;
+  background: var(--sun);
+  color: var(--ink);
+  padding: 0.6rem 1rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+}
+.orbit .skip:focus {
+  left: 0.5rem;
+}
+
+/* Shared type and parts ---------------------------------------------------- */
+
+.orbit h1,
+.orbit h2,
+.orbit h3,
+.orbit .facts dd,
+.orbit .sphere,
+.orbit .mail,
+.orbit .blank {
+  font-family: var(--display);
+  font-variation-settings: "SOFT" 100, "WONK" 0;
+  font-weight: 800;
+  line-height: 0.96;
+  letter-spacing: -0.025em;
+}
+.orbit .small {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  opacity: 0.78;
+}
+.orbit .pitch {
+  font-size: clamp(1.25rem, 1.9vw, 1.625rem);
+  font-weight: 600;
+  line-height: 1.22;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.orbit .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  min-height: 3rem;
+  padding: 0 1.4rem;
+  border: 2.5px solid currentColor;
+  border-radius: 1rem;
+  font-weight: 600;
+  transition: transform 300ms var(--spring);
+}
+.orbit .btn:hover {
+  transform: scale(1.05);
+}
+.orbit .btn:active {
+  transform: scale(0.96);
+}
+.orbit .btn-sun {
+  background: var(--sun);
+  border-color: var(--sun);
+  color: var(--ink);
+}
+.orbit .links,
+.orbit .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.orbit .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.3rem 0.7rem 0.3rem 0.6rem;
+  border-radius: 0.6rem;
+  background: var(--cream);
+  color: var(--ink);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.orbit .chip::before {
+  content: "";
+  width: 0.6em;
+  height: 0.6em;
+  border-radius: 50%;
+  background: var(--ink);
+}
+.orbit .chip[data-status="live"],
+.orbit .chip[data-status="active"] {
+  background: var(--ink);
+  color: var(--sun);
+}
+.orbit .chip[data-status="live"]::before,
+.orbit .chip[data-status="active"]::before {
+  background: var(--sun);
+}
+.orbit .chip[data-status="open-source"] {
+  background: var(--mint);
+}
+.orbit .chip[data-status="research"]::before,
+.orbit .chip[data-status="on-hold"]::before,
+.orbit .chip[data-status="discontinued"]::before {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+.orbit .state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.orbit .facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem clamp(1.5rem, 3vw, 2.75rem);
+  margin-top: 1.75rem;
+}
+.orbit .facts dd {
+  font-size: clamp(2rem, 3.4vw, 3.25rem);
+}
+.orbit .facts dt {
+  margin-top: 0.3rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.orbit .points {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  max-width: 52ch;
+}
+.orbit .points li {
+  position: relative;
+  padding-left: 1.5em;
+}
+.orbit .points li::before {
+  content: "";
+  position: absolute;
+  left: 0.1em;
+  top: 0.42em;
+  width: 0.65em;
+  height: 0.65em;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Top bar ------------------------------------------------------------------ */
+
+.orbit .top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 var(--gutter);
+  min-height: 4rem;
+}
+.orbit .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex: none;
+  font-weight: 700;
+  white-space: nowrap;
+  padding: 0.75rem 0;
+}
+.orbit .brand img {
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  max-width: none;
+}
+.orbit .top nav {
+  display: flex;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.orbit .top nav a {
+  padding: 0.9rem 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border-radius: 0.75rem;
+}
+.orbit .top nav a:hover {
+  background: var(--sun);
+  color: var(--ink);
+}
+
+/* Hero and the map --------------------------------------------------------- */
+
+.orbit .hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.5fr);
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "copy map"
+    "card map";
+  gap: 1.5rem clamp(1.5rem, 3vw, 3rem);
+  min-height: calc(100svh - 4rem);
+  padding: clamp(0.5rem, 2vw, 1.5rem) var(--gutter) calc(var(--gutter) + 2.5rem);
+}
+.orbit .hero-copy {
+  grid-area: copy;
+  align-self: start;
+}
+.orbit h1 {
+  font-size: clamp(2.75rem, 4.8vw, 5.25rem);
+  text-wrap: balance;
+}
+.orbit .lede {
+  margin-top: 1.25rem;
+  font-size: clamp(1.125rem, 1.5vw, 1.3125rem);
+  line-height: 1.4;
+  max-width: 34ch;
+}
+.orbit .hint {
+  margin-top: 0.75rem;
+  max-width: 40ch;
+  color: var(--sun);
+  font-weight: 500;
+}
+.orbit .map {
+  display: contents;
+}
+.orbit .map-frame {
+  grid-area: map;
+  position: relative;
+  min-height: 34rem;
+  height: 100%;
+}
+.orbit .map-frame svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.orbit .edges line {
+  stroke: var(--cream);
+  stroke-opacity: 0.3;
+  stroke-width: 1.5;
+  transition: stroke-opacity 200ms linear;
+}
+.orbit .edges line[data-lit="true"] {
+  stroke: var(--sun);
+  stroke-opacity: 1;
+  stroke-width: 2.5;
+}
+.orbit .node {
+  cursor: grab;
+  touch-action: none;
+  outline: none;
+  transition: opacity 200ms linear;
+}
+.orbit .node:active {
+  cursor: grabbing;
+}
+.orbit .node {
+  --fill: var(--cream);
+  --stroke: transparent;
+}
+.orbit .node .disc {
+  fill: var(--fill);
+  stroke: var(--stroke);
+  stroke-width: 2.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 350ms var(--spring);
+}
+.orbit .node:hover .disc,
+.orbit .node:focus-visible .disc {
+  transform: scale(1.1);
+}
+.orbit .node[data-status="live"],
+.orbit .node[data-status="active"] {
+  --fill: var(--sun);
+}
+.orbit .node[data-status="open-source"] {
+  --fill: var(--mint);
+}
+.orbit .node[data-status="research"],
+.orbit .node[data-status="on-hold"],
+.orbit .node[data-status="discontinued"] {
+  --fill: var(--blue);
+  --stroke: var(--cream);
+}
+/* Dimmed discs stay solid so the lines never show through them. */
+.orbit .node[data-dim="true"] .disc {
+  fill: color-mix(in srgb, var(--fill) 34%, var(--blue));
+  stroke: color-mix(in srgb, var(--stroke) 34%, var(--blue));
+}
+.orbit .node[data-dim="true"] text {
+  opacity: 0.5;
+}
+.orbit .node[data-status="on-hold"] .disc,
+.orbit .node[data-status="discontinued"] .disc {
+  stroke-dasharray: 5 6;
+}
+.orbit .node .halo {
+  fill: none;
+  stroke: var(--sun);
+  stroke-width: 2.5;
+  opacity: 0;
+}
+.orbit .node[data-selected="true"] .halo {
+  opacity: 1;
+}
+.orbit .node:focus-visible .halo {
+  opacity: 1;
+  stroke: var(--cream);
+  stroke-dasharray: 3 5;
+}
+.orbit .node text {
+  fill: var(--cream);
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: none;
+  user-select: none;
+}
+
+.orbit .card {
+  grid-area: card;
+  align-self: end;
+  padding: clamp(1.25rem, 2vw, 1.75rem);
+  border-radius: var(--round);
+  background: var(--sun);
+  color: var(--ink);
+}
+.orbit .card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.orbit .card h2 {
+  margin-top: 0.9rem;
+  font-size: clamp(1.75rem, 2.6vw, 2.5rem);
+}
+.orbit .card-pitch {
+  margin-top: 0.6rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.orbit .card-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  margin-top: 0.9rem;
+}
+.orbit .card-links a,
+.orbit .card-links-list button {
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.22em;
+  cursor: pointer;
+}
+.orbit .card-links a:hover,
+.orbit .card-links-list button:hover {
+  background: var(--ink);
+  color: var(--sun);
+  text-decoration-color: transparent;
+}
+.orbit .card-links-list {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--ink);
+  font-size: 0.9375rem;
+  line-height: 1.35;
+}
+.orbit .card-links-list button {
+  min-height: 1.5rem;
+  margin-right: 0.5em;
+  text-align: left;
+}
+
+/* Bands: each one slides over the last like a sheet. ----------------------- */
+
+.orbit .band {
+  position: relative;
+  margin-top: -2.5rem;
+  padding: clamp(3.5rem, 7vw, 6.5rem) var(--gutter) calc(clamp(3.5rem, 7vw, 6.5rem) + 2.5rem);
+  border-radius: 2.5rem 2.5rem 0 0;
+  scroll-margin-top: 0;
+}
+.orbit .band-sun {
+  background: var(--sun);
+  color: var(--ink);
+}
+.orbit .band-cloud {
+  background: var(--cloud);
+  color: var(--ink);
+}
+.orbit .band-night {
+  background: var(--night);
+  color: var(--cream);
+}
+.orbit .band-mint {
+  background: var(--mint);
+  color: var(--ink);
+}
+.orbit .band-blue {
+  background: var(--blue);
+  color: var(--cream);
+}
+.orbit .band-hot {
+  background: var(--hot);
+  color: var(--ink);
+}
+.orbit .head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+  gap: 1rem 3rem;
+  align-items: end;
+  margin-bottom: clamp(2rem, 4vw, 3.5rem);
+}
+.orbit .head h2,
+.orbit .band-hot h2 {
+  font-size: clamp(2.75rem, 7vw, 6.5rem);
+  text-wrap: balance;
+}
+.orbit .head p {
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.orbit .duo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: clamp(1.5rem, 4vw, 4.5rem);
+  align-items: center;
+}
+.orbit .duo + .duo {
+  margin-top: clamp(3rem, 6vw, 6rem);
+}
+.orbit .duo-flip {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+}
+.orbit .duo-flip > :first-child {
+  order: 2;
+}
+.orbit .duo h3 {
+  margin: 1rem 0;
+  font-size: clamp(3rem, 6.4vw, 6rem);
+}
+.orbit .duo > div > p:not([class]) {
+  margin-top: 0.9rem;
+  max-width: 54ch;
+}
+.orbit .duo .small {
+  margin-top: 1.25rem;
+  max-width: 50ch;
+}
+.orbit .stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(0.5rem, 1.2vw, 1.25rem);
+  align-items: center;
+  padding: clamp(1rem, 3vw, 3rem);
+}
+.orbit .stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: min(100%, 34rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--hot);
+}
+.orbit .stage img {
+  position: relative;
+  width: 100%;
+  height: auto;
+  border: 3px solid var(--ink);
+  border-radius: clamp(14px, 1.7vw, 26px);
+  background: var(--ink);
+  transition: transform 400ms var(--spring);
+}
+.orbit .stage img:nth-child(2) {
+  transform: translateY(8%);
+}
+.orbit .stage img:hover {
+  transform: translateY(-3%);
+}
+.orbit .frame {
+  padding: clamp(0.5rem, 1vw, 0.9rem);
+  border-radius: var(--round);
+  background: var(--night);
+}
+.orbit .frame img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 0.75rem;
+}
+.orbit .pixel {
+  image-rendering: pixelated;
+}
+
+.orbit .more {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14.5rem), 1fr));
+  gap: 1rem;
+  margin-top: clamp(3rem, 6vw, 5rem);
+}
+.orbit .more li {
+  padding: 1.5rem;
+  border-radius: var(--round);
+  background: #fff;
+  transition: transform 300ms var(--spring);
+}
+.orbit .more li:hover {
+  transform: translateY(-4px);
+}
+.orbit .more .chip {
+  background: var(--cloud);
+}
+.orbit .more .chip[data-status="open-source"] {
+  background: var(--mint);
+}
+.orbit .more h3 {
+  margin: 1rem 0 0.6rem;
+  font-size: 1.75rem;
+}
+.orbit .more .small {
+  margin-top: 0.75rem;
+}
+
+/* Archive ------------------------------------------------------------------ */
+
+.orbit .lineage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 0;
+  margin-bottom: clamp(2rem, 4vw, 3rem);
+  font-weight: 600;
+}
+.orbit .lineage li {
+  display: inline-flex;
+  align-items: center;
+}
+.orbit .lineage li::before {
+  content: "";
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--sun);
+  margin-right: 0.5rem;
+}
+.orbit .lineage li:not(:last-child)::after {
+  content: "";
+  width: 1.75rem;
+  height: 2px;
+  background: rgb(255 248 232 / 0.4);
+  margin: 0 0.6rem;
+}
+.orbit .toggles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+.orbit .toggles button {
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border: 2px solid rgb(255 248 232 / 0.45);
+  border-radius: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 250ms var(--spring);
+}
+.orbit .toggles button:hover {
+  border-color: var(--sun);
+  transform: scale(1.04);
+}
+.orbit .toggles button:active {
+  transform: scale(0.96);
+}
+.orbit .toggles button[aria-pressed="true"] {
+  background: var(--sun);
+  border-color: var(--sun);
+  color: var(--ink);
+}
+.orbit .toggles span {
+  margin-left: auto;
+  font-weight: 600;
+  opacity: 0.8;
+}
+.orbit .timeline li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 9.5rem 1.25rem minmax(0, 1fr);
+  gap: 0 1.5rem;
+  padding-bottom: 1.75rem;
+}
+.orbit .timeline li::before {
+  content: "";
+  position: absolute;
+  left: calc(9.5rem + 1.5rem + 0.625rem - 1px);
+  top: 0.5rem;
+  bottom: -0.5rem;
+  width: 2px;
+  background: rgb(255 248 232 / 0.3);
+}
+.orbit .timeline li:last-child::before {
+  display: none;
+}
+.orbit .t-date {
+  padding-top: 0.3rem;
+  text-align: right;
+  font-size: 0.875rem;
+  font-weight: 600;
+  opacity: 0.8;
+}
+.orbit .t-disc {
+  position: relative;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.3rem;
+  border-radius: 50%;
+  background: var(--cream);
+  box-shadow: 0 0 0 5px var(--night);
+}
+.orbit .timeline li[data-status="live"] .t-disc,
+.orbit .timeline li[data-status="active"] .t-disc {
+  background: var(--sun);
+}
+.orbit .timeline li[data-status="open-source"] .t-disc {
+  background: var(--mint);
+}
+.orbit .timeline li[data-status="research"] .t-disc,
+.orbit .timeline li[data-status="on-hold"] .t-disc,
+.orbit .timeline li[data-status="discontinued"] .t-disc {
+  background: var(--night);
+  border: 2.5px solid var(--cream);
+}
+.orbit .timeline h3 {
+  font-size: clamp(1.5rem, 2.6vw, 2.25rem);
+}
+.orbit .t-state {
+  margin: 0.35rem 0 0.25rem;
+  color: var(--sun);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.orbit .timeline li div > p:last-child {
+  max-width: 60ch;
+  opacity: 0.85;
+}
+
+/* Domains ------------------------------------------------------------------ */
+
+.orbit .spheres {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: clamp(2rem, 4vw, 3.5rem) var(--gutter);
+}
+.orbit .spheres li {
+  display: grid;
+  grid-template-rows: 9.5rem auto auto auto;
+  align-items: end;
+}
+.orbit .sphere {
+  display: grid;
+  place-items: center;
+  width: calc(3.5rem + var(--n) * 1.5rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--blue);
+  color: var(--cream);
+  font-size: calc(1rem + var(--n) * 0.45rem);
+  transition: transform 350ms var(--spring);
+}
+.orbit .spheres li:hover .sphere {
+  transform: scale(1.08);
+}
+.orbit .spheres h3 {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1.75rem;
+  align-self: start;
+}
+.orbit .spheres .small {
+  margin-top: 0.5rem;
+}
+
+/* Research ----------------------------------------------------------------- */
+
+.orbit .lab {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15.5rem), 1fr));
+  gap: clamp(2.5rem, 4vw, 3rem) var(--gutter);
+}
+.orbit .lab figure,
+.orbit .lab .blank {
+  margin-bottom: 1.5rem;
+}
+.orbit .lab figure img,
+.orbit .lab .blank {
+  width: min(100%, 15rem);
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+.orbit .lab figure img {
+  object-fit: cover;
+  border: 3px solid var(--sun);
+  background: var(--night);
+  transition: transform 400ms var(--spring);
+}
+.orbit .lab article:hover figure img {
+  transform: scale(1.04);
+}
+.orbit .lab figcaption {
+  margin-top: 0.6rem;
+  color: var(--sun);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.orbit .lab .blank {
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: var(--night);
+  color: var(--sun);
+  font-size: 1.625rem;
+  text-align: center;
+}
+.orbit .lab h3 {
+  margin: 0.9rem 0 0.75rem;
+  font-size: 1.75rem;
+}
+.orbit .text-link {
+  display: inline-block;
+  margin-top: 1rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.25em;
+}
+.orbit .text-link:hover {
+  color: var(--sun);
+}
+
+/* Contact ------------------------------------------------------------------ */
+
+.orbit .band-hot .lede {
+  max-width: 44ch;
+  margin-top: 1.5rem;
+  font-weight: 500;
+}
+.orbit .mail {
+  display: inline-block;
+  margin: clamp(2rem, 4vw, 3rem) 0 1rem;
+  padding: 0.5em 0.7em 0.6em;
+  border-radius: clamp(1.25rem, 3vw, 2.5rem);
+  background: var(--night);
+  color: var(--sun);
+  font-size: clamp(1.5rem, 5.6vw, 5.25rem);
+  overflow-wrap: anywhere;
+  transition: transform 350ms var(--spring);
+}
+.orbit .mail:hover {
+  transform: scale(1.03);
+}
+.orbit .mail:active {
+  transform: scale(0.98);
+}
+.orbit .band-hot .small {
+  opacity: 1;
+  font-weight: 600;
+}
+
+.orbit .foot {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  margin-top: -2.5rem;
+  padding: 2rem var(--gutter);
+  border-radius: 2.5rem 2.5rem 0 0;
+  background: var(--night);
+  font-size: 0.875rem;
+}
+.orbit .foot nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+}
+.orbit .foot a {
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+.orbit .foot a:hover {
+  color: var(--sun);
+}
+
+/* Smaller screens ---------------------------------------------------------- */
+
+@media (max-width: 62rem) {
+  .orbit .hero {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    grid-template-areas: "copy" "map" "card";
+    min-height: 0;
+  }
+  .orbit .map-frame {
+    height: 36rem;
+    min-height: 0;
+  }
+  .orbit .node text {
+    font-size: 11.5px;
+  }
+  .orbit .head,
+  .orbit .duo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .orbit .duo-flip > :first-child {
+    order: 0;
+  }
+  /* Give the circle behind the phones its own square, so it never rides up over the buttons. */
+  .orbit .stage {
+    width: 100%;
+    max-width: 34rem;
+    aspect-ratio: 1;
+    margin: 0.5rem auto 0;
+  }
+  .orbit .timeline li {
+    grid-template-columns: 1.25rem minmax(0, 1fr);
+    gap: 0 1rem;
+  }
+  .orbit .timeline li::before {
+    left: calc(0.625rem - 1px);
+  }
+  .orbit .t-date {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: left;
+    padding-top: 0;
+  }
+  .orbit .t-disc {
+    grid-column: 1;
+    grid-row: 1;
+    margin-top: 0;
+  }
+  .orbit .timeline li > div {
+    grid-column: 2;
+    margin-top: 0.25rem;
+  }
+  .orbit .toggles span {
+    margin-left: 0;
+    width: 100%;
+  }
+  .orbit .spheres li {
+    grid-template-rows: auto;
+  }
+}
+
+@media (max-width: 36rem) {
+  .orbit .top nav a {
+    padding: 0.9rem 0.5rem;
+    font-size: 0.9375rem;
+  }
+  .orbit .brand {
+    font-size: 0.9375rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit .btn,
+  .orbit .node .disc,
+  .orbit .stage img,
+  .orbit .more li,
+  .orbit .sphere,
+  .orbit .lab figure img,
+  .orbit .mail,
+  .orbit .toggles button {
+    transition: none;
+  }
+  .orbit .btn:hover,
+  .orbit .mail:hover,
+  .orbit .more li:hover,
+  .orbit .stage img:hover {
+    transform: none;
+  }
+}

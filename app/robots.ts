@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
-import { siteConfig } from "@/lib/site-config";
+import { site } from "@/content/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: "*", allow: "/" },
-    sitemap: `${siteConfig.url}/sitemap.xml`,
+    rules: { userAgent: "*", allow: "/", disallow: ["/directions", "/og"] },
+    sitemap: `${site.url}/sitemap.xml`,
   };
 }

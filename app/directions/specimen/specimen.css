@@ -1,0 +1,797 @@
+/* Direction B: Specimen.
+   White paper, black ink, one hot colour and a yellow highlighter.
+   One variable display face carries everything from the hero down. */
+
+.spec {
+  --paper: #ffffff;
+  --ink: #0a0a0a;
+  --hot: #ff4b14;
+  --sun: #ffe600;
+  --grey: #5c5c5c;
+  --rule: 3px;
+  --gutter: clamp(1rem, 2.6vw, 2.5rem);
+  --display: var(--font-display), "Arial Black", sans-serif;
+
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  overflow-x: clip;
+}
+
+.spec ::selection {
+  background: var(--sun);
+  color: var(--ink);
+}
+.spec :focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+.spec .band-ink :focus-visible,
+.spec .tile-ink :focus-visible,
+.spec .foot :focus-visible {
+  outline-color: var(--sun);
+}
+
+.spec .skip {
+  position: absolute;
+  left: -999px;
+  top: 0.5rem;
+  z-index: 50;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0.6rem 1rem;
+  font-weight: 700;
+}
+.spec .skip:focus {
+  left: 0.5rem;
+}
+
+/* Shared type -------------------------------------------------------------- */
+
+.spec h2,
+.spec h3,
+.spec .brand,
+.spec .mail,
+.spec .num,
+.spec .year-mark,
+.spec .facts dd,
+.spec .tally b {
+  font-family: var(--display);
+  font-stretch: 75%;
+  font-variation-settings: "wdth" 75;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 0.88;
+  letter-spacing: -0.01em;
+}
+.spec h2 {
+  font-size: clamp(3rem, 11.5vw, 12rem);
+  text-wrap: balance;
+}
+.spec .small,
+.spec .kicker {
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+.spec .kicker {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.spec .pitch {
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.spec .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  min-height: 3rem;
+  padding: 0 1.25rem;
+  border: var(--rule) solid currentColor;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 0.9375rem;
+  transition: transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.spec .btn:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 3px 3px 0 currentColor;
+}
+.spec .btn:active {
+  transform: translate(0, 0);
+  box-shadow: none;
+}
+.spec .btn-fill {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.spec .btn-fill:hover {
+  box-shadow: 3px 3px 0 var(--hot);
+}
+.spec .links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.spec .facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem clamp(1.5rem, 3vw, 3rem);
+  margin-top: 2rem;
+}
+.spec .facts dd {
+  font-size: clamp(2.25rem, 4.4vw, 4.25rem);
+}
+.spec .facts dt {
+  margin-top: 0.4rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.spec .points {
+  margin-top: 1.25rem;
+  display: grid;
+  gap: 0.5rem;
+  max-width: 52ch;
+}
+.spec .points li {
+  padding-left: 1.4em;
+  position: relative;
+}
+.spec .points li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 0.6em;
+  height: 0.6em;
+  background: currentColor;
+}
+
+/* Top bar ------------------------------------------------------------------ */
+
+.spec .top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 var(--gutter);
+  min-height: 3.5rem;
+  background: var(--paper);
+  border-bottom: var(--rule) solid var(--ink);
+}
+.spec .brand {
+  font-size: 1.5rem;
+  white-space: nowrap;
+  padding: 0.75rem 0;
+}
+.spec .top nav {
+  display: flex;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.spec .top nav a {
+  padding: 1rem 0.8rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.spec .top nav a:hover {
+  background: var(--sun);
+}
+
+/* Hero --------------------------------------------------------------------- */
+
+.spec .hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  min-height: calc(100svh - 3.5rem);
+  padding: clamp(1rem, 2.5vw, 2rem) var(--gutter) clamp(1.25rem, 2.5vw, 2rem);
+}
+.spec .kinetic {
+  font-family: var(--display);
+  font-weight: 760;
+  text-transform: uppercase;
+  line-height: 0.82;
+  cursor: crosshair;
+  user-select: none;
+  touch-action: pan-y;
+}
+.spec .kinetic [data-row] {
+  display: flex;
+  justify-content: space-between;
+  white-space: nowrap;
+  /* A close estimate before the script fits each row exactly. */
+  font-size: calc((100vw - 2 * var(--gutter)) / (var(--n) * 0.64));
+  margin-bottom: -0.035em;
+}
+.spec .kinetic [data-ch] {
+  display: block;
+  font-variation-settings: "wdth" 100, "wght" 760;
+}
+.spec .kinetic [data-row]:last-child [data-ch]:last-child {
+  color: var(--hot);
+}
+.spec .hero-foot {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto;
+  gap: 1.5rem clamp(1.5rem, 4vw, 4rem);
+  align-items: end;
+  padding-top: 1.25rem;
+  border-top: var(--rule) solid var(--ink);
+}
+.spec .intro {
+  font-size: clamp(1.25rem, 2.1vw, 1.875rem);
+  font-weight: 500;
+  line-height: 1.22;
+  letter-spacing: -0.015em;
+  max-width: 34ch;
+  text-wrap: pretty;
+}
+.spec mark {
+  background: var(--sun);
+  color: inherit;
+  padding: 0 0.15em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.spec .tally {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  justify-content: start;
+  gap: 0.4rem 2rem;
+  font-weight: 600;
+}
+.spec .tally b {
+  font-size: 1.5rem;
+  margin-right: 0.15em;
+}
+.spec .hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/* Bands -------------------------------------------------------------------- */
+
+.spec .band {
+  padding: clamp(3.5rem, 8vw, 8rem) var(--gutter) 0;
+  scroll-margin-top: 3.5rem;
+}
+.spec .head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+  gap: 1rem 3rem;
+  align-items: end;
+  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+  padding-bottom: clamp(1rem, 2vw, 1.5rem);
+  border-bottom: var(--rule) solid currentColor;
+}
+.spec .head p {
+  font-weight: 500;
+  font-size: 1.125rem;
+  line-height: 1.35;
+}
+
+/* Tiles -------------------------------------------------------------------- */
+
+.spec .tile {
+  padding: clamp(1.25rem, 3vw, 3rem);
+  margin-bottom: var(--gutter);
+}
+.spec .tile h3 {
+  font-size: clamp(3.5rem, 10vw, 10rem);
+  margin: 0.5rem 0 1.25rem;
+}
+.spec .tile-copy > p:not([class]) {
+  margin-top: 1rem;
+  max-width: 54ch;
+}
+.spec .tile-hot {
+  background: var(--hot);
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: center;
+}
+.spec .phones {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(0.5rem, 1.2vw, 1.25rem);
+  align-items: start;
+}
+.spec .phones img {
+  width: 100%;
+  height: auto;
+  border: var(--rule) solid var(--ink);
+  border-radius: clamp(14px, 1.8vw, 28px);
+  background: var(--ink);
+}
+.spec .phones img:nth-child(2) {
+  margin-top: clamp(1.5rem, 4vw, 4rem);
+}
+.spec .tile-ink {
+  background: var(--ink);
+  color: var(--paper);
+}
+.spec .tile-ink .facts dd,
+.spec .tile-ink .answer {
+  color: var(--sun);
+}
+.spec .shot {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.spec .pixel {
+  image-rendering: pixelated;
+  border: var(--rule) solid var(--ink);
+}
+.spec .tile-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  margin-top: clamp(1.5rem, 3vw, 3rem);
+  align-items: start;
+}
+.spec .quote {
+  border-left: var(--rule) solid var(--sun);
+  padding-left: clamp(1rem, 2vw, 2rem);
+}
+.spec .ask {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.9375rem;
+}
+.spec .ask::before {
+  content: "You: ";
+  opacity: 0.6;
+}
+.spec .answer {
+  margin: 0.75rem 0 1.25rem;
+  font-family: var(--display);
+  font-variation-settings: "wdth" 85;
+  font-weight: 700;
+  font-size: clamp(1.5rem, 2.8vw, 2.75rem);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+}
+.spec .quote figcaption {
+  max-width: 46ch;
+}
+.spec .quote .small {
+  margin-top: 0.75rem;
+  opacity: 0.7;
+  max-width: 46ch;
+}
+.spec .tile-sun {
+  background: var(--sun);
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: center;
+}
+.spec .tile-sun h3 {
+  font-size: clamp(3rem, 7vw, 7rem);
+}
+.spec .tile-sun .small {
+  margin-top: 1.25rem;
+  max-width: 44ch;
+}
+
+/* Numbered list ------------------------------------------------------------ */
+
+.spec .list li {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 0.5rem 1.5rem;
+  align-items: baseline;
+  padding: clamp(1rem, 2vw, 1.75rem) 0;
+  border-bottom: var(--rule) solid var(--ink);
+  transition: background-color 120ms linear, padding 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.spec .list li:hover {
+  background: var(--sun);
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+.spec .num {
+  font-size: 1.5rem;
+  color: var(--hot);
+}
+.spec .list h3 {
+  font-size: clamp(2rem, 5.2vw, 5rem);
+}
+.spec .list .pitch {
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+.spec .list .small {
+  margin-top: 0.4rem;
+  color: var(--grey);
+}
+.spec .list li:hover .small {
+  color: var(--ink);
+}
+
+/* Lineage band ------------------------------------------------------------- */
+
+.spec .marquee {
+  position: relative;
+  margin: 0 calc(-1 * var(--gutter)) clamp(1.5rem, 3vw, 2.5rem);
+  background: var(--sun);
+  border-block: var(--rule) solid var(--ink);
+  overflow: hidden;
+}
+.spec .marquee-track {
+  display: flex;
+  width: max-content;
+  animation: spec-run 48s linear infinite;
+}
+.spec .marquee[data-paused="true"] .marquee-track,
+.spec .marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+.spec .marquee ol {
+  display: flex;
+  flex: none;
+}
+.spec .marquee li {
+  font-family: var(--display);
+  font-variation-settings: "wdth" 75;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  line-height: 1;
+  padding: 0.9rem 0;
+  white-space: nowrap;
+}
+.spec .marquee li::after {
+  content: "→";
+  margin: 0 0.6em;
+  color: var(--hot);
+}
+.spec .marquee button {
+  position: absolute;
+  right: var(--gutter);
+  top: 50%;
+  transform: translateY(-50%);
+  min-height: 2.75rem;
+  padding: 0 0.9rem;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+@keyframes spec-run {
+  to { transform: translateX(-50%); }
+}
+
+/* Archive index ------------------------------------------------------------ */
+
+.spec .chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+}
+.spec .chips button {
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border: var(--rule) solid var(--ink);
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: transform 100ms linear;
+}
+.spec .chips button:hover {
+  background: var(--sun);
+}
+.spec .chips button:active {
+  transform: translateY(2px);
+}
+.spec .chips button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+}
+.spec .chips span {
+  margin-left: auto;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.spec .year {
+  display: grid;
+  grid-template-columns: clamp(6rem, 22vw, 22rem) minmax(0, 1fr);
+  gap: 0 var(--gutter);
+  border-top: var(--rule) solid var(--ink);
+}
+.spec .year-mark {
+  position: sticky;
+  top: 4.25rem;
+  align-self: start;
+  font-size: clamp(3rem, 10vw, 10rem);
+  padding-top: 0.75rem;
+  color: var(--hot);
+}
+.spec .year li {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 0.25rem 1.25rem;
+  align-items: baseline;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--ink);
+}
+.spec .year li:last-child {
+  border-bottom: 0;
+}
+.spec .year .when {
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.spec .year h3 {
+  font-size: clamp(1.5rem, 3vw, 2.75rem);
+  line-height: 0.95;
+}
+.spec .year .state {
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+.spec .year .state::before {
+  content: "";
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  margin-right: 0.5em;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+}
+.spec .year .state[data-status="live"]::before,
+.spec .year .state[data-status="active"]::before {
+  background: var(--hot);
+}
+.spec .year .state[data-status="open-source"]::before,
+.spec .year .state[data-status="demo"]::before,
+.spec .year .state[data-status="built"]::before {
+  background: var(--ink);
+}
+.spec .year li p {
+  grid-column: 2 / -1;
+  color: var(--grey);
+  font-size: 0.9375rem;
+}
+
+/* Domains ------------------------------------------------------------------ */
+
+.spec .domains {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: clamp(1.5rem, 3vw, 3rem) var(--gutter);
+}
+.spec .domains h3 {
+  font-size: clamp(2rem, 4.2vw, 4rem);
+  margin-bottom: 0.75rem;
+}
+.spec .domains sup {
+  font-size: 0.35em;
+  color: var(--hot);
+  vertical-align: top;
+  position: relative;
+  top: 0.2em;
+  margin-left: 0.15em;
+}
+.spec .domains .small {
+  margin-top: 0.5rem;
+  color: var(--grey);
+}
+
+/* Research ----------------------------------------------------------------- */
+
+.spec .band-ink {
+  margin-top: clamp(3.5rem, 8vw, 8rem);
+  padding-bottom: clamp(3.5rem, 8vw, 8rem);
+  background: var(--ink);
+  color: var(--paper);
+}
+.spec .lab {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: clamp(2rem, 3vw, 3rem) var(--gutter);
+}
+.spec .lab h3 {
+  font-size: clamp(1.75rem, 2.6vw, 2.5rem);
+  margin: 0.6rem 0 1.25rem;
+  min-height: 2em;
+}
+.spec .lab .kicker {
+  color: var(--sun);
+}
+.spec .lab figure {
+  margin-bottom: 1.25rem;
+}
+.spec .lab figure img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.15);
+  transition: filter 200ms linear;
+}
+.spec .lab article:hover figure img {
+  filter: none;
+}
+.spec .lab figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--sun);
+}
+.spec .text-link {
+  display: inline-block;
+  margin-top: 1rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.25em;
+}
+.spec .text-link:hover {
+  color: var(--sun);
+}
+
+/* Contact ------------------------------------------------------------------ */
+
+.spec .band-hot {
+  background: var(--hot);
+  padding-bottom: clamp(3.5rem, 8vw, 8rem);
+}
+.spec .band-hot .intro {
+  margin-top: 1.5rem;
+  max-width: 40ch;
+}
+.spec .mail {
+  display: inline-block;
+  margin: clamp(2rem, 4vw, 3.5rem) 0 1rem;
+  font-size: clamp(1.75rem, 7.6vw, 8rem);
+  text-transform: none;
+  border-bottom: clamp(4px, 0.6vw, 9px) solid var(--ink);
+  padding-bottom: 0.08em;
+  overflow-wrap: anywhere;
+  transition: background-color 120ms linear;
+}
+.spec .mail:hover {
+  background: var(--sun);
+}
+.spec .band-hot .small {
+  font-weight: 700;
+}
+
+.spec .foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  padding: 1.5rem var(--gutter) 2rem;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 0.875rem;
+}
+.spec .foot nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+}
+.spec .foot a {
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+.spec .foot a:hover {
+  color: var(--sun);
+}
+
+/* Smaller screens ---------------------------------------------------------- */
+
+@media (max-width: 60rem) {
+  .spec .hero-foot,
+  .spec .head,
+  .spec .tile-hot,
+  .spec .tile-split,
+  .spec .tile-sun {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .spec .hero {
+    min-height: 0;
+  }
+  .spec .list li {
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+  }
+  .spec .list li > div {
+    grid-column: 2;
+  }
+  .spec .year {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .spec .year-mark {
+    position: static;
+    font-size: clamp(3rem, 16vw, 6rem);
+    padding-bottom: 0.25rem;
+  }
+  .spec .year li {
+    grid-template-columns: 3rem minmax(0, 1fr);
+  }
+  .spec .year .state {
+    grid-column: 2;
+  }
+  .spec .marquee button {
+    position: static;
+    transform: none;
+    width: 100%;
+  }
+}
+
+@media (max-width: 36rem) {
+  .spec .brand {
+    font-size: 1.25rem;
+  }
+  .spec .top nav a {
+    padding: 1rem 0.55rem;
+    font-size: 0.8125rem;
+  }
+  .spec .chips span {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spec .marquee-track {
+    animation: none;
+    width: auto;
+    flex-wrap: wrap;
+  }
+  .spec .marquee ol {
+    flex-wrap: wrap;
+    padding: 0 var(--gutter);
+  }
+  .spec .marquee ol[aria-hidden],
+  .spec .marquee button {
+    display: none;
+  }
+  .spec .btn,
+  .spec .list li,
+  .spec .chips button {
+    transition: none;
+  }
+  .spec .btn:hover {
+    transform: none;
+  }
+}

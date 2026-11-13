@@ -1,0 +1,227 @@
+/* The comparison page. Deliberately plain, so it does not compete with the three directions. */
+
+.dirs {
+  --bg: #17181a;
+  --panel: #202225;
+  --line: #34373c;
+  --ink: #f1f1ee;
+  --dim: #a4a7ad;
+  --pick: #f1f1ee;
+
+  min-height: 100vh;
+  padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1rem, 3vw, 2.5rem) 3rem;
+  background: var(--bg);
+  color: var(--ink);
+  font: 1rem/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.dirs :focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+.dirs .intro {
+  max-width: 62rem;
+}
+.dirs h1 {
+  font-size: clamp(2rem, 4.6vw, 3.75rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.dirs .intro p {
+  margin-top: 1rem;
+  max-width: 62ch;
+  color: var(--dim);
+  font-size: 1.0625rem;
+}
+.dirs .intro .ask {
+  color: var(--ink);
+}
+
+.dirs .switch {
+  display: inline-flex;
+  margin: 2rem 0 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+.dirs .switch button {
+  min-height: 2.75rem;
+  padding: 0 1.1rem;
+  color: var(--dim);
+  font-weight: 600;
+  cursor: pointer;
+}
+.dirs .switch button + button {
+  border-left: 1px solid var(--line);
+}
+.dirs .switch button:hover {
+  color: var(--ink);
+}
+.dirs .switch button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.dirs .columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 2rem);
+  align-items: start;
+}
+.dirs .column {
+  display: grid;
+  gap: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 2px solid var(--ink);
+}
+.dirs .column header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+.dirs .letter {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.5rem;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+.dirs h2 {
+  font-size: 1.625rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.dirs .column header p {
+  margin-top: 0.25rem;
+  color: var(--dim);
+}
+
+.dirs .frame {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: #000;
+}
+.dirs .frame[data-mode="mobile"] {
+  max-width: 390px;
+  justify-self: center;
+  width: 100%;
+}
+.dirs .frame iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 0;
+  transform-origin: top left;
+}
+
+.dirs .open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  min-height: 3rem;
+  padding: 0 1.25rem;
+  border-radius: 0.5rem;
+  background: var(--ink);
+  color: var(--bg);
+  font-weight: 700;
+  transition: transform 120ms ease-out;
+}
+.dirs .open:hover {
+  transform: translateY(-2px);
+}
+.dirs .open:active {
+  transform: translateY(0);
+}
+
+.dirs .swatches {
+  display: flex;
+  gap: 0.4rem;
+}
+.dirs .swatches li {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+}
+.dirs .rationale {
+  color: var(--ink);
+}
+.dirs .specs {
+  display: grid;
+  gap: 0.6rem;
+  padding: 1rem 0;
+  border-block: 1px solid var(--line);
+}
+.dirs .specs div {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: 1rem;
+}
+.dirs .specs dt {
+  color: var(--dim);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.dirs .specs dd {
+  font-size: 0.9375rem;
+}
+.dirs h3 {
+  margin-bottom: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+.dirs .verdict ul {
+  display: grid;
+  gap: 0.45rem;
+  margin-bottom: 1.25rem;
+  color: var(--dim);
+  font-size: 0.9375rem;
+}
+.dirs .verdict li {
+  position: relative;
+  padding-left: 1.2rem;
+}
+.dirs .verdict li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 0.5rem;
+  height: 2px;
+  background: var(--dim);
+}
+.dirs .outro {
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+  color: var(--dim);
+  font-size: 0.875rem;
+  max-width: 70ch;
+}
+
+@media (max-width: 64rem) {
+  .dirs .columns {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dirs .open {
+    transition: none;
+  }
+}
+
+.dirs .ask a {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}

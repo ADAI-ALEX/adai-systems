@@ -7,7 +7,7 @@
  * a name or an email into copy.
  *
  * Nothing in this file may be invented. `adai.systems` is the intended
- * production domain and `alex@adai.systems` is the only configured mailbox —
+ * production domain and `alex@adai.systems` is the only configured mailbox, and
  * no second address is listed until one actually exists.
  */
 export const siteConfig = {
@@ -22,7 +22,7 @@ export const siteConfig = {
   /** The only configured mailbox. Do not add a second one speculatively. */
   contactEmail: "alex@adai.systems",
 
-  /** Founded as a studio in December 2024 — the ADAI Systems project entry. */
+  /** Founded as a studio in December 2024: the ADAI Systems project entry. */
   foundedYear: 2024,
 
   legal: {
