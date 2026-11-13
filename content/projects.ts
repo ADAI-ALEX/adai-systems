@@ -54,11 +54,30 @@ export type Project = {
   disclosure?: string;
   /** True when the source is public under an open licence. */
   openSource?: boolean;
+  /** The case study. Every line traces back to the inventory. */
+  story?: Story;
+};
+
+export type Story = {
+  /** Why the project exists, in a sentence or two. */
+  problem?: string;
+  /** What was made, as short factual points. */
+  built?: string[];
+  /** How it works. */
+  how?: string[];
+  /** Where it ended up. */
+  outcome?: string;
+  /** Limits and caveats, stated plainly. */
+  honest?: string[];
 };
 
 export const projects: Project[] = [
   {
     slug: "adai-systems",
+    story: {
+      outcome:
+        "Still the foundation. The studio stays small, builds its own tools, and keeps the research that did not become a product.",
+    },
     title: "ADAI Systems",
     start: "2024-12",
     dateLabel: "Dec 2024 to now",
@@ -74,6 +93,12 @@ export const projects: Project[] = [
   },
   {
     slug: "vantage-ai",
+    story: {
+      problem:
+        "Every client build repeated the same shape: a chatbot here, a voice agent there, a set of automations behind them, and no single place to deploy or manage any of it.",
+      outcome:
+        "Discontinued. The problem is real, but the product surface needed to solve it properly was far larger than a studio this size could carry alongside client work. What survived is the voice architecture it needed, which became its own project.",
+    },
     title: "Vantage AI",
     start: "2025-11",
     dateLabel: "Nov 2025",
@@ -89,6 +114,19 @@ export const projects: Project[] = [
   },
   {
     slug: "reinforcement-learning",
+    story: {
+      problem:
+        "A set of experiments, not a product: environments built to study how an agent learns to act when it is given an objective and nothing else.",
+      how: [
+        "Model 1, an 8-sensor radar. It only knew what was directly next to it, so it acted blind.",
+        "Model 2, ray casting. Longer-range vision, so it could see walls before hitting them.",
+        "Model 2.1, a reward rebalance. The agent had been getting stuck in infinite loops because the penalties made it afraid to backtrack.",
+        "Model 3, spatial awareness. It can plan a path out of U-shaped traps and dense clusters of obstacles.",
+        "Predator and prey are two separate networks. The library is built for single agents, so a custom loop lets them take turns learning from each other.",
+      ],
+      outcome:
+        "Research. The interesting results were rarely the scores. They were the strategies that appeared without being designed.",
+    },
     openSource: true,
     title: "Reinforcement Learning",
     start: "2026-02",
@@ -124,6 +162,18 @@ export const projects: Project[] = [
   },
   {
     slug: "fitdawg",
+    story: {
+      problem:
+        "Language apps hold attention with streaks, levels and leagues. FitDawg applied the same mechanics to exercise. The bet was social: friends, competition and visible standings, on the theory that accountability to other people outlasts accountability to yourself.",
+      built: [
+        "Streaks, XP and levels, gems and a shop, daily quests and an animated mascot.",
+        "Weekly leagues with friends.",
+        "GPS workout tracking.",
+        "AI meal scanning from a photo.",
+      ],
+      outcome:
+        "No longer in active development, and it may return. The idea did not go away: it reappeared, inverted, in Lockout, where exercise is the price of a distraction and not a score on a leaderboard.",
+    },
     title: "FitDawg",
     start: "2026-03",
     dateLabel: "Mar to Aug 2026",
@@ -140,6 +190,16 @@ export const projects: Project[] = [
   },
   {
     slug: "acoustic-levitation",
+    story: {
+      how: [
+        "Pressure at any point is the sum of every transducer treated as a point source (the Rayleigh integral).",
+        "The Gor'kov potential turns that pressure field into the force on a small sphere.",
+        "A Gymnasium environment wraps the physics so an agent can set each transducer and see what happens.",
+        "The reward favours liftable mass first, then a deep potential well, a stiff trap and distance. It penalises instability and unrealistic sound pressure.",
+        "Transducers can run at different frequencies, summed correctly.",
+      ],
+      outcome: "Research. No results are published in the repository, so none are claimed here.",
+    },
     title: "Acoustic Levitation RL",
     start: "2026-04",
     dateLabel: "Apr 2026",
@@ -162,6 +222,27 @@ export const projects: Project[] = [
   },
   {
     slug: "voice-agent",
+    story: {
+      problem:
+        "Hosted voice AI is fast to adopt and hard to own. Every call goes through someone else's stack, at their latency, under their pricing, with their retention policy.",
+      built: [
+        "A phone-style agent you talk to through the browser, by holding a button or the space bar.",
+        "Speech-to-text with Whisper and text-to-speech with Piper, both running on the machine, with a choice of UK voices.",
+        "A local database of customers, products, depots and bookings for the agent to work against. The data is fictional.",
+        "A live activity feed showing every lookup the agent makes and what came back.",
+      ],
+      how: [
+        "One autonomous turn can ask, look something up, quote, confirm and book.",
+        "Interrupt it mid-reply and it stops, remembers what it was doing, and offers to pick the thread back up.",
+        "Slow lookups get a spoken \"let me check that for you\" while the work happens.",
+        "What the agent knows about the business lives in editable context, so its behaviour changes without a restart.",
+        "A second build tested the same idea as a streaming pipeline over WebRTC.",
+      ],
+      outcome: "A working demo, built speculatively. Not a client engagement.",
+      honest: [
+        "In the later version the language model is a hosted one. The audio and the data stay on the machine.",
+      ],
+    },
     title: "Voice Agent",
     start: "2026-05",
     dateLabel: "May 2026",
@@ -177,6 +258,18 @@ export const projects: Project[] = [
   },
   {
     slug: "call-analyser",
+    story: {
+      built: [
+        "It watches a folder for new call recordings.",
+        "Each one is transcribed on the machine.",
+        "Claude writes a report for each call from the transcript.",
+        "Results are read in a web UI and exported as CSV or as HTML reports.",
+      ],
+      how: [
+        "It runs on locked-down Windows machines without admin rights, which rules out most installers and services.",
+      ],
+      outcome: "Built in May 2026.",
+    },
     title: "Call Recording Analyser",
     start: "2026-05",
     dateLabel: "May 2026",
@@ -192,6 +285,28 @@ export const projects: Project[] = [
   },
   {
     slug: "apex-terminal",
+    story: {
+      problem:
+        "Systematic trading research is normally split across a terminal for looking at markets and a notebook for testing ideas about them.",
+      built: [
+        "A live terminal of dockable widgets: charts, watchlist, positions, a profit and loss calendar, risk status and the system log.",
+        "A strategy editor. A strategy is a short script that runs once per bar and sets a signal.",
+        "A backtester that replays strategies over bundled local data with no network calls.",
+        "A compare view that overlays strategies, with a Monte Carlo estimate of the chance of passing or breaching a prop challenge.",
+        "A live book: a tested strategy is promoted to the engine, which trades it under the same risk rules.",
+      ],
+      how: [
+        "Every entry passes a risk engine first: kill switch, daily and weekly loss limits, position caps, news blackouts and total open risk. It can shrink a position and never grows one.",
+        "On prop accounts a second guard samples equity every second and flattens everything before a drawdown limit is reached.",
+        "Claude reviews signals and the portfolio and returns recommendations. It has no route to the broker.",
+        "If the AI errors or times out, the answer is no trade.",
+        "Demo by default. Live trading needs an explicit flag.",
+      ],
+      outcome: "Open source under the MIT licence, and still being worked on.",
+      honest: [
+        "Educational software. Leveraged trading can lose you more than you expect, and nothing here is a claim about performance.",
+      ],
+    },
     openSource: true,
     title: "Apex Terminal",
     start: "2026-06",
@@ -212,6 +327,14 @@ export const projects: Project[] = [
   },
   {
     slug: "holographic-display",
+    story: {
+      problem: "Could a true volumetric display be built from a flat array of lasers making points of plasma in the air?",
+      how: [
+        "The study worked through the physics, the laser choices, the limits the geometry puts on the image, and what it would realistically cost.",
+      ],
+      outcome:
+        "The conclusion was that a swept-volume persistence-of-vision LED display is the practical first step. Nothing was built.",
+    },
     title: "Holographic Display Study",
     start: "2026-06",
     dateLabel: "Jun 2026",
@@ -237,6 +360,14 @@ export const projects: Project[] = [
   },
   {
     slug: "hospitality-platform",
+    story: {
+      built: [
+        "Table booking for guests.",
+        "Staff management for the venue.",
+        "A live demo site that shows both.",
+      ],
+      outcome: "A demo, built speculatively for independent pubs, restaurants and cafés. Not a client engagement.",
+    },
     title: "Hospitality Platform",
     start: "2026-06",
     dateLabel: "Jun 2026",
@@ -249,9 +380,49 @@ export const projects: Project[] = [
     summary:
       "A staff management and table booking system for independent pubs, restaurants and cafés, shown as a live demo site.",
     stack: ["Web app", "Table booking", "Staff management"],
+    media: [
+      {
+        src: "/work/hospitality-platform/booking-date.webp",
+        alt: "Table booking, step one: choose a party size and pick a date from a calendar.",
+        width: 1100,
+        height: 1365,
+        type: "screen",
+      },
+      {
+        src: "/work/hospitality-platform/booking-time.webp",
+        alt: "Table booking, step two: choose a lunch or dinner time for the chosen date.",
+        width: 1100,
+        height: 727,
+        type: "screen",
+      },
+    ],
+    disclosure: "Real captures of the demo's booking flow. The demo venue's name and branding are left out.",
   },
   {
     slug: "spatial-memory-scanner",
+    story: {
+      problem:
+        "Capturing a room is the easy part. The question is what it feels like to walk back into it later, at the scale you recorded it.",
+      built: [
+        "A capture page that runs in Chrome on an Android phone. No app to install.",
+        "A live overlay that paints the room in as you scan and points you at what you have not covered yet.",
+        "A walkthrough viewer on the laptop: first person, up and down stairs, with footsteps and each area's own ambient sound.",
+      ],
+      how: [
+        "Three depth paths are chosen automatically: the phone's own depth map, a fan of hit-test rays, and a monocular depth model fitted to real scale every frame.",
+        "The walkable floor comes from the path the person actually walked. That gives correct stairs and natural bounds with no collision geometry.",
+        "Sound is pooled by place in 2 m cells, and each area keeps only its best few seconds, crossfaded into one loop.",
+        "Eye-dome lighting, a depth-only pass, makes the raw point cloud read as surfaces.",
+        "The scan streams to disk while you walk, so an interrupted scan is still a usable one.",
+        "A check script asserts the floor directly. Level ground matches the walked path within 7 cm, 1.3 cm on average.",
+      ],
+      outcome: "On hold. The laptop is the only server and scans never leave it.",
+      honest: [
+        "You can only walk where the phone was carried.",
+        "Depth is noisy past a few metres and poor on glass, mirrors and matte black.",
+        "Android and Chrome only. Safari does not expose what this needs.",
+      ],
+    },
     title: "Spatial Memory Scanner",
     start: "2026-07",
     dateLabel: "Jul 2026",
@@ -267,6 +438,28 @@ export const projects: Project[] = [
   },
   {
     slug: "lockout",
+    story: {
+      problem: "Traditional app blockers tell you no, so you turn them off. Lockout asks you to earn it.",
+      built: [
+        "Pick the apps that take your time. Each gets a daily allowance that drains only while you are in the app.",
+        "When it runs out you get a wall, not the feed.",
+        "Push-ups, squats and jumping jacks, counted through the camera.",
+        "Or a 1 km walk, measured by GPS and checked against your step count.",
+        "Finish and you have earned more time. A streak counts the days protection stays on.",
+      ],
+      how: [
+        "Built on Apple's Screen Time frameworks, with three extensions and a custom shield screen.",
+        "One idempotent reconcile recomputes what is locked from the rules and the live grants, so a missed event or a crash cannot leave the lock out of step.",
+        "Everything the app and its extensions share fails closed: a read it cannot trust resolves to locked.",
+        "Elapsed time is measured against two clocks. Winding the device clock back cannot extend an unlock.",
+        "Pose detection runs on the phone and returns thirteen joints. The camera frame is not kept.",
+        "Rep counters are tested against synthetic pose sequences, for both failure directions: counting a half rep and refusing a good one.",
+      ],
+      outcome: "Live on the App Store since September 2026.",
+      honest: [
+        "Rep counting is a product feature, not a fitness or medical assessment. A rep can be missed or miscounted.",
+      ],
+    },
     title: "Lockout",
     start: "2026-08",
     dateLabel: "Aug 2026 to now",
@@ -322,11 +515,54 @@ export const projects: Project[] = [
         width: 880,
         height: 1912,
         type: "phone",
+      },      {
+        src: "/work/lockout/rules.webp",
+        alt: "Lockout rules screen: five locked apps, each with its own challenge and daily allowance.",
+        width: 880,
+        height: 1912,
+        type: "phone",
+      },
+      {
+        src: "/work/lockout/squats.webp",
+        alt: "Lockout squat challenge screen showing what the camera sees and how to set up.",
+        width: 880,
+        height: 1912,
+        type: "phone",
+      },
+      {
+        src: "/work/lockout/history.webp",
+        alt: "Lockout history screen: a week of completed challenges and the minutes they earned.",
+        width: 880,
+        height: 1912,
+        type: "phone",
       },
     ],
   },
   {
     slug: "jeb-depot",
+    story: {
+      problem:
+        "Some software needs a calibrated probability, not a sentence. A robot deciding whether to detour round a forklift is one example. JEB Depot is a playable demo of that idea.",
+      built: [
+        "A seeded warehouse simulation with four levels, from a training depot to a night shift with short sensors and urgent deadlines.",
+        "A side panel that shows every probability the model produced for the current tick, its confidence and how long it took.",
+        "Three policies: take the most likely answer, sample from the distribution, or act only when confident enough for the risk the model itself reports.",
+        "A rules-based controller and a manual mode on the same missions.",
+        "Replay, analysis and benchmark screens.",
+      ],
+      how: [
+        "Code owns the geometry: routes, distances and where the forklifts will be. The model only judges.",
+        "Each tick asks up to four typed questions: which job next, reroute or not, which way to move, and how risky that is.",
+        "The model runs in a local server on the Mac's GPU, bound to loopback. After one download the game works offline.",
+        "The protocol was ported to Rust and checked against the official server: 221 tokenizer test strings with no mismatches, and 40 of 40 matching top answers.",
+        "Priming one slot with the shared game state took a three-question tick from about 3.0 s to about 0.95 s on an M1 Pro.",
+        "The whole screen is a 480 by 270 software framebuffer, scaled by whole numbers. That is also what lets the tests render real screens.",
+      ],
+      outcome: "Open source under the MIT licence.",
+      honest: [
+        "JEB-4B is a research model published by szybkie.ai. This is an independent demo, and in it the model only steers a simulated robot.",
+      ],
+    },
     openSource: true,
     title: "JEB Depot",
     start: "2026-09",
@@ -366,6 +602,33 @@ export const projects: Project[] = [
         width: 1920,
         height: 1080,
         type: "pixel",
+      },      {
+        src: "/work/jeb-depot/boot.png",
+        alt: "JEB Depot boot screen: checking the local runtime, verifying the model and warming up the GPU.",
+        width: 1920,
+        height: 1080,
+        type: "pixel",
+      },
+      {
+        src: "/work/jeb-depot/summary.png",
+        alt: "JEB Depot mission summary: deliveries, collisions, battery and score for the run.",
+        width: 1920,
+        height: 1080,
+        type: "pixel",
+      },
+      {
+        src: "/work/jeb-depot/analysis.png",
+        alt: "JEB Depot analysis screen: latency, confidence and calibration for a recorded run.",
+        width: 1920,
+        height: 1080,
+        type: "pixel",
+      },
+      {
+        src: "/work/jeb-depot/bench.png",
+        alt: "JEB Depot benchmark screen: inference latency on this machine and the model against the rules baseline.",
+        width: 1920,
+        height: 1080,
+        type: "pixel",
       },
     ],
     disclosure:
@@ -373,6 +636,36 @@ export const projects: Project[] = [
   },
   {
     slug: "glimmer",
+    story: {
+      problem:
+        "What does it take to train a language model from nothing, on a laptop, with every part of the stack written by hand in one language?",
+      built: [
+        "A byte-level BPE tokenizer and a data pipeline with licences, checksums, deduplication and leak-free splits.",
+        "A transformer, a training loop and three optimisers.",
+        "Hyperparameter search: random, Bayesian and successive halving.",
+        "An inference engine with cached decoding and streaming chat.",
+        "Evaluation that stores every generated response.",
+        "A nine-screen terminal laboratory: training dashboard, chat, models, datasets, experiments, evaluation, hardware and settings.",
+      ],
+      how: [
+        "Ten crates. Only the ones that touch tensors depend on Burn, which supplies the maths and the GPU kernels.",
+        "Training runs on the Apple GPU through Metal. A pure-Rust CPU fallback exists and is never silently substituted. Both are verified numerically at start-up.",
+        "The model is a small modern transformer: 6 layers, 384 wide, 6 heads, a 512-token context and an 8,192-token vocabulary.",
+        "Stage one is pretraining on 137M tokens of openly licensed English: simple stories, Simple English Wikipedia and 28 Australian public-domain books.",
+        "Stage two is fine-tuning on 628 original conversations, with loss counted only on the model's own turns.",
+        "Training can stop and resume exactly. That is verified against an uninterrupted run.",
+        "For chat, the CPU is faster than the GPU on this machine, so the lab picks it automatically.",
+      ],
+      outcome:
+        "STEVIE trained in under three hours on one MacBook Pro. After fine-tuning, every reply closes its turn (none did before), and no reply quotes eight or more words of its training data.",
+      honest: [
+        "STEVIE has the voice and knows when to stop talking. It does not have the sense. It gets arithmetic wrong and forgets a name it was just told.",
+        "Australian vocabulary shows up in 18% of replies. The corpus it learned from manages 44%.",
+        "The first hyperparameter study was mis-designed and had to be rebuilt. Both are documented.",
+        "The conversation corpus is synthetic dialogue written for the project by Claude.",
+        "It is a demonstration of training on a laptop, not a competitor to foundation models.",
+      ],
+    },
     openSource: true,
     title: "Glimmer",
     start: "2026-11",
@@ -410,6 +703,33 @@ export const projects: Project[] = [
       {
         src: "/work/glimmer/chat.webp",
         alt: "Glimmer's chat screen in a terminal, with STEVIE streaming a reply.",
+        width: 1440,
+        height: 841,
+        type: "screen",
+      },      {
+        src: "/work/glimmer/training-finished.webp",
+        alt: "Glimmer's training lab at the end of the run: the monitor flags overfitting and early stopping is logged.",
+        width: 1440,
+        height: 841,
+        type: "screen",
+      },
+      {
+        src: "/work/glimmer/models.webp",
+        alt: "Glimmer's models screen: architecture and the full training lineage from random weights to fine-tuning.",
+        width: 1440,
+        height: 841,
+        type: "screen",
+      },
+      {
+        src: "/work/glimmer/evaluation.webp",
+        alt: "Glimmer's evaluation screen: metrics and every generated response for each model.",
+        width: 1440,
+        height: 841,
+        type: "screen",
+      },
+      {
+        src: "/work/glimmer/hardware.webp",
+        alt: "Glimmer's hardware screen: verified backends and live GPU counters during pretraining.",
         width: 1440,
         height: 841,
         type: "screen",
@@ -515,3 +835,19 @@ export const stevie: { prompt: string; reply: string }[] = [
   { prompt: "Are koalas dangerous?", reply: "Sounds like you're not afraid, but they're friendly. What are you in the mornings?" },
   { prompt: "What is 7 times 8?", reply: "A. It's a hundred and a half of the year, and the longest-running is 8 times 9." },
 ];
+
+/** Projects linked to this one, each with the reason for the link. */
+export function linksOf(slug: string): { project: Project; why: string }[] {
+  return relations
+    .filter((relation) => relation.from === slug || relation.to === slug)
+    .map((relation) => ({
+      project: getProject(relation.from === slug ? relation.to : relation.from),
+      why: relation.why,
+    }));
+}
+
+/** The projects either side of this one in date order, for paging through the archive. */
+export function neighboursOf(slug: string): { previous?: Project; next?: Project } {
+  const index = byDate.findIndex((project) => project.slug === slug);
+  return { previous: byDate[index - 1], next: byDate[index + 1] };
+}

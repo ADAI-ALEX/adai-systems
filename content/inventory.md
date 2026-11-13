@@ -109,6 +109,13 @@ Fourteen entries, oldest first. Slugs marked (existing) are live URLs today.
 - **Type / status:** Demo.
 - **Dates:** May 2026.
 - **Stack:** Python, FastAPI (server-sent events), faster-whisper, Piper TTS, SQLite, tool-calling agent loop. Second build: Pipecat, WebRTC.
+- **Also true of the demo (from its private README):**
+  - You talk to it through the browser by holding a button or the space bar.
+  - It works against a local database of customers, products, depots and bookings. The data is fictional.
+  - A live activity feed shows every lookup the agent makes and what came back.
+  - Slow lookups get a spoken "let me check that for you" while the work happens.
+  - What the agent knows about the business lives in editable context, so its behaviour changes without a restart.
+- **Why it exists (from the old site):** hosted voice AI is fast to adopt and hard to own. Every call goes through someone else's stack, at their latency, under their pricing, with their retention policy.
 - **Links:** None. Source is private.
 - **Media:** None yet.
 - **Open:** Alex has not confirmed that the old "Voice Agent Architecture" entry and the phone agent are the same work. `DEFAULT`: merged into this one entry, because both date from May 2026 and no other voice work exists in the record.
@@ -153,7 +160,7 @@ Fourteen entries, oldest first. Slugs marked (existing) are live URLs today.
 - **Type / status:** Demo.
 - **Dates:** June 2026.
 - **Links:** None. Source is not public, and the demo URL carries a venue name, so it is not linked.
-- **Media:** Screenshots from the live demo, cropped or masked so no venue name, logo or photography shows.
+- **Media (real):** two captures of the demo's table booking flow (choose a date and party size, choose a time). Taken with the site header, navigation and footer hidden, so no venue name, logo or photography shows. The booking details step is not used because its consent line names the venue.
 - **Careful:** a speculative demo. Not a client engagement.
 
 ### 3.11 Spatial Memory Scanner · `spatial-memory-scanner` (existing)
@@ -272,7 +279,15 @@ Fourteen entries, oldest first. Slugs marked (existing) are live URLs today.
 
 ---
 
-## 5. Still open (defaults in use)
+## 5. Decisions taken without a checkpoint
+
+On 13 November 2026 Alex asked for the build to continue to a finished site without stopping. These calls were made on his behalf and can all be reversed.
+
+1. **Direction.** Lab Terminal (A) as the base, with Orbit's draggable lineage map (C) as the archive on the home page, and Specimen's scale (B) on the contact band. All three directions stay viewable at `/directions` on preview deployments.
+2. **Tweaks config.** No tuned config was supplied, so the baked tokens are the direction's own defaults. The tweaks bar stays available on preview deployments at `?tweaks=1`.
+3. **Every project has a page.** All fourteen get a case study at `/work/[slug]`, so the eight existing URLs keep working and the archive has no dead rows. Depth follows what the inventory holds: Glimmer, Lockout and JEB Depot are full, Vantage AI and ADAI Systems are short on purpose.
+
+## 6. Still open (defaults in use)
 
 1. Glimmer backstory (why Rust, why Australian). Default: none.
 2. Lockout pricing wording. Default: not stated.
