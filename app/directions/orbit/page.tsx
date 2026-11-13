@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { previewOnly } from "@/lib/preview";
 import Image from "next/image";
 import { Fraunces, Instrument_Sans } from "next/font/google";
 import { Graph } from "@/components/orbit/graph";
@@ -20,6 +21,7 @@ const serif = Fraunces({ subsets: ["latin"], axes: ["SOFT", "WONK", "opsz"], var
 const sans = Instrument_Sans({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: false },
   title: "Direction C: Orbit",
   description: "ADAI Systems as a living map of connected projects.",
 };
@@ -66,6 +68,7 @@ function State({ project }: { project: Project }) {
 }
 
 export default function OrbitDirection() {
+  previewOnly();
   return (
     <div className={`${serif.variable} ${sans.variable} orbit`}>
       <a className="skip" href="#main">

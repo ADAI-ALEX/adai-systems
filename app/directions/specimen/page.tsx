@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { previewOnly } from "@/lib/preview";
 import Image from "next/image";
 import { Anybody, Hanken_Grotesk } from "next/font/google";
 import { Kinetic } from "@/components/specimen/kinetic";
@@ -21,6 +22,7 @@ const display = Anybody({ subsets: ["latin"], axes: ["wdth"], variable: "--font-
 const body = Hanken_Grotesk({ subsets: ["latin"], variable: "--font-body", display: "swap" });
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: false },
   title: "Direction B: Specimen",
   description: "ADAI Systems as a type specimen that reacts to the cursor.",
 };
@@ -57,6 +59,7 @@ function Facts({ project }: { project: Project }) {
 }
 
 export default function SpecimenDirection() {
+  previewOnly();
   return (
     <div className={`${display.variable} ${body.variable} spec`}>
       <a className="skip" href="#main">

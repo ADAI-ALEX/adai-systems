@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { previewOnly } from "@/lib/preview";
 import { Frames, type Direction } from "@/components/directions/frames";
 import "./directions.css";
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: false },
   title: "Three directions",
   description: "Three directions for the new adai.systems, side by side.",
 };
@@ -89,6 +92,7 @@ const directions: Direction[] = [
 ];
 
 export default function DirectionsPage() {
+  previewOnly();
   return (
     <main className="dirs">
       <header className="intro">
@@ -98,15 +102,15 @@ export default function DirectionsPage() {
           any preview, or open it full screen to try it properly.
         </p>
         <p className="ask">
-          Then tell me which way to go: one of these as it stands, another round of three on your favourite, or a mix
-          (for example, A&apos;s type with C&apos;s map).
+          The site now on this branch is A with C&apos;s map as its archive and B&apos;s scale on the contact band. If
+          you would sooner go another way, say which: one of these as it stands, another round of three, or a different
+          mix. <Link href="/">Open the built site</Link>.
         </p>
       </header>
       <Frames directions={directions} />
       <footer className="outro">
         <p>
-          Preview only. Not linked from anywhere, and hidden from search engines. The legal pages still wear a holding
-          layout until a direction is chosen.
+          Preview only. Not linked from anywhere, hidden from search engines, and switched off in production.
         </p>
       </footer>
     </main>

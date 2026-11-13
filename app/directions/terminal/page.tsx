@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { previewOnly } from "@/lib/preview";
 import Image from "next/image";
 import { Doto, JetBrains_Mono } from "next/font/google";
 import { Keys } from "@/components/terminal/keys";
@@ -21,6 +22,7 @@ const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", displ
 const dot = Doto({ subsets: ["latin"], variable: "--font-dot", display: "swap", axes: ["ROND"] });
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: false },
   title: "Direction A: Lab Terminal",
   description: "ADAI Systems as a running terminal lab.",
 };
@@ -67,6 +69,7 @@ function Status({ project }: { project: Project }) {
 }
 
 export default function TerminalDirection() {
+  previewOnly();
   return (
     <div className={`${mono.variable} ${dot.variable} term`}>
       <a className="skip" href="#main">
