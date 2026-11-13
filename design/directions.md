@@ -1,5 +1,7 @@
 # Phase 3: three directions
 
+> **Outcome.** Alex asked for the build to continue without a checkpoint, so the mix recommended below was built: A as the base, C's lineage map as the archive, B's scale on the contact band. The three prototypes are kept at `/directions` on preview deployments and return 404 in production.
+
 Compared live at `/directions`. Each direction is a real, scrollable homepage built from `content/projects.ts`. Screenshots are in `design/screenshots/`.
 
 ## Information architecture (shared by all three)

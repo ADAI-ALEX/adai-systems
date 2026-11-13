@@ -59,3 +59,6 @@ next-env.d.ts
 # large review screenshots: regenerate with scripts/shoot.mjs
 /design/screenshots/*-768.jpg
 /design/screenshots/*-390.jpg
+
+# full QA screenshot set: regenerate with `npm run check -- --shots`
+/design/screenshots/site
