@@ -1,0 +1,78 @@
+/* ADAI Systems design tokens.
+   The single source for every value the tweaks bar can change. To re-tune the
+   site, open a preview deployment with ?tweaks=1, adjust, press "Copy config",
+   and bake the result in here and in design/tokens.ts. */
+
+.site {
+  /* Palette: "Glimmer". Base colours first, then the adjusted ones the page uses. */
+  --bg: #0b0c10;
+  --panel: #10121a;
+  --line-base: #2a2e3a;
+  --ink: #d9dce6;
+  --dim-base: #8a90a3;
+  --accent-base: #f2c46e;
+  --ok-base: #7fc69a;
+  --info-base: #93a8f5;
+  --warn-base: #ee8478;
+  --hue: 0;
+  --contrast: 1;
+  --accent: oklch(from var(--accent-base) l c calc(h + var(--hue)));
+  --ok: oklch(from var(--ok-base) l c calc(h + var(--hue)));
+  --info: oklch(from var(--info-base) l c calc(h + var(--hue)));
+  --warn: oklch(from var(--warn-base) l c calc(h + var(--hue)));
+  --dim: oklch(from var(--dim-base) calc(l * var(--contrast)) c h);
+  --line: oklch(from var(--line-base) calc(l * var(--contrast)) c h);
+
+  /* Type */
+  --display: var(--font-dot), ui-monospace, monospace;
+  --body: var(--font-mono), ui-monospace, monospace;
+  --base: 0.9375rem;
+  --scale: 1.2;
+  --display-weight: 900;
+  --body-weight: 400;
+  --display-tracking: -0.03em;
+  --body-tracking: 0em;
+  --display-leading: 0.92;
+  --body-leading: 1.6;
+  --display-case: none;
+  --h1-size: 1;
+
+  /* Layout */
+  --max: 96rem;
+  --gutter: clamp(0.875rem, 2.4vw, 2rem);
+  --section: 1;
+  --density: 1;
+  --hero-split: 1.2fr;
+  --cols-min: 17rem;
+  --row-pad: 0.6rem;
+
+  /* Hero */
+  --hero-min: 100;
+  --shell-h: 62;
+  --type-ms: 22;
+
+  /* Surfaces */
+  --radius: 6px;
+  --border: 1px;
+  --border-style: solid;
+  --panel-fill: 0;
+  --grain: 0;
+  --pattern-size: 18px;
+  --pattern-alpha: 1;
+
+  /* Motion */
+  --speed: 1;
+  --ease: steps(2);
+  --lift: 2px;
+
+  /* Components */
+  --btn-h: 2.75rem;
+  --ring: 2px;
+
+  /* Imagery */
+  --img-sat: 1;
+  --img-contrast: 1;
+  --img-bright: 1;
+  --img-radius: 6px;
+  --phone-radius: 14px;
+}
