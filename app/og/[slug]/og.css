@@ -1,0 +1,45 @@
+.og {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 1200px;
+  height: 630px;
+  padding: 56px 64px;
+  background-color: #0b0c10;
+  background-image: radial-gradient(#1c202b 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+  color: #d9dce6;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 24px;
+  line-height: 1.4;
+}
+.og-top {
+  display: flex;
+  justify-content: space-between;
+  color: #7fc69a;
+}
+.og-top span:first-child {
+  color: #f2c46e;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.og h1 {
+  font-family: var(--font-dot), monospace;
+  font-weight: 900;
+  font-size: 132px;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  color: #f2c46e;
+}
+.og[data-long="true"] h1 {
+  font-size: 96px;
+}
+.og-line {
+  margin-top: 28px;
+  max-width: 30em;
+  font-size: 30px;
+  line-height: 1.3;
+}
+.og-foot {
+  color: #8a90a3;
+}
