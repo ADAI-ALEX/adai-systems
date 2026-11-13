@@ -1,11 +1,7 @@
 import Link from "next/link";
 import { siteConfig } from "@/lib/site-config";
 
-/**
- * Holding shell for the two legal pages while the redesign is in progress.
- * The legal copy itself is untouched. Phase 5 replaces this shell with the
- * chosen direction's layout.
- */
+/** Shared shell for the two legal pages. The wording lives in the pages themselves. */
 export function LegalLayout({
   title,
   intro,
@@ -16,14 +12,17 @@ export function LegalLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="legal">
-      <p className="legal-meta">
-        <Link href="/">ADAI Systems</Link>
-        <span>Updated {siteConfig.legal.lastUpdated}</span>
-      </p>
-      <h1>{title}</h1>
-      <p className="legal-intro">{intro}</p>
-      <div className="legal-body">{children}</div>
-    </main>
+    <>
+      <header className="page-head">
+        <p className="crumb">
+          <Link href="/">home</Link> / legal · updated {siteConfig.legal.lastUpdated}
+        </p>
+        <h1>{title}</h1>
+        <p className="lede">{intro}</p>
+      </header>
+      <div className="block">
+        <div className="prose">{children}</div>
+      </div>
+    </>
   );
 }

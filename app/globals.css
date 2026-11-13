@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Shared base only. Each direction scopes its own tokens under its root class. */
+/* Shared base only. The site scopes its tokens under .site (see app/(site)/site.css). */
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
@@ -8,6 +8,7 @@ html {
 
 body {
   margin: 0;
+  background: #0b0c10;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -20,57 +21,4 @@ body {
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
-}
-
-/* Holding styles for the legal pages until the chosen direction replaces them. */
-.legal {
-  max-width: 42rem;
-  margin: 0 auto;
-  padding: 3rem 1.25rem 6rem;
-  font: 1.0625rem/1.7 ui-sans-serif, system-ui, sans-serif;
-  color: #16161a;
-}
-.legal-meta {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  font-size: 0.875rem;
-  color: #5b5b66;
-  border-bottom: 1px solid #dcdce2;
-  padding-bottom: 1rem;
-}
-.legal h1 {
-  font-size: clamp(2.25rem, 6vw, 3.5rem);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  margin-top: 3rem;
-}
-.legal-intro {
-  margin-top: 1.5rem;
-  font-size: 1.125rem;
-  color: #45454f;
-}
-.legal-body h2 {
-  margin-top: 3rem;
-  padding-top: 2rem;
-  border-top: 1px solid #dcdce2;
-  font-size: 1.25rem;
-  font-weight: 650;
-}
-.legal-body p,
-.legal-body ul {
-  margin-top: 1.25rem;
-}
-.legal-body ul {
-  list-style: disc;
-  padding-left: 1.5rem;
-}
-.legal a {
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-}
-.legal a:focus-visible {
-  outline: 2px solid #16161a;
-  outline-offset: 3px;
 }

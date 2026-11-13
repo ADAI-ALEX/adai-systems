@@ -2,31 +2,52 @@ import type { Metadata, Viewport } from "next";
 import { site } from "@/content/site";
 import "./globals.css";
 
-/**
- * Root shell for the redesign branch.
- *
- * Deliberately bare: each of the three directions brings its own fonts and
- * tokens, so nothing visual lives here. Indexing is off until a direction is
- * chosen and the real pages exist.
- */
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
-  title: { default: site.name, template: `%s · ${site.name}` },
+  title: { default: `${site.name}. ${site.headline}`, template: `%s · ${site.name}` },
   description: site.description,
-  robots: { index: false, follow: false },
+  applicationName: site.name,
+  authors: [{ name: site.name, url: site.url }],
+  creator: site.name,
+  publisher: "FitDawg Ltd",
+  robots: { index: true, follow: true },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: "#0b0c10",
+  colorScheme: "dark",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+/**
+ * Organisation schema. Every field is a fact stated on the site itself:
+ * nothing is asserted here that a visitor could not also read.
+ */
+const organisation = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: site.name,
+  url: site.url,
+  logo: `${site.url}/assets/logo/adai-mark.svg`,
+  description: site.description,
+  foundingDate: "2024-12",
+  email: site.email,
+  parentOrganization: { "@type": "Organization", name: "FitDawg Ltd" },
+  contactPoint: { "@type": "ContactPoint", contactType: "general enquiries", email: site.email },
+};
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en-GB">
-      <body>{children}</body>
+      <body>
+        <script
+          type="application/ld+json"
+          // Static, first-party JSON built above. No user input reaches it.
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organisation) }}
+        />
+        {children}
+      </body>
     </html>
   );
 }
