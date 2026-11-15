@@ -19,6 +19,8 @@ type WebNode = {
   id: string;
   kind: NodeKind;
   label: string;
+  /** A shorter name for narrow screens. */
+  short?: string;
   href: string;
   aspect?: Aspect;
   /** Model position. One unit is the radius of the outer ring. */
@@ -57,6 +59,7 @@ function build(): { nodes: WebNode[]; edges: Edge[] } {
       id: `aspect:${service.slug}`,
       kind: "aspect",
       label: service.title,
+      short: service.short,
       href: `/services/${service.path}`,
       aspect: service.slug,
       x: Math.cos(angle) * 0.4,
@@ -177,7 +180,7 @@ export function Web({ mode = "hero" }: { mode?: "hero" | "full" }) {
       if (mode === "hero") {
         centreX = wide ? width * 0.68 : width * 0.5;
         centreY = wide ? height * 0.52 : height * 0.5;
-        unit = wide ? Math.min(width * 0.27, height * 0.43) : Math.min(width * 0.44, height * 0.43);
+        unit = wide ? Math.min(width * 0.27, height * 0.43) : Math.min(width * 0.4, height * 0.43);
       } else {
         centreX = width * 0.5;
         centreY = height * 0.5;
@@ -395,7 +398,8 @@ export function Web({ mode = "hero" }: { mode?: "hero" | "full" }) {
         context.fillStyle = node.kind === "aspect" ? hue : palette.bone;
         context.font = node.kind === "aspect" ? `500 ${width < 520 ? 11 : 12}px ${monoFamily}` : `500 ${width < 520 ? 11 : 13}px ${family}`;
         context.textAlign = right ? "left" : "right";
-        context.fillText(node.kind === "aspect" ? node.label.toUpperCase() : node.label, sx + (right ? r + 9 : -r - 9), sy);
+        const text = node.kind === "aspect" ? (width < 700 ? (node.short ?? node.label) : node.label).toUpperCase() : node.label;
+        context.fillText(text, sx + (right ? r + 9 : -r - 9), sy);
       }
       context.globalAlpha = 1;
     }

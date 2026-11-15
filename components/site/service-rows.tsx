@@ -11,7 +11,8 @@ export function ServiceRows() {
   const [current, setCurrent] = useState(services[2].slug);
   const active = services.find((service) => service.slug === current) ?? services[0];
   const proof = getProject(active.proof[0]);
-  const shot = proof.media?.find((media) => media.type !== "phone") ?? proof.media?.[0];
+  const phones = proof.media?.every((media) => media.type === "phone") ? proof.media.slice(0, 3) : null;
+  const shot = phones ? null : (proof.media?.find((media) => media.type !== "phone") ?? null);
 
   return (
     <div className="services">
@@ -39,6 +40,13 @@ export function ServiceRows() {
         ))}
       </ol>
       <aside className="service-preview" data-hue={active.slug} aria-hidden="true">
+        {phones ? (
+          <div className="service-phones phones" key={proof.slug}>
+            {phones.map((phone) => (
+              <Image key={phone.src} src={phone.src} alt="" width={phone.width} height={phone.height} sizes="(min-width: 960px) 11vw, 0px" />
+            ))}
+          </div>
+        ) : null}
         {shot ? (
           <Image
             key={shot.src}
