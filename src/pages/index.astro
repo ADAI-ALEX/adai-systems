@@ -1,4 +1,5 @@
 ---
+import { MASCOT } from '@/lib/mascot';
 import Base from '@/layouts/Base.astro';
 import MascotAnchor from '@/components/MascotAnchor.astro';
 import SectionHead from '@/components/SectionHead.astro';
@@ -50,9 +51,9 @@ const stats = [
           ))}
         </ul>
       </div>
-      <MascotAnchor pose="hero" class="hero-mascot" eager label="This is Adi. Move your cursor, or give Adi a poke." />
+      <MascotAnchor pose="hero" class="hero-mascot" eager />
     </div>
-    <a class="scroll-cue mono" href="#services">Scroll to see what Adi can show you <span aria-hidden="true">↓</span></a>
+    <a class="scroll-cue mono" href="#services">Scroll to see what {MASCOT.name} can show you <span aria-hidden="true">↓</span></a>
   </section>
 
   <!-- SERVICES OVERVIEW -->
@@ -183,7 +184,7 @@ const stats = [
   .showcase { grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); }
   @media (min-width: 900px) { .showcase { grid-template-columns: repeat(6, 1fr); } .showcase > :global(:nth-child(1)), .showcase > :global(:nth-child(2)) { grid-column: span 3; } .showcase > :global(:nth-child(n + 3)) { grid-column: span 3; } }
   .more-title { margin: 4rem 0 1.5rem; font-size: var(--step-2); }
-  .more { grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+  .more { grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); grid-auto-rows: 1fr; }
   .center-cta { display: flex; justify-content: center; margin-top: 3rem; }
 
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 1rem; margin: 3rem 0 2rem; padding: 1.5rem 0; border-block: 1px solid var(--line); }

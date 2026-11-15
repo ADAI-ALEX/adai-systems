@@ -1,4 +1,5 @@
 ---
+import { MASCOT } from '@/lib/mascot';
 import Base from '@/layouts/Base.astro';
 import MascotAnchor from '@/components/MascotAnchor.astro';
 import { byDateDesc } from '@/content/projects';
@@ -8,7 +9,7 @@ import { byDateDesc } from '@/content/projects';
     <div class="wrap grid-nf">
       <div class="stack" style="--stack:1.25rem">
         <p class="eyebrow">404</p>
-        <h1>Adi looked everywhere.</h1>
+        <h1>{MASCOT.name} looked everywhere.</h1>
         <p class="lead">This page does not exist, or it moved. Everything that does exist is one click away.</p>
         <div class="actions"><a class="btn" href="/">Go home</a><a class="btn btn--ghost" href="/work">See all the work</a><a class="btn btn--ghost" href="/start">Start a project</a></div>
         <ul class="list">{byDateDesc.map((p) => <li><a href={`/work/${p.slug}`}>{p.title}</a></li>)}</ul>

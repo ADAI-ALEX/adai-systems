@@ -73,6 +73,13 @@ body {
   overflow-x: clip;
 }
 img, video, svg, canvas { display: block; max-width: 100%; }
+
+/* Visuals are part of the composition, not loose files: they cannot be dragged off the page, and decorative
+   layers and display headings are not selectable. Body copy, links and form fields stay fully selectable. */
+img, svg, canvas, picture { -webkit-user-drag: none; user-drag: none; }
+img, svg, canvas, .gl-stage, .grain, .mascot-anchor, .phone, .frame, .plate, .icon, .tick, .t-dot { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+h1, .promise, .stat strong, .big-email-display { -webkit-user-select: none; user-select: none; }
+a:has(> img), a:has(.card-media), a:has(.plate) { -webkit-user-drag: none; }
 img, video { height: auto; }
 a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
 a:hover { text-decoration-color: var(--hue); }
@@ -143,7 +150,7 @@ p { margin: 0; text-wrap: pretty; }
 
 /* WebGL stage */
 .gl-stage { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-.gl-stage canvas { width: 100% !important; height: 100% !important; opacity: 0; transition: opacity 900ms var(--ease-out); }
+.gl-stage canvas { width: 100% !important; height: 100% !important; opacity: 0; transition: opacity 450ms var(--ease-out); }
 .gl-stage.is-ready canvas { opacity: 1; }
 .page { position: relative; z-index: 1; }
 

@@ -7,120 +7,92 @@
  */
 import * as THREE from 'three';
 
-function hash(x: number, y: number, seed: number) {
-  const s = Math.sin(x * 127.1 + y * 311.7 + seed * 74.7) * 43758.5453;
-  return s - Math.floor(s);
-}
-
-function valueNoise(x: number, y: number, seed: number, period: number) {
-  const xi = Math.floor(x), yi = Math.floor(y);
-  const xf = x - xi, yf = y - yi;
-  const w = (n: number) => ((n % period) + period) % period;
-  const a = hash(w(xi), w(yi), seed), b = hash(w(xi + 1), w(yi), seed);
-  const c = hash(w(xi), w(yi + 1), seed), d = hash(w(xi + 1), w(yi + 1), seed);
-  const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
-  return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
-}
-
-/** A tileable normal map from fractal value noise. `fibre` stretches it into soft directional strands. */
-function normalMap(size: number, seed: number, scale: number, strength: number, fibre = 0) {
-  const height = new Float32Array(size * size);
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      let h = 0, amp = 1, freq = scale;
-      for (let o = 0; o < 4; o++) {
-        const period = Math.round(freq);
-        const fx = (x / size) * period, fy = (y / size) * period * (1 + fibre * 6);
-        h += valueNoise(fx, fy, seed + o, period) * amp;
-        amp *= 0.5; freq *= 2;
-      }
-      height[y * size + x] = h;
-    }
-  }
-  const data = new Uint8Array(size * size * 4);
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const l = height[y * size + ((x - 1 + size) % size)], r = height[y * size + ((x + 1) % size)];
-      const u = height[((y - 1 + size) % size) * size + x], d = height[((y + 1) % size) * size + x];
-      const nx = (l - r) * strength, ny = (u - d) * strength, nz = 1;
-      const len = Math.hypot(nx, ny, nz);
-      const i = (y * size + x) * 4;
-      data[i] = ((nx / len) * 0.5 + 0.5) * 255;
-      data[i + 1] = ((ny / len) * 0.5 + 0.5) * 255;
-      data[i + 2] = ((nz / len) * 0.5 + 0.5) * 255;
-      data[i + 3] = 255;
-    }
-  }
-  const tex = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.magFilter = THREE.LinearFilter;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.generateMipmaps = true;
-  tex.needsUpdate = true;
-  return tex;
-}
-
 export type MascotMaterials = ReturnType<typeof createMaterials>;
 
+/** Auri's signature accent: a deep, slightly electric indigo, used sparingly (antenna tip, ear cushions). */
+export const AURI_ACCENT = '#5a63f0';
+
+/**
+ * Smooth, sculpted materials. No grain or bump textures: the surface reads as soft silicone through its
+ * lighting (satin sheen, a very light clearcoat) and a gentle warm-to-cool colour variation baked into
+ * the vertex colours, rather than through micro-texture.
+ */
 export function createMaterials(hue: THREE.Color) {
-  const siliconeNormal = normalMap(128, 3, 8, 2.2);
-  siliconeNormal.repeat.set(3, 2);
-  const plushNormal = normalMap(128, 11, 32, 2.0, 0.6);
-  plushNormal.repeat.set(6, 4);
-
   const silicone = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color('#e4d9c6'),
-    roughness: 0.42,
+    color: new THREE.Color('#f1ebe0'),
+    vertexColors: true,
+    roughness: 0.52,
     metalness: 0,
-    sheen: 0.55,
-    sheenColor: new THREE.Color('#ffe6c9'),
-    sheenRoughness: 0.55,
-    clearcoat: 0.32,
-    clearcoatRoughness: 0.38,
-    normalMap: siliconeNormal,
-    normalScale: new THREE.Vector2(0.07, 0.07),
-    envMapIntensity: 0.9,
+    sheen: 0.35,
+    sheenColor: new THREE.Color('#fff1de'),
+    sheenRoughness: 0.6,
+    clearcoat: 0.16,
+    clearcoatRoughness: 0.55,
+    envMapIntensity: 0.85,
   });
 
+  // The body: soft-touch matte, a warmer oat than the head. Restrained contrast, same family.
   const plush = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color('#d9cfbf'),
-    roughness: 0.92,
-    sheen: 1,
-    sheenColor: new THREE.Color('#fff2df'),
-    sheenRoughness: 0.42,
-    normalMap: plushNormal,
-    normalScale: new THREE.Vector2(0.12, 0.12),
-    envMapIntensity: 0.6,
+    color: new THREE.Color('#ddd0bc'),
+    vertexColors: true,
+    roughness: 0.82,
+    sheen: 0.7,
+    sheenColor: new THREE.Color('#fff4e4'),
+    sheenRoughness: 0.45,
+    envMapIntensity: 0.55,
   });
 
+  // Ear cushions: matte indigo felt, the quiet half of the accent.
   const cushion = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color('#c9b9a1'),
-    roughness: 0.7,
-    sheen: 0.8,
-    sheenColor: new THREE.Color('#ffe9cf'),
+    color: new THREE.Color('#3d4380'),
+    roughness: 0.88,
+    sheen: 1,
+    sheenColor: new THREE.Color('#9aa3ff'),
     sheenRoughness: 0.5,
-    normalMap: plushNormal,
-    normalScale: new THREE.Vector2(0.35, 0.35),
   });
 
+  // Antenna tip: glossy indigo with a soft inner glow; it lights up in the section hue when Auri thinks.
   const glow = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color('#1a1510'),
+    color: new THREE.Color(AURI_ACCENT),
     emissive: hue.clone(),
-    emissiveIntensity: 2.2,
-    roughness: 0.25,
+    emissiveIntensity: 0.15,
+    roughness: 0.28,
     clearcoat: 1,
-    clearcoatRoughness: 0.1,
+    clearcoatRoughness: 0.12,
+    sheen: 0.4,
+    sheenColor: new THREE.Color('#c3c8ff'),
   });
 
+  // Chest emblem (the speech bubble): ink glass lit from inside in the section hue.
   const core = new THREE.MeshPhysicalMaterial({
     color: new THREE.Color('#0d1015'),
     emissive: hue.clone(),
-    emissiveIntensity: 1.6,
+    emissiveIntensity: 1.5,
     roughness: 0.15,
     clearcoat: 1,
     clearcoatRoughness: 0.05,
   });
 
   silicone.name = 'silicone'; plush.name = 'plush'; cushion.name = 'cushion'; glow.name = 'glow'; core.name = 'core';
-  return { silicone, plush, cushion, glow, core, textures: [siliconeNormal, plushNormal] };
+  return { silicone, plush, cushion, glow, core, textures: [] as THREE.Texture[] };
+}
+
+/**
+ * Bakes a soft colour variation into a sculpted part: a little warmer and deeper toward the underside
+ * (as if softly occluded), a little cooler and brighter on top. Gives "material depth" without texture.
+ */
+export function bakeWarmth(geo: THREE.BufferGeometry, strength = 1) {
+  const pos = geo.attributes.position as THREE.BufferAttribute;
+  geo.computeBoundingBox();
+  const bb = geo.boundingBox!;
+  const colors = new Float32Array(pos.count * 3);
+  const top = new THREE.Color('#ffffff'), under = new THREE.Color('#e9d6c2'), c = new THREE.Color();
+  for (let i = 0; i < pos.count; i++) {
+    const t = (pos.getY(i) - bb.min.y) / Math.max(bb.max.y - bb.min.y, 1e-4);
+    const k = Math.pow(1 - t, 1.6) * strength;
+    c.copy(top).lerp(under, k);
+    colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  return geo;
 }

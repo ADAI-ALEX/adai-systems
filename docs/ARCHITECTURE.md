@@ -44,7 +44,7 @@
   - keyboard operable, using real buttons, a tablist with arrow keys, and live regions for updates;
   - illustrative content is labelled as such;
   - under reduced motion they show their final state.
-- The motion toggle state lives in `sessionStorage`, as disclosed on `/privacy`.
+- Motion follows the OS `prefers-reduced-motion` setting live; the site stores nothing in the browser.
 
 ## SEO
 

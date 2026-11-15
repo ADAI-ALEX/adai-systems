@@ -1,4 +1,5 @@
 ---
+import { MASCOT } from '@/lib/mascot';
 import Base from '@/layouts/Base.astro';
 import Legal from '@/components/Legal.astro';
 import { site } from '@/content/site';
@@ -14,7 +15,7 @@ import { site } from '@/content/site';
     <h2>Accuracy</h2>
     <p>The archive is kept accurate to the studio's own record of it. Dates and statuses are as recorded; nothing here should be read as audited or independently verified. If something on the site looks wrong, <a href={`mailto:${site.email}`}>tell the studio</a> and it will be corrected.</p>
     <h2>Intellectual property</h2>
-    <p>The {site.name} name, mark, the character Adi, written content and the design of this site belong to their owner. You are welcome to read, link to and quote from the site; nothing on it transfers any rights in the work it describes.</p>
+    <p>The {site.name} name, mark, the character {MASCOT.name}, written content and the design of this site belong to their owner. You are welcome to read, link to and quote from the site; nothing on it transfers any rights in the work it describes.</p>
     <h2>Links out</h2>
     <p>The site links to separate sites operated for individual products. Those sites have their own terms, and following a link takes you outside the scope of this document.</p>
     <h2>No warranty</h2>

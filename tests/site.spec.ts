@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { routes, staticRoutes } from './routes';
+import { MASCOT } from '../src/lib/mascot';
 
 for (const path of routes) {
   test(`page ${path}: renders, one h1, SEO tags, no console errors`, async ({ page }) => {
@@ -41,7 +42,7 @@ test('no horizontal scroll at 375px on any page', async ({ page }) => {
   expect(wide).toEqual([]);
 });
 
-test('home: WebGL world boots and Adi is drawn', async ({ page }) => {
+test('home: WebGL world boots and the mascot is drawn', async ({ page }) => {
   await page.goto('/', { waitUntil: 'networkidle' });
   await page.waitForFunction(() => document.documentElement.classList.contains('gl-ready'), null, { timeout: 15_000 });
   await expect(page.locator('[data-gl-stage] canvas')).toHaveCount(1);
@@ -62,12 +63,20 @@ test('reduced motion: no smooth scrolling, motion flag set', async ({ page }) =>
   await expect(page.locator('html')).not.toHaveClass(/lenis-smooth/);
 });
 
-test('motion toggle switches motion off for the session', async ({ page }) => {
-  await page.goto('/', { waitUntil: 'networkidle' });
-  await page.getByRole('button', { name: 'Reduce motion' }).click();
-  await expect(page.locator('html')).toHaveClass(/motion-off/);
-  await page.goto('/work');
-  await expect(page.locator('html')).toHaveClass(/motion-off/);
+test('no theme or motion toggle in the header', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('[data-motion-toggle]')).toHaveCount(0);
+  await expect(page.locator('header button')).toHaveCount(1); // only the mobile menu button remains
+});
+
+test('header shows the real ADAI wordmark asset', async ({ page }) => {
+  await page.goto('/');
+  const logo = page.locator('header .brand img');
+  await expect(logo).toHaveAttribute('src', '/brand/adai-wordmark-white.svg');
+  await expect(logo).toHaveAttribute('alt', 'ADAI Systems, home');
+  const box = await logo.boundingBox();
+  expect(box!.height).toBeGreaterThanOrEqual(30);
+  expect(box!.width / box!.height).toBeCloseTo(700 / 246.43, 1);
 });
 
 test('brief builder writes the email and nothing is sent', async ({ page }) => {
@@ -99,7 +108,7 @@ test('work archive filters', async ({ page }) => {
 test('unknown route serves the 404 page', async ({ page }) => {
   const res = await page.goto('/this-does-not-exist');
   expect(res?.status()).toBe(404);
-  await expect(page.locator('h1')).toHaveText('Adi looked everywhere.');
+  await expect(page.locator('h1')).toHaveText(`${MASCOT.name} looked everywhere.`);
 });
 
 test('sitemap lists every case study and service', async ({ request }) => {

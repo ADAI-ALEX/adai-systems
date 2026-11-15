@@ -1,16 +1,29 @@
 ---
+/**
+ * A project card with a fixed structure, so every card in a grid has identical dimensions whatever its
+ * content: a fixed-ratio media frame, a two-line title, a three-line pitch and a single row of stack tags.
+ * Screens whose shape differs from the frame are shown whole (contain) over a soft blurred copy of
+ * themselves, so important parts of a screenshot are never cropped away.
+ */
 import type { Project } from '@/content/projects';
 import StatusPill from './StatusPill.astro';
 import Plate from './Plate.astro';
 interface Props { project: Project; size?: 's' | 'l'; headingLevel?: 'h2' | 'h3'; lazy?: boolean }
 const { project, size = 's', headingLevel: H = 'h3', lazy = true } = Astro.props;
 const media = project.video ? { src: project.video.poster, alt: project.video.label, width: project.video.width, height: project.video.height, type: 'screen' as const } : project.media?.[0];
+const frameRatio = size === 'l' ? 16 / 9 : 16 / 10;
+const ratio = media ? media.width / media.height : frameRatio;
+// Phones always sit whole in the frame; other media cover the frame only when its shape is close enough.
+const fit: 'phone' | 'cover' | 'contain' = !media ? 'cover' : media.type === 'phone' ? 'phone' : Math.abs(ratio / frameRatio - 1) <= 0.12 ? 'cover' : 'contain';
 ---
 <article class:list={['card', `card--${size}`]} data-hue={project.aspect ?? undefined} data-reveal data-kind={project.kind} data-status={project.status} data-open={project.openSource ? '1' : undefined}>
   <a class="card-link" href={`/work/${project.slug}`}>
-    <div class:list={['card-media', media?.type === 'phone' && 'is-phone', media?.type === 'pixel' && 'is-pixel']}>
+    <div class:list={['card-media', `fit-${fit}`, media?.type === 'pixel' && 'is-pixel']}>
       {media ? (
-        <img src={media.src} alt={media.alt} width={media.width} height={media.height} loading={lazy ? 'lazy' : 'eager'} decoding="async" />
+        <>
+          {fit === 'contain' && <img draggable="false" class="backdrop" src={media.src} alt="" aria-hidden="true" width={media.width} height={media.height} loading="lazy" decoding="async" />}
+          <img draggable="false" class="shot" src={media.src} alt={media.alt} width={media.width} height={media.height} loading={lazy ? 'lazy' : 'eager'} decoding="async" />
+        </>
       ) : (
         <Plate project={project} size={size} />
       )}
@@ -19,26 +32,39 @@ const media = project.video ? { src: project.video.poster, alt: project.video.la
     <div class="card-body">
       <div class="meta"><StatusPill project={project} /><span class="mono mute">{project.dateLabel}</span></div>
       <H class="card-title">{project.title}</H>
-      <p class="mute">{project.pitch}</p>
-      <ul class="tags">{project.stack.slice(0, size === 'l' ? 5 : 3).map((s) => <li class="pill pill--plain">{s}</li>)}</ul>
+      <p class="pitch mute">{project.pitch}</p>
+      <ul class="tags">{project.stack.slice(0, size === 'l' ? 5 : 4).map((s) => <li class="pill pill--plain">{s}</li>)}</ul>
     </div>
   </a>
 </article>
 <style>
-  .card { position: relative; border-radius: var(--radius-l); background: var(--ink-1); border: 1px solid var(--line); overflow: hidden; transition: border-color var(--dur-2), transform var(--dur-3) var(--ease-out); }
+  .card { position: relative; height: 100%; border-radius: var(--radius-l); background: var(--ink-1); border: 1px solid var(--line); overflow: hidden; transition: border-color var(--dur-2), transform var(--dur-3) var(--ease-out); }
   .card:hover { border-color: color-mix(in srgb, var(--hue) 55%, transparent); transform: translateY(-4px); }
-  .card-link { display: grid; height: 100%; text-decoration: none; color: inherit; }
+  .card-link { display: grid; grid-template-rows: auto 1fr; height: 100%; text-decoration: none; color: inherit; }
+
+  /* Media: one fixed frame ratio for every card of a size */
   .card-media { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: var(--ink-2); border-bottom: 1px solid var(--line); }
   .card--l .card-media { aspect-ratio: 16 / 9; }
-  .card-media img { width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 900ms var(--ease-out); }
-  .card:hover .card-media img { transform: scale(1.035); }
-  .card-media.is-phone { display: grid; place-items: center; background: radial-gradient(80% 80% at 50% 100%, color-mix(in srgb, var(--hue) 22%, transparent), transparent), var(--ink-2); }
-  .card-media.is-phone img { width: auto; height: 88%; margin-top: 6%; object-fit: contain; border-radius: 18px; box-shadow: 0 30px 50px -20px rgb(0 0 0 / 0.8); }
-  .card-media.is-pixel img { image-rendering: pixelated; object-fit: cover; }
+  .card-media img { position: absolute; inset: 0; width: 100%; height: 100%; transition: transform 900ms var(--ease-out); }
+  .card:hover .card-media .shot { transform: scale(1.035); }
+  .fit-cover .shot { object-fit: cover; object-position: top center; }
+  .fit-contain .shot { object-fit: contain; padding: 6%; filter: drop-shadow(0 18px 30px rgb(0 0 0 / 0.55)); }
+  .fit-contain .backdrop { object-fit: cover; filter: blur(22px) saturate(1.1) brightness(0.5); transform: scale(1.2); opacity: 0.9; }
+  .fit-phone { background: radial-gradient(80% 80% at 50% 100%, color-mix(in srgb, var(--hue) 22%, transparent), transparent), var(--ink-2); }
+  .fit-phone .shot { inset: 7% 0 0; height: 93%; object-fit: contain; object-position: top center; filter: drop-shadow(0 26px 40px rgb(0 0 0 / 0.75)); }
+  .card:hover .fit-phone .shot { transform: translateY(-2%); }
+  .is-pixel .shot { image-rendering: pixelated; }
+  .card-media :global(.plate) { position: absolute; inset: 0; min-height: 0; height: 100%; }
   .concept { position: absolute; left: 0.75rem; bottom: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 6px; background: rgb(0 0 0 / 0.6); }
-  .card-body { display: grid; gap: 0.6rem; padding: clamp(1rem, 0.8rem + 0.8vw, 1.6rem); align-content: start; }
-  .meta { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
-  .card-title { font-size: var(--step-2); }
-  .card--l .card-title { font-size: var(--step-3); }
+
+  /* Body: fixed-line slots so differing text lengths never change the card's height */
+  .card-body { display: grid; grid-template-rows: auto auto auto 1fr; gap: 0.6rem; padding: clamp(1rem, 0.8rem + 0.8vw, 1.6rem); align-content: start; }
+  .meta { display: flex; gap: 0.75rem; align-items: center; flex-wrap: nowrap; min-width: 0; overflow: hidden; white-space: nowrap; }
+  .meta .mono { overflow: hidden; text-overflow: ellipsis; }
+  .card-title { font-size: var(--step-2); line-height: 1.1; min-height: 2.2em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card--l .card-title { font-size: var(--step-3); min-height: 1.1em; -webkit-line-clamp: 1; }
+  .pitch { line-height: 1.5; min-height: 4.5em; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .card--l .pitch { min-height: 3em; -webkit-line-clamp: 2; }
+  .tags { align-self: end; flex-wrap: nowrap; overflow: hidden; mask-image: linear-gradient(90deg, #000 85%, transparent); -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); }
   .card-link:focus-visible { outline-offset: -3px; border-radius: var(--radius-l); }
 </style>

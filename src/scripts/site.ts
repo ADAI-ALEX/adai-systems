@@ -1,6 +1,12 @@
-import { apply, motionAllowed, setMotionOff } from './motion';
+import { apply, motionAllowed } from './motion';
 
 apply();
+
+/* Visual assets never start a drag (the CSS covers WebKit; this covers everything else). */
+document.addEventListener('dragstart', (e) => {
+  const t = e.target as Element | null;
+  if (t instanceof Element && (t.matches('img, svg, canvas, picture') || t.closest('.card, .phone, .frame, .mascot-anchor, .t-card, .brand'))) e.preventDefault();
+});
 
 /* Header: solid after scrolling, hides on scroll down, returns on scroll up. */
 const header = document.querySelector<HTMLElement>('[data-header]');
@@ -30,13 +36,6 @@ menuBtn?.addEventListener('click', () => setMenu(menuBtn.getAttribute('aria-expa
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && menuBtn?.getAttribute('aria-expanded') === 'true') { setMenu(false); menuBtn.focus(); }
 });
-
-/* Motion toggle */
-const toggle = document.querySelector<HTMLButtonElement>('[data-motion-toggle]');
-const syncToggle = () => toggle?.setAttribute('aria-pressed', String(!motionAllowed()));
-toggle?.addEventListener('click', () => { setMotionOff(motionAllowed()); syncToggle(); });
-window.addEventListener('adai:motion', syncToggle);
-syncToggle();
 
 /* Scroll reveals */
 const io = new IntersectionObserver((entries) => {

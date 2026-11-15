@@ -9,8 +9,8 @@
  *  - expressions are parameter sets blended over ~0.15 s; transient reactions override them briefly.
  */
 import * as THREE from 'three';
-import { bodyGeometry, bulbGeometry, coreGeometry, earGeometry, handGeometry, headGeometry, SPROUT_LENGTH, sproutStalkGeometry, visorGeometry } from './shapes';
-import { createMaterials } from './materials';
+import { bodyGeometry, bulbGeometry, emblemGeometry, earGeometry, handGeometry, headGeometry, SPROUT_LENGTH, sproutStalkGeometry, visorGeometry } from './shapes';
+import { bakeWarmth, createMaterials } from './materials';
 import { createFaceMaterial } from './faceMaterial';
 import { expressions, lerpExpression } from './expressions';
 import type { ExpressionName, ExpressionState, GestureName, MascotRig, RigInput } from './rig';
@@ -91,16 +91,17 @@ export class ProceduralMascot implements MascotRig {
     this.mats = createMaterials(this.hue);
     this.face = createFaceMaterial();
 
-    const body = new THREE.Mesh(bodyGeometry(detail), this.mats.plush);
+    const body = new THREE.Mesh(bakeWarmth(bodyGeometry(detail), 0.8), this.mats.plush);
     body.position.y = 0.62;
-    const core = new THREE.Mesh(coreGeometry(), this.mats.core);
-    core.position.set(0.06, 0.66, 0.5);
-    core.rotation.set(-0.15, 0.1, 0);
+    // The speech-bubble emblem: the ADAI bubble, worn on the chest and lit in the colour of the work.
+    const core = new THREE.Mesh(emblemGeometry(), this.mats.core);
+    core.position.set(0.0, 0.47, 0.64);
+    core.rotation.set(0.12, 0, 0);
     this.bodyPivot.add(body, core);
 
     this.neck.position.y = 1.08;
     this.head.position.y = 0.56;
-    const headMesh = new THREE.Mesh(headGeometry(detail), this.mats.silicone);
+    const headMesh = new THREE.Mesh(bakeWarmth(headGeometry(detail), 0.7), this.mats.silicone);
     const visor = new THREE.Mesh(visorGeometry(detail), this.face.material);
     visor.renderOrder = 2;
     const earL = new THREE.Mesh(earGeometry(1), this.mats.cushion);
@@ -119,7 +120,7 @@ export class ProceduralMascot implements MascotRig {
         .replace('#include <common>', '#include <common>\nuniform vec2 uBend;')
         .replace('#include <begin_vertex>', `#include <begin_vertex>\nfloat sproutT = clamp(transformed.y / ${SPROUT_LENGTH.toFixed(3)}, 0.0, 1.0);\ntransformed.xz += uBend * sproutT * sproutT;`);
     };
-    const stalk = new THREE.Mesh(sproutStalkGeometry(), stalkMat);
+    const stalk = new THREE.Mesh(bakeWarmth(sproutStalkGeometry(), 0.2), stalkMat);
     this.bulb = new THREE.Mesh(bulbGeometry(), this.mats.glow);
     this.sprout.position.set(0.34, 0.74, -0.02);
     this.sprout.rotation.set(-0.08, 0, -0.38);
@@ -127,8 +128,8 @@ export class ProceduralMascot implements MascotRig {
     this.head.add(this.sprout);
     this.neck.add(this.head);
 
-    const handMeshL = new THREE.Mesh(handGeometry(-1, detail), this.mats.silicone);
-    const handMeshR = new THREE.Mesh(handGeometry(1, detail), this.mats.silicone);
+    const handMeshL = new THREE.Mesh(bakeWarmth(handGeometry(-1, detail), 0.6), this.mats.silicone);
+    const handMeshR = new THREE.Mesh(bakeWarmth(handGeometry(1, detail), 0.6), this.mats.silicone);
     this.handL.add(handMeshL);
     this.handR.add(handMeshR);
     this.springL.pos.copy(HAND_REST_L);
@@ -286,8 +287,8 @@ export class ProceduralMascot implements MascotRig {
     const sp = motion ? this.sproutSpring.step(sway, dt) : this.sproutSpring.pos.set(0, 0, 0);
     this.stalkUniforms.uBend.value.set(clamp(sp.x, -0.25, 0.25), clamp(sp.z, -0.25, 0.25));
     this.bulb.position.set(this.stalkUniforms.uBend.value.x, SPROUT_LENGTH + 0.07, this.stalkUniforms.uBend.value.y);
-    const pulse = 1 + e.think * (0.5 + 0.5 * Math.sin(time * 6));
-    this.mats.glow.emissiveIntensity = 1.6 * pulse;
+    // The indigo tip glows softly in the section hue, and brightens in pulses while Auri is thinking.
+    this.mats.glow.emissiveIntensity = 0.18 + e.think * (0.6 + 0.6 * Math.sin(time * 6));
 
     // Hands
     const tL = new THREE.Vector3().copy(HAND_REST_L), tR = new THREE.Vector3().copy(HAND_REST_R);

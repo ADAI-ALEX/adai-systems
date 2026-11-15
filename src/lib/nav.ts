@@ -1,3 +1,5 @@
+import { MASCOT } from './mascot';
+
 export const nav = [
   { href: '/work', label: 'Work' },
   { href: '/services', label: 'Services' },
@@ -13,5 +15,5 @@ export const footerNav = [
   { href: '/studio', label: 'Studio' },
   { href: '/start', label: 'Start a project' },
   { href: '/contact', label: 'Contact' },
-  { href: '/mascot', label: 'Meet Adi' },
+  { href: MASCOT.path, label: `Meet ${MASCOT.name}` },
 ] as const;

@@ -41,7 +41,7 @@ async function loadMascot(coarse: boolean): Promise<MascotRig> {
   } catch (err) {
     console.warn('[adai] authored mascot unavailable, using the procedural one', err);
   }
-  return new ProceduralMascot({ detail: coarse ? 0.6 : 1 });
+  return new ProceduralMascot({ detail: coarse ? 0.6 : 0.85 });
 }
 
 export type MascotCommand = { pose?: string; expression?: ExpressionName; hold?: number; gesture?: GestureName; hue?: HueName };
@@ -68,6 +68,14 @@ export class World {
   private sweep = { t: -1, start: 0 };
   private transition = { at: -10, teleport: false, jumped: true };
   private lastInput = performance.now() / 1000;
+  private bounds = new THREE.Box3();
+  private projected = new THREE.Vector3();
+  private reveal = 0;
+  private revealTarget = 0;
+  private revealOrigin = new THREE.Vector2(-1, -1);
+  private revealPulseUntil = -1;
+  /** ?glyphdebug paints any 3D pixel left uncovered at full glyph activation magenta (for tests). */
+  private glyphDebug = new URLSearchParams(location.search).has('glyphdebug');
   private asleep = false;
   private wasNear = false;
   private turn = 0;
@@ -102,6 +110,7 @@ export class World {
     this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     pmrem.dispose();
     this.scene.environmentIntensity = 0.5;
+    performance.mark('adai:gl-environment');
     await yieldToMain();
 
     const key = this.key;
@@ -120,13 +129,16 @@ export class World {
     this.scene.add(key, key.target, fill, this.rimLight);
 
     const coarse = matchMedia('(pointer: coarse)').matches;
+    const atlasPromise = createGlyphAtlas(64); // waits on the mono font; overlaps with the character build
     this.mascot = await loadMascot(coarse);
+    performance.mark('adai:gl-mascot');
     await yieldToMain();
     this.scene.add(this.mascot.object);
     this.camera.position.set(0, 0, 11);
     this.camera.lookAt(0, 0, 0);
 
-    const atlas = await createGlyphAtlas(64);
+    const atlas = await atlasPromise;
+    performance.mark('adai:gl-atlas');
     await yieldToMain();
     this.pipeline = new GlyphPipeline(this.renderer, atlas);
     this.dprCap = coarse ? 1.25 : 1.5;
@@ -139,7 +151,9 @@ export class World {
     // compile shaders before the first visible frame (async where the driver supports it)
     await yieldToMain();
     await this.renderer.compileAsync(this.scene, this.camera);
+    performance.mark('adai:gl-compiled');
     this.update(0.016, true);
+    performance.mark('adai:gl-first-frame');
     this.stage.classList.add('is-ready');
     document.documentElement.classList.add('gl-ready');
     this.start();
@@ -225,7 +239,11 @@ export class World {
     on('pointerdown', (e) => {
       const t = e.target as HTMLElement;
       if (t.closest('a, button, input, textarea, select, label, summary, [role="button"]')) return;
-      if (this.hitTest(e.clientX, e.clientY)) { this.mascot.react('poke'); this.dirty = true; }
+      if (this.hitTest(e.clientX, e.clientY)) {
+        this.mascot.react('poke');
+        if (e.pointerType !== 'mouse') { this.pointer.x = e.clientX; this.pointer.y = e.clientY; this.revealPulseUntil = this.clock.elapsedTime + 1.6; }
+        this.dirty = true;
+      }
     }, { passive: true });
     on('scroll', () => { this.dirty = true; this.wake(); }, { passive: true });
     on('keydown', () => this.wake());
@@ -379,12 +397,14 @@ export class World {
       if (k > 1) this.sweep.t = -1; else sweep = 1 - k * 1.3 + 0.15;
     }
 
-    const near = this.pointer.x >= 0 && this.isNearMascot(this.pointer.x, this.pointer.y, 1.25) && !this.pointer.touched;
+    const reveal = this.updateReveal(dt, W, H);
     this.pipeline.render(this.scene, this.camera, {
       cellCss: 9,
-      pointer: new THREE.Vector2(this.pointer.x / W, 1 - this.pointer.y / H),
-      lensRadius: clamp((this.frame.h / H) * 0.32, 0.08, 0.22),
-      lensAmount: this.motion && near && !this.posterMode ? 1 : 0,
+      pointer: new THREE.Vector2(this.revealOrigin.x / W, 1 - this.revealOrigin.y / H),
+      revealRadius: reveal.radius,
+      revealEdge: reveal.edge,
+      revealFull: reveal.full,
+      debug: this.glyphDebug ? 1 : 0,
       glyphAmount: this.poseGlyph,
       aura: this.posterMode ? 0 : this.poseAura,
       sweep,
@@ -396,6 +416,40 @@ export class World {
       time: now,
       motion: this.motion,
     });
+  }
+
+  /**
+   * The glyph reveal. While the cursor is over Auri (or briefly after a tap on touch screens), a disc grows
+   * from the cursor until its radius exceeds the distance to the furthest corner of Auri's projected
+   * bounding box (hands, antenna and all), at which point coverage is forced complete. Leaving reverses it.
+   * The disc only reveals glyphs where the rendered silhouette is, so it never spills into the background.
+   */
+  private updateReveal(dt: number, W: number, H: number) {
+    // Projected screen bounds of the whole character, recomputed every frame (it moves, turns and gestures).
+    this.bounds.setFromObject(this.mascot.object);
+    const b = this.bounds, v = this.projected;
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (let i = 0; i < 8; i++) {
+      v.set(i & 1 ? b.max.x : b.min.x, i & 2 ? b.max.y : b.min.y, i & 4 ? b.max.z : b.min.z).project(this.camera);
+      const sx = (v.x * 0.5 + 0.5) * W, sy = (-v.y * 0.5 + 0.5) * H;
+      minX = Math.min(minX, sx); maxX = Math.max(maxX, sx); minY = Math.min(minY, sy); maxY = Math.max(maxY, sy);
+    }
+    const now = this.clock.elapsedTime;
+    const px = this.pointer.x, py = this.pointer.y;
+    const insetX = (maxX - minX) * 0.1, insetY = (maxY - minY) * 0.06;
+    const over = px >= 0 && px > minX + insetX && px < maxX - insetX && py > minY + insetY && py < maxY - insetY;
+    const holding = this.revealTarget > 0 && px > minX - 12 && px < maxX + 12 && py > minY - 12 && py < maxY + 12;
+    const active = this.motion && !this.posterMode && ((over && !this.pointer.touched) || holding || now < this.revealPulseUntil);
+    this.revealTarget = active ? 1 : 0;
+    if (active && px >= 0) this.revealOrigin.set(px, py);
+    // Linear progress (0.7 s in, 0.5 s out), eased when turned into a radius.
+    this.reveal = clamp(this.reveal + (active ? dt / 0.7 : -dt / 0.5), 0, 1);
+    const ox = this.revealOrigin.x, oy = this.revealOrigin.y;
+    let far = 0;
+    for (const [cx, cy] of [[minX, minY], [maxX, minY], [minX, maxY], [maxX, maxY]]) far = Math.max(far, Math.hypot(cx - ox, cy - oy));
+    const cover = far / H + 0.04; // height units, as the shader measures distance
+    const e = this.reveal < 0.5 ? 4 * this.reveal ** 3 : 1 - (-2 * this.reveal + 2) ** 3 / 2;
+    return { radius: this.reveal > 0 ? 0.03 + (cover - 0.03) * e : 0, edge: Math.max(0.05, cover * 0.18), full: this.reveal >= 0.999 ? 1 : 0 };
   }
 
   private loop = () => {

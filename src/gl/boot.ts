@@ -4,6 +4,7 @@ let world: World | null = null;
 
 export async function boot(stage: HTMLElement) {
   if (world) return world;
+  performance.mark('adai:gl-imported');
   world = new World(stage);
   await world.init();
   (window as unknown as { adai?: object }).adai = {

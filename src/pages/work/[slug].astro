@@ -62,11 +62,11 @@ const description = project.summary.length > 158 ? project.summary.slice(0, 155)
         </figure>
       ) : screens[0] ? (
         <figure class:list={['frame', 'hero-shot', screens[0].type === 'pixel' && 'frame--pixel']}>
-          <img src={screens[0].src} alt={screens[0].alt} width={screens[0].width} height={screens[0].height} decoding="async" fetchpriority="high" />
+          <img draggable="false" src={screens[0].src} alt={screens[0].alt} width={screens[0].width} height={screens[0].height} decoding="async" fetchpriority="high" />
           {screens[0].type === 'concept' && <figcaption class="mono">Concept illustration</figcaption>}
         </figure>
       ) : phones.length ? (
-        <div class="phone-row">{phones.slice(0, 4).map((m) => <div class="phone"><img src={m.src} alt={m.alt} width={m.width} height={m.height} decoding="async" /></div>)}</div>
+        <div class="phone-row">{phones.slice(0, 4).map((m) => <div class="phone"><img draggable="false" src={m.src} alt={m.alt} width={m.width} height={m.height} decoding="async" /></div>)}</div>
       ) : (
         <div class="frame plate-frame"><Plate project={project} size="l" /></div>
       )}
@@ -84,12 +84,12 @@ const description = project.summary.length > 158 ? project.summary.slice(0, 155)
       {screens.length > (project.video ? 0 : 1) && (
         <section class="row gallery-row"><h2>Screens</h2>
           <div class="gallery">{screens.slice(project.video ? 0 : 1).map((m) => (
-            <figure class:list={['frame', m.type === 'pixel' && 'frame--pixel']}><img src={m.src} alt={m.alt} width={m.width} height={m.height} loading="lazy" decoding="async" /><figcaption class="mono mute">{m.alt}</figcaption></figure>
+            <figure class:list={['frame', m.type === 'pixel' && 'frame--pixel']}><img draggable="false" src={m.src} alt={m.alt} width={m.width} height={m.height} loading="lazy" decoding="async" /><figcaption class="mono mute">{m.alt}</figcaption></figure>
           ))}</div>
         </section>
       )}
       {phones.length > 4 && (
-        <section class="row"><h2>More screens</h2><div class="phone-row small">{phones.slice(4).map((m) => <div class="phone"><img src={m.src} alt={m.alt} width={m.width} height={m.height} loading="lazy" decoding="async" /></div>)}</div></section>
+        <section class="row"><h2>More screens</h2><div class="phone-row small">{phones.slice(4).map((m) => <div class="phone"><img draggable="false" src={m.src} alt={m.alt} width={m.width} height={m.height} loading="lazy" decoding="async" /></div>)}</div></section>
       )}
       {story.outcome && <section class="row"><h2>Where it stands</h2><div class="prose"><p>{story.outcome}</p></div></section>}
       {story.honest && <section class="row honest"><h2>Said plainly</h2><div class="prose"><ul>{story.honest.map((b) => <li>{b}</li>)}</ul></div></section>}
@@ -145,6 +145,7 @@ const description = project.summary.length > 158 ? project.summary.slice(0, 155)
   .gallery figcaption { padding: 0.6rem 0.85rem; font-size: 0.72rem; line-height: 1.4; }
   .sub { font-size: var(--step-3); margin-bottom: 1.5rem; }
   .connected { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+  .conn { display: grid; grid-template-rows: auto 1fr; }
   .why { margin-bottom: 0.6rem; min-height: 2.6em; }
   .pager { display: flex; justify-content: space-between; gap: 1rem; padding-block: 2rem 1rem; }
   .pg { display: grid; gap: 0.25rem; text-decoration: none; padding: 1rem 1.25rem; border-radius: var(--radius-m); border: 1px solid var(--line); min-width: 40%; }

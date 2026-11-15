@@ -16,8 +16,10 @@ const fullscreenVert = /* glsl */ `
 
 export interface GlyphParams {
   cellCss: number;
-  lensRadius: number;
-  lensAmount: number;
+  revealRadius: number;
+  revealEdge: number;
+  revealFull: number;
+  debug: number;
   glyphAmount: number;
   aura: number;
   sweep: number;
@@ -47,19 +49,24 @@ export class GlyphPipeline {
     this.sceneRT = new THREE.WebGLRenderTarget(1, 1, opts);
     this.cellRT = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, format: THREE.RGBAFormat, depthBuffer: false, minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter });
 
+    // Reduction: one texel per glyph cell. Cells are addressed in *screen pixels* (cell × cellPx), exactly
+    // as the composite draws them, so the glyph grid can never drift from the 3D render underneath.
+    // rgb = average colour of the covered taps (unpremultiplied), a = MAX coverage of the 16 taps, so a cell
+    // that touches the silhouette anywhere counts as part of it (a one-cell silhouette dilation at most).
     this.reduceMat = new THREE.ShaderMaterial({
-      uniforms: { tScene: { value: this.sceneRT.texture }, uGrid: { value: this.grid } },
+      uniforms: { tScene: { value: this.sceneRT.texture }, uGrid: { value: this.grid }, uRes: { value: this.size }, uCellPx: { value: 12 } },
       vertexShader: fullscreenVert,
       fragmentShader: /* glsl */ `
-        uniform sampler2D tScene; uniform vec2 uGrid; varying vec2 vUv;
+        uniform sampler2D tScene; uniform vec2 uGrid, uRes; uniform float uCellPx; varying vec2 vUv;
         void main() {
           vec2 cell = floor(vUv * uGrid);
-          vec4 acc = vec4(0.0);
+          vec3 rgb = vec3(0.0); float sumA = 0.0; float maxA = 0.0;
           for (int y = 0; y < 4; y++) for (int x = 0; x < 4; x++) {
-            vec2 uv = (cell + (vec2(float(x), float(y)) + 0.5) / 4.0) / uGrid;
-            acc += texture2D(tScene, uv);
+            vec2 px = (cell + (vec2(float(x), float(y)) + 0.5) / 4.0) * uCellPx;
+            vec4 t = texture2D(tScene, min(px, uRes - 0.5) / uRes);
+            rgb += t.rgb; sumA += t.a; maxA = max(maxA, t.a);
           }
-          gl_FragColor = acc / 16.0;
+          gl_FragColor = vec4(rgb / max(sumA, 1e-4), maxA);
         }
       `,
       depthTest: false,
@@ -76,8 +83,10 @@ export class GlyphPipeline {
         uGrid: { value: this.grid },
         uCellPx: { value: 12 },
         uPointer: { value: new THREE.Vector2(-10, -10) },
-        uLensRadius: { value: 0.16 },
-        uLensAmount: { value: 1 },
+        uRevealRadius: { value: 0 },
+        uRevealEdge: { value: 0.06 },
+        uRevealFull: { value: 0 },
+        uDebug: { value: 0 },
         uGlyphAmount: { value: 0 },
         uAura: { value: 1 },
         uSweep: { value: -1 },
@@ -93,7 +102,7 @@ export class GlyphPipeline {
         precision highp float;
         varying vec2 vUv;
         uniform sampler2D tScene, tCells, tAtlas;
-        uniform float uShadowAmount, uCount, uCellPx, uLensRadius, uLensAmount, uGlyphAmount, uAura, uSweep, uMascotRadius, uTime;
+        uniform float uShadowAmount, uCount, uCellPx, uRevealRadius, uRevealEdge, uRevealFull, uDebug, uGlyphAmount, uAura, uSweep, uMascotRadius, uTime;
         uniform vec2 uRes, uGrid, uPointer, uMascot, uShadow;
         uniform vec3 uHue;
 
@@ -116,30 +125,35 @@ export class GlyphPipeline {
 
           vec2 cellId = floor(frag / uCellPx);
           vec2 local = fract(frag / uCellPx);
-          vec2 cellUv = (cellId + 0.5) / uGrid;
-          vec4 cell = texture2D(tCells, cellUv);
+          vec2 cellCentre = (cellId + 0.5) * uCellPx / uRes;     // same pixel-space grid as the reduction
+          vec4 cell = texture2D(tCells, (cellId + 0.5) / uGrid);
           float n = noise(cellId * 0.18 + vec2(uTime * 0.25, -uTime * 0.15));
 
-          // --- Reveal mask (per cell, with a dithered edge so it dissolves cell by cell)
-          vec2 dp = (cellUv - uPointer) * vec2(aspect, 1.0);
-          float lens = (1.0 - smoothstep(uLensRadius * 0.45, uLensRadius, length(dp))) * uLensAmount;
-          float sweepBand = uSweep < -0.5 ? 0.0 : 1.0 - smoothstep(0.0, 0.18, abs(cellUv.y - uSweep));
-          float m = clamp(lens + uGlyphAmount + sweepBand, 0.0, 1.5);
-          float mask = smoothstep(0.42, 0.58, m * 0.92 + (n - 0.5) * 0.45);
+          // --- Reveal mask, decided per cell (a cell is either glyph or 3D, never a blend of both).
+          // The reveal is a disc that grows from the cursor; at full activation its radius exceeds the
+          // projected bounds of the whole character, and uRevealFull forces complete coverage.
+          float dist = length((cellCentre - uPointer) * vec2(aspect, 1.0));
+          float front = 1.0 - smoothstep(uRevealRadius - uRevealEdge, uRevealRadius, dist + (n - 0.5) * uRevealEdge);
+          float reveal = max(front * step(1e-4, uRevealRadius), uRevealFull);
+          float sweepBand = uSweep < -0.5 ? 0.0 : 1.0 - smoothstep(0.0, 0.18, abs(cellCentre.y - uSweep));
+          float dissolve = smoothstep(0.42, 0.58, (uGlyphAmount + sweepBand) * 0.92 + (n - 0.5) * 0.45);
+          float mask = step(0.5, max(reveal, dissolve));
 
-          // --- Glyphs for the mascot
-          vec3 cellCol = cell.rgb / max(cell.a, 1e-3);
+          // --- Glyphs, drawn wherever the rendered silhouette touches the cell (alpha-derived mask)
+          vec3 cellCol = cell.rgb;
           float lum = dot(cellCol, vec3(0.2126, 0.7152, 0.0722));
           float level = clamp(pow(lum * 1.15, 0.75), 0.0, 1.0);
           float idx = floor(level * (uCount - 1.0) + (hash(cellId) - 0.5) * 0.6 + 0.5);
           idx = clamp(idx, 1.0, uCount - 1.0);
-          float g = glyph(idx, local) * step(0.08, cell.a);
-          vec3 gCol = mix(uHue, cellCol * 1.25 + uHue * 0.15, 0.55) * (0.65 + 0.75 * level);
-          vec4 glyphOut = vec4(gCol * g, g) * cell.a;
+          float cover = smoothstep(0.01, 0.25, cell.a);
+          float g = glyph(idx, local) * cover;
+          vec3 gCol = mix(uHue, cellCol * 1.3 + uHue * 0.15, 0.55) * (0.8 + 0.9 * level);
+          vec4 glyphOut = vec4(gCol * g, g);
 
-          vec4 col = mix(scene, glyphOut, mask * step(0.02, cell.a));
-          // a faint ghost of the solid form stays under the glyphs so the silhouette never breaks
-          col += scene * mask * 0.12;
+          // Inside the mask the 3D pixels are replaced outright (no ghost, no coverage gate), so no
+          // sliver of the model can show through, even where the taps missed thin geometry.
+          vec4 col = mix(scene, glyphOut, mask);
+          if (uDebug > 0.5 && scene.a > 0.02 && mask < 0.5 && uRevealFull > 0.5) { gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0); return; }
 
           // --- Ambient glyph aura in the section hue, only where the mascot is not
           vec2 dm = (uv - uMascot) * vec2(aspect, 1.0);
@@ -194,6 +208,7 @@ export class GlyphPipeline {
     this.grid.set(Math.ceil(w / this.cellPx), Math.ceil(h / this.cellPx));
     this.cellRT.setSize(this.grid.x, this.grid.y);
     this.compositeMat.uniforms.uCellPx.value = this.cellPx;
+    this.reduceMat.uniforms.uCellPx.value = this.cellPx;
   }
 
   render(scene: THREE.Scene, camera: THREE.Camera, p: GlyphParams) {
@@ -209,8 +224,10 @@ export class GlyphPipeline {
 
     const u = this.compositeMat.uniforms;
     u.uPointer.value.copy(p.pointer);
-    u.uLensRadius.value = p.lensRadius;
-    u.uLensAmount.value = p.lensAmount;
+    u.uRevealRadius.value = p.revealRadius;
+    u.uRevealEdge.value = p.revealEdge;
+    u.uRevealFull.value = p.revealFull;
+    u.uDebug.value = p.debug;
     u.uGlyphAmount.value = p.glyphAmount;
     u.uAura.value = p.aura;
     u.uSweep.value = p.sweep;

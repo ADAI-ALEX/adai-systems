@@ -41,15 +41,18 @@ function sculpt(geo: THREE.BufferGeometry, radius: (d: V3) => number, post?: (p:
 }
 
 /* ---------------- Head: a soft speech bubble with a tail nub at the lower left ---------------- */
-export const HEAD = { a: 1.0, b: 0.84, c: 0.8, p: 3.1 };
-const TAIL_DIR = norm(-0.62, -0.66, 0.42);
-const CROWN_DIR = norm(0.45, 0.85, 0.05);
+export const HEAD = { a: 1.0, b: 0.86, c: 0.82, p: 2.75 };
+const CROWN_DIR = norm(0.42, 0.88, 0.05);
 
+/**
+ * A smooth, evenly rounded cushion of a head. The speech-bubble identity now lives in the visor's proportions
+ * and in the bubble emblem on the chest, so nothing distorts the silhouette of the face.
+ */
 export function headRadius(d: V3) {
   let r = superRadius(d, HEAD.a, HEAD.b, HEAD.c, HEAD.p);
-  r += bulge(d, TAIL_DIR, 0.2, 26); // the bubble tail, the core of the ADAI identity
-  r += bulge(d, CROWN_DIR, 0.035, 6); // a slightly fuller top right: subtle asymmetry
-  r -= bulge(d, norm(0, 0, 1), 0.035, 10); // a gentle face plane for the visor to sit in
+  r += bulge(d, CROWN_DIR, 0.025, 6); // a touch fuller at the top right: subtle, organic asymmetry
+  r += bulge(d, norm(0, -1, 0.2), 0.02, 4); // soft fullness under the chin so the head sits on the body
+  r -= bulge(d, norm(0, 0, 1), 0.03, 10); // a gentle face plane for the visor to sit in
   return r;
 }
 
@@ -106,8 +109,28 @@ export function bulbGeometry() {
   return sculpt(geo, (d) => superRadius(d, 0.1, 0.12, 0.1, 2.2));
 }
 
-/** Core light on the chest: a smooth lens. */
-export function coreGeometry() {
-  const geo = new THREE.SphereGeometry(1, 40, 30);
-  return sculpt(geo, (d) => superRadius(d, 0.13, 0.13, 0.05, 2.0));
+/**
+ * The chest emblem: the ADAI speech bubble (rounded body, tail at the lower left) as a soft, bevelled light.
+ * Its back is bent to follow the curve of the body so it sits flush.
+ */
+export function emblemGeometry() {
+  const w = 0.17, h = 0.12, r = 0.085;
+  const s = new THREE.Shape();
+  s.moveTo(-w + r, -h);
+  s.lineTo(-w * 0.35, -h);
+  s.quadraticCurveTo(-w * 0.62, -h - 0.03, -w * 0.8, -h - 0.085); // the tail, drawn as one soft curve
+  s.quadraticCurveTo(-w * 0.86, -h - 0.02, -w + 0.02, -h + 0.02);
+  s.quadraticCurveTo(-w, -h + 0.02, -w, -h + r);
+  s.lineTo(-w, h - r);
+  s.quadraticCurveTo(-w, h, -w + r, h);
+  s.lineTo(w - r, h);
+  s.quadraticCurveTo(w, h, w, h - r);
+  s.lineTo(w, -h + r);
+  s.quadraticCurveTo(w, -h, w - r, -h);
+  s.closePath();
+  const geo = new THREE.ExtrudeGeometry(s, { depth: 0.025, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.018, bevelSegments: 6, curveSegments: 18 });
+  const pos = geo.attributes.position as THREE.BufferAttribute;
+  for (let i = 0; i < pos.count; i++) pos.setZ(i, pos.getZ(i) - (pos.getX(i) ** 2 + pos.getY(i) ** 2) * 0.9);
+  geo.computeVertexNormals();
+  return geo;
 }

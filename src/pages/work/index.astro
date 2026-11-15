@@ -60,7 +60,9 @@ const matches = (slug: string) => filters.filter((f) => f.test(archive.find((p) 
   .filter:hover { border-color: var(--bone); color: var(--bone); }
   .filter[aria-pressed='true'] { background: var(--bone); color: var(--ink-0); border-color: var(--bone); }
   .filter[aria-pressed='true'] .mono { color: var(--ink-3); }
-  .archive { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+  /* Equal columns and equal rows: every card in the archive has identical dimensions. */
+  .archive { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); grid-auto-rows: 1fr; align-items: stretch; }
+  .archive-item { display: grid; min-width: 0; }
   .archive-item[hidden] { display: none; }
 </style>
 <script>

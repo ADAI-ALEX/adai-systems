@@ -4,25 +4,26 @@ import SectionHead from '@/components/SectionHead.astro';
 import MascotAnchor from '@/components/MascotAnchor.astro';
 import Mark from '@/components/Mark.astro';
 import { breadcrumbLd } from '@/lib/seo';
+import { MASCOT } from '@/lib/mascot';
 const expressionList = ['neutral', 'happy', 'curious', 'surprised', 'thinking', 'focused', 'talking', 'excited', 'confused', 'proud', 'sleepy'];
 const gestures = ['wave', 'point', 'think', 'cheer', 'present', 'shrug', 'nod'];
 const hues = [{ id: 'studio', label: 'Studio' }, { id: 'agents', label: 'Agents' }, { id: 'automation', label: 'Automation' }, { id: 'products', label: 'Apps' }, { id: 'research', label: 'Research' }];
 const traits = [
-  { t: 'A head that is a speech bubble', d: 'The ADAI mark is a chat bubble with two eyes. Adi keeps that idea in three dimensions: the whole head is a soft bubble, tail and all, and the face is a glossy visor in the same shape.' },
-  { t: 'Two round eyes, the same as the logo', d: 'Same spacing and size as the mark. They blink, squint, smile, widen and look where you look, so the face reads even when it is only a few glyphs wide.' },
-  { t: 'Soft, not mechanical', d: 'Satin silicone for the head and hands, a plush body, felted ear cushions. No joints, no panels, no screws. Everything moves on springs, so it follows through like something physical.' },
-  { t: 'Small asymmetries', d: 'The sprout grows off-centre and leans, one ear cushion is bigger, the bubble tail sits on one side. It makes the character feel designed rather than generated.' },
-  { t: 'It changes colour with the work', d: 'The eyes, the sprout and the chest light take the colour of the kind of work on screen: amber for agents, aqua for automation, coral for apps, sky for research.' },
-  { t: 'It is also made of letters', d: 'Move your cursor over Adi and the render turns into typographic glyphs from the ADAI ramp, ending in the ADAI mark itself.' },
+  { t: 'Born from the ADAI mark', d: `The mark is a chat bubble with two round eyes. ${MASCOT.name} keeps those eyes, same spacing and same size within the face, and wears the speech bubble as a glowing emblem on the chest.` },
+  { t: 'A face that reads at any size', d: 'Two round eyes in a calm, centred visor. They blink, squint, smile, widen and look where you look, so the face still reads when it is only a few glyphs wide.' },
+  { t: 'Soft, not mechanical', d: 'Satin silicone for the head and hands, a soft-touch body, felt ear cushions. No joints, no panels, no screws. Everything moves on springs, so it follows through like something physical.' },
+  { t: 'One signature accent', d: 'A deep indigo on the antenna tip and the ear cushions. Everything else stays warm cream, so the accent reads as a signature rather than decoration.' },
+  { t: 'It changes colour with the work', d: 'The eyes, the chest bubble and the glow in the antenna take the colour of the kind of work on screen: amber for agents, aqua for automation, coral for apps, sky for research.' },
+  { t: 'It is also made of letters', d: `Hover over ${MASCOT.name} and the whole character dissolves into typographic glyphs from the ADAI ramp, ending in the ADAI mark itself.` },
 ];
 ---
-<Base title="Meet Adi" path="/mascot" description="Adi is the ADAI Systems character: a soft, speech-bubble-headed companion built in real-time 3D, with a typographic glyph renderer." mascot={{ mode: 'hero', pose: 'intro' }} jsonLd={[breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'Meet Adi', path: '/mascot' }])]}>
+<Base title={`Meet ${MASCOT.name}`} path={MASCOT.path} description={`${MASCOT.name} is the ADAI Systems character: a soft, sculpted companion built in real-time 3D, with a typographic glyph renderer.`} mascot={{ mode: 'hero', pose: 'intro' }} jsonLd={[breadcrumbLd([{ name: 'Home', path: '/' }, { name: `Meet ${MASCOT.name}`, path: MASCOT.path }])]}>
   <section class="page-hero">
     <div class="wrap hero-grid">
       <div class="stack" style="--stack:1.25rem">
         <p class="eyebrow">The ADAI character</p>
-        <h1>Meet Adi.</h1>
-        <p class="lead">A soft companion with a speech bubble for a head, drawn live in your browser. Try the controls: everything Adi does on this site comes from the same handful of expressions and gestures.</p>
+        <h1>Meet {MASCOT.name}.</h1>
+        <p class="lead">A soft companion grown out of the ADAI mark, drawn live in your browser. Try the controls: everything {MASCOT.name} does on this site comes from the same handful of expressions and gestures.</p>
         <div class="controls panel" data-controls>
           <p class="mono mute">Expression</p>
           <div class="chips">{expressionList.map((e) => <button type="button" class="chip" data-expression={e}>{e}</button>)}</div>
@@ -30,7 +31,7 @@ const traits = [
           <div class="chips">{gestures.map((g) => <button type="button" class="chip" data-gesture={g}>{g}</button>)}</div>
           <p class="mono mute">Colour of the work</p>
           <div class="chips">{hues.map((h) => <button type="button" class="chip hue-chip" data-hue={h.id} data-set-hue={h.id}>{h.label}</button>)}</div>
-          <p class="mono mute fine" data-gl-note>Needs WebGL. Without it, you will see a still of Adi instead.</p>
+          <p class="mono mute fine" data-gl-note>Needs WebGL. Without it, you will see a still of {MASCOT.name} instead.</p>
         </div>
       </div>
       <MascotAnchor pose="intro" class="adi-stage" eager />
@@ -39,11 +40,11 @@ const traits = [
 
   <section class="section" aria-labelledby="traits-title">
     <div class="wrap">
-      <SectionHead id="traits-title" title="Where Adi comes from" lead="Adi grew out of the ADAI mark below. The new character keeps its face and its idea, and nothing else is borrowed." />
+      <SectionHead id="traits-title" title={`Where ${MASCOT.name} comes from`} lead={`${MASCOT.name} grew out of the ADAI mark below. The character keeps its eyes and its idea, and nothing else is borrowed.`} />
       <div class="origin" data-reveal>
         <Mark size={120} title="The ADAI mark" />
         <span class="arrow-big" aria-hidden="true">→</span>
-        <p class="mono mute">Circle, speech bubble, two eyes. The bubble became the head, the eyes stayed.</p>
+        <p class="mono mute">Circle, speech bubble, two eyes. The eyes became the face; the bubble became the light on the chest.</p>
       </div>
       <div class="grid traits">
         {traits.map((t, i) => (

@@ -66,11 +66,10 @@ export function createFaceMaterial() {
         float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
         return mix(b, a, h) - k * h * (1.0 - h);
       }
-      // The visor: a rounded bubble with its tail at the lower left, as in the ADAI mark.
+      // The visor: the rounded body of the ADAI speech bubble, centred on the face. (The bubble's tail now
+      // lives on the chest emblem, so the face stays symmetrical and calm.)
       float visorSdf(vec2 p) {
-        float body = sdRoundBox(p - vec2(0.02, 0.06), vec2(0.64, 0.42), 0.36);
-        float tail = sdSegment(p, vec2(-0.3, -0.28), vec2(-0.42, -0.6)) - mix(0.1, 0.03, clamp((-p.y - 0.28) / 0.32, 0.0, 1.0));
-        return smin(body, tail, 0.1);
+        return sdRoundBox(p - vec2(0.0, 0.04), vec2(0.63, 0.41), 0.34);
       }
       float eyeSdf(vec2 p, vec2 c, vec4 e, float side) {
         float r = 0.165 * e.y;
@@ -111,8 +110,8 @@ export function createFaceMaterial() {
 
         // Eyes
         vec2 gaze = uGaze * vec2(0.075, 0.055);
-        float dL = eyeSdf(p, vec2(-0.33, 0.07) + gaze, uEyeL, -1.0);
-        float dR = eyeSdf(p, vec2(0.33, 0.07) + gaze, uEyeR, 1.0);
+        float dL = eyeSdf(p, vec2(-0.32, 0.05) + gaze, uEyeL, -1.0);
+        float dR = eyeSdf(p, vec2(0.32, 0.05) + gaze, uEyeR, 1.0);
         float d = min(dL, dR);
         float eye = 1.0 - smoothstep(-aa, aa, d);
         vec3 eyeCore = mix(vec3(1.0, 0.96, 0.88), uHue, 0.22);
@@ -123,8 +122,8 @@ export function createFaceMaterial() {
         col += uHue * halo * 0.6;
         // Tiny specular catch-lights keep the eyes alive
         vec2 hl = vec2(-0.055, 0.07) * mix(uEyeL.y, uEyeR.y, step(0.0, p.x));
-        float catchL = 1.0 - smoothstep(0.016, 0.03, length(p - (vec2(-0.33, 0.07) + gaze + hl)));
-        float catchR = 1.0 - smoothstep(0.016, 0.03, length(p - (vec2(0.33, 0.07) + gaze + hl)));
+        float catchL = 1.0 - smoothstep(0.016, 0.03, length(p - (vec2(-0.32, 0.05) + gaze + hl)));
+        float catchR = 1.0 - smoothstep(0.016, 0.03, length(p - (vec2(0.32, 0.05) + gaze + hl)));
         eyeCol += vec3(2.0) * (catchL + catchR) * (1.0 - uHappy) * step(0.35, min(uEyeL.x, uEyeR.x));
         col = mix(col, eyeCol, eye);
 

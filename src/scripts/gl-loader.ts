@@ -24,13 +24,19 @@ export function bootWhenReady() {
     document.documentElement.classList.add('gl-fallback');
     return;
   }
-  const start = () => import('@/gl/boot').then((m) => m.boot(stage)).catch((err) => {
+  // Download (and parse) the WebGL chunk straight after first paint, in parallel with the page's images…
+  performance.mark('adai:gl-start');
+  let modulePromise: Promise<typeof import('@/gl/boot')> | null = null;
+  const fetchModule = () => (modulePromise ??= import('@/gl/boot'));
+  requestAnimationFrame(() => setTimeout(fetchModule, 0));
+  // …but only initialise once the page has loaded and the main thread is idle: the headline and the
+  // poster of the character are on screen from the first paint, so nothing ever waits on WebGL.
+  const start = () => fetchModule().then((m) => m.boot(stage)).catch((err) => {
     console.warn('[adai] WebGL failed, using the poster', err);
     document.documentElement.classList.add('gl-fallback');
   });
-  // Let the page paint and become interactive first; the DOM headline is the LCP element.
   const idle = (window as Window & { requestIdleCallback?: (cb: () => void, o?: object) => void }).requestIdleCallback;
-  const go = () => (idle ? idle(start, { timeout: 2000 }) : setTimeout(start, 300));
+  const go = () => (idle ? idle(start, { timeout: 500 }) : setTimeout(start, 50));
   if (document.readyState === 'complete') go();
   else addEventListener('load', go, { once: true });
 }
