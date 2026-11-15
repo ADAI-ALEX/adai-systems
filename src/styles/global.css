@@ -78,7 +78,11 @@ img, video, svg, canvas { display: block; max-width: 100%; }
    layers and display headings are not selectable. Body copy, links and form fields stay fully selectable. */
 img, svg, canvas, picture { -webkit-user-drag: none; user-drag: none; }
 img, svg, canvas, .gl-stage, .grain, .mascot-anchor, .phone, .frame, .plate, .icon, .tick, .t-dot { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
-h1, .promise, .stat strong, .big-email-display { -webkit-user-select: none; user-select: none; }
+/* Display typography (page titles, section headings, oversized decorative text) cannot be highlighted by an
+   accidental drag. `.display-text` is the reusable opt-in for display text that is not a heading.
+   Headings inside articles (legal prose, case-study rows) stay selectable, like the body copy around them. */
+h1, h2, .display-text { -webkit-user-select: none; user-select: none; }
+.prose h2, .case-row > h2 { -webkit-user-select: text; user-select: text; }
 a:has(> img), a:has(.card-media), a:has(.plate) { -webkit-user-drag: none; }
 img, video { height: auto; }
 a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }

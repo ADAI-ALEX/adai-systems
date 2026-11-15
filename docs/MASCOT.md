@@ -80,11 +80,13 @@ Code: `src/gl/passes/`.
 2. A reduction pass reads each glyph cell in **screen pixels**, on exactly the grid the composite draws, and stores the cell's average colour and its **maximum** coverage. Any cell the silhouette touches counts as part of it.
 3. The composite decides **per cell**: either glyph or 3D, never a blend. Glyphs come from a ramp set in IBM Plex Mono (`· . : - ~ + = * o x % # @`), and the densest glyph is the ADAI mark itself.
 
-**The lens.** While the cursor is over or near Auri (or briefly after a tap on touch screens), a small circular glyph lens follows the cursor:
-- its radius is `clamp(frameHeight / viewportHeight × 0.32, 0.08, 0.22)` of the viewport height, so it scales with Auri but never covers the whole character;
+**The lens.** While the cursor is over or near Auri, or while a finger drags across Auri on a touch screen (and briefly after a tap), a small circular glyph lens follows the pointer:
+- its radius is `clamp(frameHeight / viewportHeight × 0.24, 0.06, 0.165)` of the viewport height (`LENS_*` in `World.ts`), so it scales with Auri but never covers the whole character. That is 25 % smaller in diameter than the first version (`0.32, 0.08, 0.22`);
 - it opens over about 0.22 s and closes over about 0.3 s, and its centre is damped so it trails the cursor softly;
 - only the area inside the lens turns into glyphs; the rest of Auri stays 3D;
 - glyphs are only drawn where the rendered silhouette is, so the effect never bleeds into the background.
+
+**Touch.** A touch that starts on Auri's rendered silhouette inside a mascot area belongs to Auri: `World.ts` cancels that touch's scrolling in a non-passive `touchstart` listener (attached only to the `[data-mascot-anchor]` boxes, and only when the 3D hit test lands on Auri), captures the pointer to the box, and drives the lens with the finger. `pointerup`, `pointercancel` and `lostpointercapture` all end the drag, so it cannot get stuck. A touch anywhere else, including the empty parts of a mascot area, scrolls the page as usual. With reduced motion there is no lens, so touches never block scrolling. `scripts/touch-probe.mjs` reproduces a finger drag on a phone viewport.
 
 ### Rendering accuracy (kept from revision 2)
 

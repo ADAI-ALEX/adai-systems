@@ -1,6 +1,6 @@
 import { defineConfig } from '@playwright/test';
 
-// Set BASE_URL (for example https://www.adai.systems) to run the same suite against a deployed site.
+// Set BASE_URL (for example https://adai.systems) to run the same suite against a deployed site.
 const remote = process.env.BASE_URL;
 
 export default defineConfig({

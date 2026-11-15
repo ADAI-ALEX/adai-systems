@@ -1,14 +1,14 @@
 <p align="center"><img src="docs/assets/banner.png" alt="ADAI Systems: Building intelligent software. The ADAI wordmark beside Auri, the studio's soft 3D character, with the four kinds of work: agents, automation, apps and research." width="100%"></p>
 
 <p align="center">
-  <a href="https://www.adai.systems"><img src="https://img.shields.io/badge/live-adai.systems-eceae4?labelColor=06080b" alt="Live: adai.systems"></a>
+  <a href="https://adai.systems"><img src="https://img.shields.io/badge/live-adai.systems-eceae4?labelColor=06080b" alt="Live: adai.systems"></a>
   <img src="https://img.shields.io/badge/Astro-7.4-ff5d01?logo=astro&logoColor=white" alt="Astro 7.4">
   <img src="https://img.shields.io/badge/three.js-r187-000000?logo=threedotjs" alt="three.js r187">
   <img src="https://img.shields.io/badge/TypeScript-5.9-3178c6?logo=typescript&logoColor=white" alt="TypeScript 5.9">
   <img src="https://img.shields.io/badge/GLSL-custom%20shaders-5a63f0" alt="Custom GLSL shaders">
   <img src="https://img.shields.io/badge/Playwright-1.65-2ead33?logo=playwright" alt="Playwright 1.65">
   <img src="https://img.shields.io/badge/axe--core-4.14-8db3ff" alt="axe-core 4.14">
-  <a href="https://www.adai.systems"><img src="https://img.shields.io/badge/deployed-Vercel-000000?logo=vercel" alt="Deployed on Vercel"></a>
+  <a href="https://adai.systems"><img src="https://img.shields.io/badge/deployed-Vercel-000000?logo=vercel" alt="Deployed on Vercel"></a>
   <img src="https://img.shields.io/badge/tracking-none-5cd6c4" alt="No tracking: no analytics and no cookies">
 </p>
 
@@ -19,9 +19,9 @@ The site is built around **Auri**, an original real-time 3D character grown out 
 <p align="center"><img src="docs/screenshots/home-desktop.png" alt="The ADAI Systems home page: the headline 'Building intelligent software.' on the left and Auri, a soft cream 3D character with a dark visor and two glowing eyes, on the right." width="100%"></p>
 <p align="center"><sub>The home page at 1440 × 900. Auri is drawn live in the browser with WebGL; the headline and every link are ordinary HTML.</sub></p>
 
-- **Live site:** https://www.adai.systems
-- **Start a project:** https://www.adai.systems/start
-- **Meet Auri:** https://www.adai.systems/mascot
+- **Live site:** https://adai.systems
+- **Start a project:** https://adai.systems/start
+- **Meet Auri:** https://adai.systems/mascot
 - **Contact:** alex@adai.systems
 
 ## Contents
@@ -52,7 +52,7 @@ It's soft rather than mechanical: satin silicone, a soft-touch body, felt ear cu
 | **Alive** | Gaze led by the eyes, then head, then body. Blinking, breathing, idle glances. It gets sleepy if left alone. |
 | **Expressive** | 11 expressions (curious, thinking, talking, proud and more) and 7 gestures (wave, point, think, cheer, present, shrug, nod). |
 | **In the story** | Each section of the home page has its own pose and colour. Auri glides between them as you scroll, and nothing hijacks the scroll. |
-| **Made of letters** | A small circle of typographic glyphs follows your cursor over Auri. The glyphs are set in IBM Plex Mono, and the densest one is the ADAI mark. |
+| **Made of letters** | A small circle of typographic glyphs follows your cursor (or your finger, on a phone) over Auri. The glyphs are set in IBM Plex Mono, and the densest one is the ADAI mark. |
 | **Replaceable** | The site talks to Auri through one interface. An authored Blender model (GLB) can replace the procedural one with a single manifest change. See [docs/MASCOT.md](docs/MASCOT.md). |
 
 <p align="center"><img src="docs/screenshots/lens-sheet.png" alt="Eight views of Auri with the glyph lens at different cursor positions: the left and right edges of the face, the centre, the antenna, both hands, the left ear, and after the cursor leaves." width="100%"></p>
@@ -172,6 +172,7 @@ Node 22.12 or newer is required. Tests use the installed Google Chrome so WebGL 
 | Tool | What it does |
 |---|---|
 | `node scripts/glyph-probe.mjs <dir> [url] --metric` | Moves the cursor around Auri and counts any 3D pixel inside the glyph lens (expected: 0) |
+| `node scripts/touch-probe.mjs <out.png> [url]` | Drags a finger across Auri on a phone viewport and reports whether the page scrolled (expected: 0) |
 | `node scripts/load-profile.mjs [url] 3 --throttle` | Times start-up (first paint, WebGL import, build, first frame) on cold and cached visits |
 | `npm run mascot:glb` | Exports the procedural Auri as a GLB blockout for Blender |
 | `npm run still` · `node scripts/build-banner.mjs` · `node scripts/build-icons.mjs` | Regenerate the README art and the favicon set |
@@ -179,15 +180,16 @@ Node 22.12 or newer is required. Tests use the installed Google Chrome so WebGL 
 ## Quality
 
 - `astro check`: 0 errors, 0 warnings.
-- `npm test`: 59 tests, covering:
+- `npm test`: 63 tests, covering:
   - every route: status, a single h1, title, description, canonical, JSON-LD and no console errors;
   - axe WCAG 2.2 AA (no serious or critical issues);
   - no horizontal scroll at 375 px;
   - the WebGL boot, and the no-WebGL fallback;
   - reduced motion;
-  - glyph-lens coverage (0 uncovered pixels);
+  - the glyph lens: size, cursor following and coverage (0 uncovered pixels);
+  - touch on a phone: a drag on Auri moves the lens without scrolling, lift and cancel release it, and swipes elsewhere scroll;
   - identical project cards at three widths;
-  - no draggable images;
+  - no draggable images, and no highlightable display headings;
   - the favicon, the header wordmark, the brief builder (no network requests), filters, the 404 page and the sitemap.
 - Lighthouse, mobile emulation:
 
@@ -201,7 +203,7 @@ Node 22.12 or newer is required. Tests use the installed Google Chrome so WebGL 
 
 The site deploys on [Vercel](https://vercel.com) from this repository:
 - `main` is production; every other branch gets a preview.
-- `www.adai.systems` is the canonical host, and `adai.systems` redirects to it (308).
+- `https://adai.systems` is the canonical address; `www.adai.systems` redirects to it (308).
 - `vercel.json` sets clean URLs (`/work/lockout`, matching the previous site's URLs) and cache headers for built assets.
 - No environment variables are needed.
 

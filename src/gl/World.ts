@@ -19,6 +19,9 @@ import { motionAllowed } from '@/scripts/motion';
 const HUES: Record<HueName, string> = { agents: '#f2b560', automation: '#5cd6c4', products: '#ff7d61', research: '#8db3ff', studio: '#f3e6cf' };
 const MASCOT_HEIGHT = 3.0; // rig units, measured floor (y = -0.08) to the top of the sprout bulb (y = 2.92)
 const MASCOT_CENTER_Y = 1.42;
+/** Glyph lens radius = clamp(frame height / viewport height × SCALE, MIN, MAX), in viewport heights.
+ *  0.75 × the original (0.32, 0.08, 0.22): the circle is 25 % smaller in diameter. */
+const LENS_SCALE = 0.24, LENS_MIN = 0.06, LENS_MAX = 0.165;
 /** Let the browser breathe between heavy start-up steps, so no single task blocks input for long. */
 const yieldToMain = () => new Promise<void>((r) => setTimeout(r, 0));
 const damp = (a: number, b: number, l: number, dt: number) => a + (b - a) * (1 - Math.exp(-l * dt));
@@ -74,6 +77,8 @@ export class World {
   private reveal = 0;
   private revealOrigin = new THREE.Vector2(-1, -1);
   private revealPulseUntil = -1;
+  /** A touch gesture that started on Auri: it drives the lens instead of scrolling the page until it ends. */
+  private drag: { id: number; el: HTMLElement } | null = null;
   /** ?glyphdebug paints any 3D pixel left uncovered at full glyph activation magenta (for tests). */
   private glyphDebug = new URLSearchParams(location.search).has('glyphdebug');
   private asleep = false;
@@ -242,10 +247,35 @@ export class World {
       if (t.closest('a, button, input, textarea, select, label, summary, [role="button"]')) return;
       if (this.hitTest(e.clientX, e.clientY)) {
         this.mascot.react('poke');
-        if (e.pointerType !== 'mouse') { this.pointer.x = e.clientX; this.pointer.y = e.clientY; this.revealPulseUntil = this.clock.elapsedTime + 1.6; }
+        if (e.pointerType !== 'mouse') {
+          this.pointer.x = e.clientX; this.pointer.y = e.clientY; this.revealPulseUntil = this.clock.elapsedTime + 1.6;
+          // A finger that lands on Auri keeps driving the lens wherever it moves, until it lifts.
+          const anchor = t.closest<HTMLElement>('[data-mascot-anchor]');
+          if (anchor && this.canDrag()) {
+            this.drag = { id: e.pointerId, el: anchor };
+            try { anchor.setPointerCapture(e.pointerId); } catch { /* pointer already gone */ }
+          }
+        }
         this.dirty = true;
       }
     }, { passive: true });
+    const release = (e: PointerEvent) => this.endDrag(e.pointerId);
+    on('pointerup', release, { passive: true });
+    on('pointercancel', release, { passive: true });
+    // Touch scrolling is decided when the finger lands, so it is cancelled there, and only for a touch that
+    // starts on Auri's rendered silhouette inside a mascot area. Everywhere else (and on the empty parts of a
+    // mascot area) the page scrolls exactly as before. The listener is non-passive only on the mascot areas.
+    document.querySelectorAll<HTMLElement>('[data-mascot-anchor]').forEach((el) => {
+      const touchStart = (e: TouchEvent) => {
+        if (e.touches.length !== 1 || !e.cancelable || !this.canDrag()) return;
+        const p = e.touches[0];
+        if (this.hitTest(p.clientX, p.clientY)) e.preventDefault();
+      };
+      const lost = (e: PointerEvent) => this.endDrag(e.pointerId);
+      el.addEventListener('touchstart', touchStart, { passive: false });
+      el.addEventListener('lostpointercapture', lost);
+      this.disposers.push(() => { el.removeEventListener('touchstart', touchStart); el.removeEventListener('lostpointercapture', lost); });
+    });
     on('scroll', () => { this.dirty = true; this.wake(); }, { passive: true });
     on('keydown', () => this.wake());
     on('adai:motion', (e) => { this.motion = e.detail.allowed; this.dirty = true; if (this.motion) this.start(); });
@@ -264,6 +294,19 @@ export class World {
       el.addEventListener('pointerenter', enter);
       el.addEventListener('focus', enter);
     });
+  }
+
+  /** Finger interaction with Auri only exists while the lens is animated (not with reduced motion). */
+  private canDrag() { return this.motion && !this.posterMode; }
+
+  /** Ends a touch drag (lift, cancel or lost capture); the lens lingers briefly, then closes. */
+  private endDrag(id: number) {
+    if (!this.drag || this.drag.id !== id) return;
+    const { el } = this.drag;
+    this.drag = null;
+    try { if (el.hasPointerCapture(id)) el.releasePointerCapture(id); } catch { /* already released */ }
+    this.revealPulseUntil = Math.max(this.revealPulseUntil, this.clock.elapsedTime + 0.35);
+    this.dirty = true;
   }
 
   /** Any input wakes Adi up; a long quiet spell makes Adi doze off (motion permitting). */
@@ -424,7 +467,7 @@ export class World {
   }
 
   /**
-   * The glyph lens: a small circle that follows the cursor over Auri (the original interaction and radius).
+   * The glyph lens: a small circle that follows the cursor (or a finger dragging across Auri).
    * Inside it Auri is drawn as glyphs, outside it in 3D. It glides after the cursor and grows/shrinks
    * smoothly on enter/leave. Coverage inside the circle is exact (cell grid shared with the reduction pass,
    * silhouette-derived coverage, per-cell switching), so no 3D shows through within it.
@@ -445,7 +488,7 @@ export class World {
       }
       over = px > minX && px < maxX && py > minY && py < maxY;
     }
-    const near = px >= 0 && (this.isNearMascot(px, py, 1.25) || over) && !this.pointer.touched;
+    const near = px >= 0 && (this.drag !== null || ((this.isNearMascot(px, py, 1.25) || over) && !this.pointer.touched));
     const active = this.motion && !this.posterMode && (near || now < this.revealPulseUntil);
     this.reveal = clamp(this.reveal + (active ? dt / 0.22 : -dt / 0.3), 0, 1);
     if (px >= 0) {
@@ -453,9 +496,13 @@ export class World {
       this.revealOrigin.x = damp(this.revealOrigin.x, px, 18, dt);
       this.revealOrigin.y = damp(this.revealOrigin.y, py, 18, dt);
     }
-    const base = clamp((this.frame.h / H) * 0.32, 0.08, 0.22);
+    // Lens radius as a fraction of viewport height: 25 % smaller than the original 0.32 × frame (0.08–0.22).
+    const base = clamp((this.frame.h / H) * LENS_SCALE, LENS_MIN, LENS_MAX);
     const e = 1 - Math.pow(1 - this.reveal, 3);
-    return { radius: this.reveal > 0 ? base * e : 0, edge: 0, full: 0 };
+    const radius = this.reveal > 0 ? base * e : 0;
+    // Test hook (only with ?glyphdebug): the live lens state, so tests can check size and touch behaviour.
+    if (this.glyphDebug) (window as unknown as { __adaiLens: object }).__adaiLens = { radius, frame: this.frame.h / H, viewportH: H, dragging: this.drag !== null, x: this.revealOrigin.x, y: this.revealOrigin.y };
+    return { radius, edge: 0, full: 0 };
   }
 
   private loop = () => {

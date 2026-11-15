@@ -39,7 +39,7 @@ const others = services.filter((s) => s.slug !== service.slug);
         <div class="stack" style="--stack:1.25rem">
           <Breadcrumbs items={[{ name: 'Services', href: '/services' }, { name: service.title }]} />
           <h1>{service.title}</h1>
-          <p class="promise">{service.promise}</p>
+          <p class="promise display-text">{service.promise}</p>
           <p class="lead">{service.intro}</p>
           <div class="actions">
             <a class="btn btn--hue" href={`/start?type=${service.slug}`} data-mascot-react="excited">Start a project <span class="arrow" aria-hidden="true">→</span></a>

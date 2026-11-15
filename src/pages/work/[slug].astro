@@ -74,25 +74,25 @@ const description = project.summary.length > 158 ? project.summary.slice(0, 155)
     </section>
 
     <div class="wrap body">
-      <section class="row"><h2>What it is</h2><div class="prose"><p>{project.summary}</p>{project.points && <ul>{project.points.map((pt) => <li>{pt}</li>)}</ul>}</div></section>
-      {story.problem && <section class="row"><h2>Why it exists</h2><div class="prose"><p>{story.problem}</p></div></section>}
-      {story.built && <section class="row"><h2>What was built</h2><div class="prose"><ul>{story.built.map((b) => <li>{b}</li>)}</ul></div></section>}
-      {story.how && <section class="row"><h2>How it works</h2><div class="prose"><ul>{story.how.map((b) => <li>{b}</li>)}</ul></div></section>}
+      <section class="case-row row"><h2>What it is</h2><div class="prose"><p>{project.summary}</p>{project.points && <ul>{project.points.map((pt) => <li>{pt}</li>)}</ul>}</div></section>
+      {story.problem && <section class="case-row row"><h2>Why it exists</h2><div class="prose"><p>{story.problem}</p></div></section>}
+      {story.built && <section class="case-row row"><h2>What was built</h2><div class="prose"><ul>{story.built.map((b) => <li>{b}</li>)}</ul></div></section>}
+      {story.how && <section class="case-row row"><h2>How it works</h2><div class="prose"><ul>{story.how.map((b) => <li>{b}</li>)}</ul></div></section>}
       {project.facts && project.facts.length > 0 && (
-        <section class="row"><h2>The numbers</h2><dl class="numbers">{project.facts.map((f) => <div><dt class="mono mute">{f.label}</dt><dd>{f.value}</dd></div>)}</dl></section>
+        <section class="case-row row"><h2>The numbers</h2><dl class="numbers">{project.facts.map((f) => <div><dt class="mono mute">{f.label}</dt><dd>{f.value}</dd></div>)}</dl></section>
       )}
       {screens.length > (project.video ? 0 : 1) && (
-        <section class="row gallery-row"><h2>Screens</h2>
+        <section class="case-row row gallery-row"><h2>Screens</h2>
           <div class="gallery">{screens.slice(project.video ? 0 : 1).map((m) => (
             <figure class:list={['frame', m.type === 'pixel' && 'frame--pixel']}><img draggable="false" src={m.src} alt={m.alt} width={m.width} height={m.height} loading="lazy" decoding="async" /><figcaption class="mono mute">{m.alt}</figcaption></figure>
           ))}</div>
         </section>
       )}
       {phones.length > 4 && (
-        <section class="row"><h2>More screens</h2><div class="phone-row small">{phones.slice(4).map((m) => <div class="phone"><img draggable="false" src={m.src} alt={m.alt} width={m.width} height={m.height} loading="lazy" decoding="async" /></div>)}</div></section>
+        <section class="case-row row"><h2>More screens</h2><div class="phone-row small">{phones.slice(4).map((m) => <div class="phone"><img draggable="false" src={m.src} alt={m.alt} width={m.width} height={m.height} loading="lazy" decoding="async" /></div>)}</div></section>
       )}
-      {story.outcome && <section class="row"><h2>Where it stands</h2><div class="prose"><p>{story.outcome}</p></div></section>}
-      {story.honest && <section class="row honest"><h2>Said plainly</h2><div class="prose"><ul>{story.honest.map((b) => <li>{b}</li>)}</ul></div></section>}
+      {story.outcome && <section class="case-row row"><h2>Where it stands</h2><div class="prose"><p>{story.outcome}</p></div></section>}
+      {story.honest && <section class="case-row row honest"><h2>Said plainly</h2><div class="prose"><ul>{story.honest.map((b) => <li>{b}</li>)}</ul></div></section>}
     </div>
 
     {connected.length > 0 && (

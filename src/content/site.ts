@@ -6,7 +6,7 @@
  */
 export const site = {
   name: "ADAI Systems",
-  url: "https://www.adai.systems",
+  url: "https://adai.systems",
   headline: "Building intelligent software.",
   line: "A system for building systems.",
   description:

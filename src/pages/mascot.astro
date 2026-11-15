@@ -14,7 +14,7 @@ const traits = [
   { t: 'Soft, not mechanical', d: 'Satin silicone for the head and hands, a soft-touch body, felt ear cushions. No joints, no panels, no screws. Everything moves on springs, so it follows through like something physical.' },
   { t: 'One signature accent', d: 'A deep indigo on the antenna tip and the ear cushions. Everything else stays warm cream, so the accent reads as a signature rather than decoration.' },
   { t: 'It changes colour with the work', d: 'The eyes, the chest bubble and the glow in the antenna take the colour of the kind of work on screen: amber for agents, aqua for automation, coral for apps, sky for research.' },
-  { t: 'It is also made of letters', d: `Hover over ${MASCOT.name} and the whole character dissolves into typographic glyphs from the ADAI ramp, ending in the ADAI mark itself.` },
+  { t: 'It is also made of letters', d: `Hover over ${MASCOT.name}, or drag a finger across it, and a small lens turns that part of the character into typographic glyphs from the ADAI ramp, ending in the ADAI mark itself.` },
 ];
 ---
 <Base title={`Meet ${MASCOT.name}`} path={MASCOT.path} description={`${MASCOT.name} is the ADAI Systems character: a soft, sculpted companion built in real-time 3D, with a typographic glyph renderer.`} mascot={{ mode: 'hero', pose: 'intro' }} jsonLd={[breadcrumbLd([{ name: 'Home', path: '/' }, { name: `Meet ${MASCOT.name}`, path: MASCOT.path }])]}>
@@ -31,7 +31,7 @@ const traits = [
           <div class="chips">{gestures.map((g) => <button type="button" class="chip" data-gesture={g}>{g}</button>)}</div>
           <p class="mono mute">Colour of the work</p>
           <div class="chips">{hues.map((h) => <button type="button" class="chip hue-chip" data-hue={h.id} data-set-hue={h.id}>{h.label}</button>)}</div>
-          <p class="mono mute fine" data-gl-note>Needs WebGL. Without it, you will see a still of {MASCOT.name} instead.</p>
+          <p class="mono mute fine" data-gl-note>Needs WebGL. Without it, {MASCOT.name} cannot appear and these controls have nothing to move.</p>
         </div>
       </div>
       <MascotAnchor pose="intro" class="adi-stage" />
@@ -43,7 +43,7 @@ const traits = [
       <SectionHead id="traits-title" title={`Where ${MASCOT.name} comes from`} lead={`${MASCOT.name} grew out of the ADAI mark below. The character keeps its eyes and its idea, and nothing else is borrowed.`} />
       <div class="origin" data-reveal>
         <Mark size={120} title="The ADAI mark" />
-        <span class="arrow-big" aria-hidden="true">→</span>
+        <span class="arrow-big display-text" aria-hidden="true">→</span>
         <p class="mono mute">Circle, speech bubble, two eyes. The eyes became the face; the bubble became the light on the chest.</p>
       </div>
       <div class="grid traits">
@@ -71,7 +71,7 @@ const traits = [
   .hue-chip::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--hue); margin-right: 0.45rem; }
   .fine { font-size: 0.72rem; }
   :global(html.gl-ready) [data-gl-note] { display: none; }
-  .origin { display: flex; flex-wrap: wrap; align-items: center; gap: 1.5rem; margin-bottom: 3rem; color: var(--amber); }
+  .origin { display: flex; flex-wrap: wrap; align-items: center; gap: 1.5rem; margin-bottom: 3rem; color: #fff; }
   .arrow-big { font-size: 2.5rem; color: var(--mute); }
   .origin p { max-width: 36ch; }
   .traits { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }

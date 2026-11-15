@@ -6,7 +6,7 @@ const { project, size = 's' } = Astro.props;
 ---
 <div class:list={['plate', `plate--${size}`]} data-hue={project.aspect ?? undefined} role="img" aria-label={`${project.title}: ${project.pitch}`}>
   <span class="mono">{project.kindLabel} · {project.dateLabel}</span>
-  <strong>{project.title}</strong>
+  <strong class="display-text">{project.title}</strong>
   <span class="pitch">{project.pitch}</span>
 </div>
 <style>

@@ -4,7 +4,7 @@ import sitemap from '@astrojs/sitemap';
 
 // URLs match the live site (no trailing slash, e.g. /work/lockout) so search rankings carry over.
 export default defineConfig({
-  site: 'https://www.adai.systems',
+  site: 'https://adai.systems',
   trailingSlash: 'never',
   build: { format: 'file', inlineStylesheets: 'auto' },
   compressHTML: true,

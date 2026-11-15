@@ -16,7 +16,7 @@
   3. 16-tap cell reduction, addressed in screen pixels, storing average colour and max coverage;
   4. per-cell composite (glyph or 3D) with tone mapping (Neutral) straight to the canvas.
 
-  A small glyph lens follows the cursor near Auri (radius scales with Auri, capped at 22 % of the viewport height), and `?glyphdebug` exposes any uncovered 3D pixel inside it.
+  A small glyph lens follows the cursor near Auri (radius scales with Auri, capped at 16.5 % of the viewport height); a finger dragging across Auri drives it on touch screens without scrolling the page, and `?glyphdebug` exposes any uncovered 3D pixel inside it.
 
   The device pixel ratio is capped at 1.5 on desktop and 1.25 on coarse pointers. A frame-time watchdog steps it down (to 0.85) or back up.
 - **Pausing.** Rendering stops when the tab is hidden. Under reduced motion it renders only when something changes.
