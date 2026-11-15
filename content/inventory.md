@@ -321,9 +321,9 @@ Every capability line in `content/services.ts` names the project that demonstrat
 
 On 13 November 2026 Alex asked for the build to continue to a finished site without stopping. These calls were made on his behalf and can all be reversed.
 
-1. **Direction.** Lab Terminal (A) as the base, with Orbit's draggable lineage map (C) as the archive on the home page, and Specimen's scale (B) on the contact band. All three directions stay viewable at `/directions` on preview deployments.
-2. **Tweaks config.** No tuned config was supplied, so the baked tokens are the direction's own defaults. The tweaks bar stays available on preview deployments at `?tweaks=1`.
-3. **Every project has a page.** All fourteen get a case study at `/work/[slug]`, so the eight existing URLs keep working and the archive has no dead rows. Depth follows what the inventory holds: Glimmer, Lockout and JEB Depot are full, Vantage AI and ADAI Systems are short on purpose.
+1. **Direction.** The first build used Lab Terminal. Alex turned it down, along with the other two, on 15 November 2026. The site is now the Atlas design: see `design/README.md`. He has not yet seen Atlas.
+2. **Tweaks bar.** Removed with the old design. It was never used to tune anything.
+3. **Every project has a page.** All fifteen get a case study at `/work/[slug]`, so the eight existing URLs keep working and the archive has no dead rows. Depth follows what the inventory holds: Glimmer, Lockout and JEB Depot are full, Vantage AI and ADAI Systems are short on purpose.
 
 4. **15 November 2026: a new direction.** Alex turned down all three earlier designs (he liked the interaction and the web, not the look) and asked for a new one. The site is now the "Atlas" design: dark and precise, with the web of projects as the hero. The terminal design, the three direction prototypes and the tweaks bar were removed.
 

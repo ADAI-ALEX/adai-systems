@@ -39,3 +39,12 @@ Written 12 November 2026 from the 18 references in the taste vault (`npm run tas
 - The lineage of fourteen projects is the studio's best story. It should be something a visitor can explore, not a list they scroll past.
 - STEVIE's real, unedited, slightly wrong replies are the most human thing in the archive. Use them.
 - The copy should sound like the Glimmer README: plain, measured, honest about limits.
+
+## Second round, 15 November 2026
+
+The first three directions were turned down. What changed the brief:
+
+- **Margin is the reference.** Alex's own project shows what he means by good: a dark instrument, precise type, colour that carries meaning, nothing decorative.
+- **The web stays.** It was the one thing he liked in every round, so it became the hero and the structure of the site: the studio, four branches, every project.
+- **The site has to win work.** Linear, Resend and Cursor all make the next step obvious within one screen. Atlas does the same with one button, "Start a project", on every page.
+- **What was dropped:** pixel and terminal styling, poster-sized capitals, bright colour fields and soft serifs.

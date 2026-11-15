@@ -35,3 +35,17 @@ Every generated image is planned here before it is made. Generation spends Alex'
 | Date | Shot | Model | Credits | Result |
 |---|---|---|---|---|
 | 12 Nov 2026 | 1. Holographic Display Study | gpt_image_2_6, 1:1 | 0.25 | Kept. A glowing wireframe cube inside a glass cylinder on black. No text or marks in frame. |
+
+## 15 November 2026: Atlas
+
+Higgsfield's unlimited trial does not work from Claude Code. The API says it applies in Claude chat, Claude Cowork and ChatGPT only, and the account held 0.05 credits. So nothing new was generated for Atlas. The art is the web, drawn in code, plus real project media.
+
+### Shot list, if Alex wants generated art later
+
+Run these in Claude chat, where the trial applies, and save the results under `public/art/`. Each is optional: no page depends on them. Anything used must be labelled as an illustration, and none may stand in for product screens.
+
+| File | Where it would go | Prompt |
+|---|---|---|
+| `web-sculpture.webp` (21:9) | Behind the closing band on the home page | Dark gallery photograph of a suspended kinetic sculpture: hair-thin brass wires radiating from one central glass sphere to many smaller glass spheres, some glowing amber, some aqua, some coral, some pale blue. Deep black background, shallow depth of field, museum lighting, wide composition with empty black space on the left. No text, no logos, no people. |
+| `voice.webp` (4:3) | Voice Agent case study, labelled as an illustration | Studio photograph of a single vintage desk telephone handset resting on matte black, lit by one warm amber light from the side, fine dust in the beam, very dark and minimal. No text, no logos, no people. |
+| `spatial.webp` (4:3) | Spatial Memory Scanner case study, labelled as an illustration | A dark room rendered as a sparse cloud of tiny pale blue points of light tracing walls, a doorway and a staircase, seen from inside, black background, no surfaces, only points. No text, no people. |

@@ -1,26 +1,289 @@
 {
   "about": "ADAI Systems taste vault. Local only: never linked from the site, never deployed. Images live in references/ and are gitignored because they are screenshots of other people's sites. Re-capture them with `node scripts/capture-references.mjs`.",
-  "updated": "2026-11-12",
-  "collections": ["Type", "Layout", "Colour", "Motion", "Interaction", "Avoid"],
-  "addedByLegend": { "alex": "Alex's own pick, in references/", "claude": "Sourced by Claude, in references/found/" },
+  "updated": "2026-11-15",
+  "collections": [
+    "Type",
+    "Layout",
+    "Colour",
+    "Motion",
+    "Interaction",
+    "Avoid"
+  ],
+  "addedByLegend": {
+    "alex": "Alex's own pick, in references/",
+    "claude": "Sourced by Claude, in references/found/"
+  },
   "items": [
-    { "id": "rauno", "file": "references/found/rauno.jpg", "source": "https://rauno.me", "addedBy": "claude", "collections": ["Type", "Colour", "Interaction"], "steal": "One plain sentence set huge, one flat yellow circle, and a crosshair cursor: a single loud idea with nothing competing." },
-    { "id": "ohno", "file": "references/found/ohno.jpg", "source": "https://ohnotype.co", "addedBy": "claude", "collections": ["Type", "Layout"], "steal": "Type used as the image itself, packed tight in black and white, with a quiet sidebar so the specimens can shout." },
-    { "id": "pangram", "file": "references/found/pangram.jpg", "source": "https://pangrampangram.com", "addedBy": "claude", "collections": ["Type", "Layout"], "steal": "Full-width rounded tiles where a single word at display size sits on top of a texture: each project could be a tile like this." },
-    { "id": "snellenberg", "file": "references/found/snellenberg.jpg", "source": "https://dennissnellenberg.com", "addedBy": "claude", "collections": ["Type", "Motion"], "steal": "A name so large it runs off both edges and scrolls sideways: scale as confidence, with tiny labels as counterweight." },
-    { "id": "ghostty", "file": "references/found/ghostty.jpg", "source": "https://ghostty.org", "addedBy": "claude", "collections": ["Interaction", "Motion"], "steal": "The hero is the product doing its thing (animated ASCII in a real terminal window), then two buttons. No tagline needed." },
-    { "id": "oxide", "file": "references/found/oxide.jpg", "source": "https://oxide.computer", "addedBy": "claude", "collections": ["Colour", "Type", "Layout"], "steal": "Near-black with one green, a live terminal snippet in the corner, mono labels for everything technical: serious without being corporate." },
-    { "id": "modal", "file": "references/found/modal.jpg", "source": "https://modal.com", "addedBy": "claude", "collections": ["Colour", "Motion"], "steal": "A dot-matrix object built from glyphs, in one accent green on black: texture from characters instead of gradients." },
-    { "id": "charm", "file": "references/found/charm.jpg", "source": "https://charm.land", "addedBy": "claude", "collections": ["Colour"], "steal": "Terminal tools sold with zero restraint: proof that developer work can be loud and still credible. Take the nerve, not the pink and violet." },
-    { "id": "teenage-engineering", "file": "references/found/teenage-engineering.jpg", "source": "https://teenage.engineering", "addedBy": "claude", "collections": ["Layout", "Type"], "steal": "Navigation as a row of tiny pictograms with micro labels, and the object lit like a museum piece on pure black." },
-    { "id": "mistral", "file": "references/found/mistral.jpg", "source": "https://mistral.ai", "addedBy": "claude", "collections": ["Colour", "Motion"], "steal": "Flat orange and yellow blocks stepping like pixels, with tiny pixel-art characters walking along the edges: an AI lab that looks hand-made." },
-    { "id": "poolsuite", "file": "references/found/poolsuite.jpg", "source": "https://poolsuite.net", "addedBy": "claude", "collections": ["Interaction", "Colour"], "steal": "The whole site is a little desktop with draggable windows on a flat pink ground: an interface metaphor people want to play with." },
-    { "id": "posthog", "file": "references/found/posthog.jpg", "source": "https://posthog.com", "addedBy": "claude", "collections": ["Interaction", "Layout"], "steal": "Dense, funny and unafraid of clutter: a site as an operating system, with humour in the cookie banner. Personality in every corner." },
-    { "id": "basement", "file": "references/found/basement.jpg", "source": "https://basement.studio", "addedBy": "claude", "collections": ["Colour", "Interaction"], "steal": "A studio that shows a room, not a pitch: dark, cinematic, with a neon wordmark and the line 'We make cool shit that performs'. Attitude in the copy." },
-    { "id": "sfcompute", "file": "references/found/sfcompute.jpg", "source": "https://sfcompute.com", "addedBy": "claude", "collections": ["Layout", "Type"], "steal": "Reads like a document: sidebar index, plain sentences, and a real data diagram as the only decoration. Substance as style." },
-    { "id": "tldraw", "file": "references/found/tldraw.jpg", "source": "https://tldraw.dev", "addedBy": "claude", "collections": ["Interaction", "Layout"], "steal": "A working canvas in the hero that you can draw on straight away: the demo is the pitch." },
-    { "id": "railway", "file": "references/found/railway.jpg", "source": "https://railway.com", "addedBy": "claude", "collections": ["Colour"], "steal": "An illustrated night sky behind real product UI: a mood that belongs to one company only. Take the idea of a world, not the purple." },
-    { "id": "zed", "file": "references/found/zed.jpg", "source": "https://zed.dev", "addedBy": "claude", "collections": ["Layout"], "steal": "A faint blueprint grid with measured margins makes the page feel engineered. The old ADAI site already did this, so use sparingly." },
-    { "id": "browser-company", "file": "references/found/browser-company.jpg", "source": "https://thebrowser.company", "addedBy": "claude", "collections": ["Avoid"], "steal": "Nothing to steal: cream ground, small serif italic, tiny spaced caps. Elegant here, but it is now the default look of every generated site. Kept as the thing not to make." }
+    {
+      "id": "rauno",
+      "file": "references/found/rauno.jpg",
+      "source": "https://rauno.me",
+      "addedBy": "claude",
+      "collections": [
+        "Type",
+        "Colour",
+        "Interaction"
+      ],
+      "steal": "One plain sentence set huge, one flat yellow circle, and a crosshair cursor: a single loud idea with nothing competing."
+    },
+    {
+      "id": "ohno",
+      "file": "references/found/ohno.jpg",
+      "source": "https://ohnotype.co",
+      "addedBy": "claude",
+      "collections": [
+        "Type",
+        "Layout"
+      ],
+      "steal": "Type used as the image itself, packed tight in black and white, with a quiet sidebar so the specimens can shout."
+    },
+    {
+      "id": "pangram",
+      "file": "references/found/pangram.jpg",
+      "source": "https://pangrampangram.com",
+      "addedBy": "claude",
+      "collections": [
+        "Type",
+        "Layout"
+      ],
+      "steal": "Full-width rounded tiles where a single word at display size sits on top of a texture: each project could be a tile like this."
+    },
+    {
+      "id": "snellenberg",
+      "file": "references/found/snellenberg.jpg",
+      "source": "https://dennissnellenberg.com",
+      "addedBy": "claude",
+      "collections": [
+        "Type",
+        "Motion"
+      ],
+      "steal": "A name so large it runs off both edges and scrolls sideways: scale as confidence, with tiny labels as counterweight."
+    },
+    {
+      "id": "ghostty",
+      "file": "references/found/ghostty.jpg",
+      "source": "https://ghostty.org",
+      "addedBy": "claude",
+      "collections": [
+        "Interaction",
+        "Motion"
+      ],
+      "steal": "The hero is the product doing its thing (animated ASCII in a real terminal window), then two buttons. No tagline needed."
+    },
+    {
+      "id": "oxide",
+      "file": "references/found/oxide.jpg",
+      "source": "https://oxide.computer",
+      "addedBy": "claude",
+      "collections": [
+        "Colour",
+        "Type",
+        "Layout"
+      ],
+      "steal": "Near-black with one green, a live terminal snippet in the corner, mono labels for everything technical: serious without being corporate."
+    },
+    {
+      "id": "modal",
+      "file": "references/found/modal.jpg",
+      "source": "https://modal.com",
+      "addedBy": "claude",
+      "collections": [
+        "Colour",
+        "Motion"
+      ],
+      "steal": "A dot-matrix object built from glyphs, in one accent green on black: texture from characters instead of gradients."
+    },
+    {
+      "id": "charm",
+      "file": "references/found/charm.jpg",
+      "source": "https://charm.land",
+      "addedBy": "claude",
+      "collections": [
+        "Colour"
+      ],
+      "steal": "Terminal tools sold with zero restraint: proof that developer work can be loud and still credible. Take the nerve, not the pink and violet."
+    },
+    {
+      "id": "teenage-engineering",
+      "file": "references/found/teenage-engineering.jpg",
+      "source": "https://teenage.engineering",
+      "addedBy": "claude",
+      "collections": [
+        "Layout",
+        "Type"
+      ],
+      "steal": "Navigation as a row of tiny pictograms with micro labels, and the object lit like a museum piece on pure black."
+    },
+    {
+      "id": "mistral",
+      "file": "references/found/mistral.jpg",
+      "source": "https://mistral.ai",
+      "addedBy": "claude",
+      "collections": [
+        "Colour",
+        "Motion"
+      ],
+      "steal": "Flat orange and yellow blocks stepping like pixels, with tiny pixel-art characters walking along the edges: an AI lab that looks hand-made."
+    },
+    {
+      "id": "poolsuite",
+      "file": "references/found/poolsuite.jpg",
+      "source": "https://poolsuite.net",
+      "addedBy": "claude",
+      "collections": [
+        "Interaction",
+        "Colour"
+      ],
+      "steal": "The whole site is a little desktop with draggable windows on a flat pink ground: an interface metaphor people want to play with."
+    },
+    {
+      "id": "posthog",
+      "file": "references/found/posthog.jpg",
+      "source": "https://posthog.com",
+      "addedBy": "claude",
+      "collections": [
+        "Interaction",
+        "Layout"
+      ],
+      "steal": "Dense, funny and unafraid of clutter: a site as an operating system, with humour in the cookie banner. Personality in every corner."
+    },
+    {
+      "id": "basement",
+      "file": "references/found/basement.jpg",
+      "source": "https://basement.studio",
+      "addedBy": "claude",
+      "collections": [
+        "Colour",
+        "Interaction"
+      ],
+      "steal": "A studio that shows a room, not a pitch: dark, cinematic, with a neon wordmark and the line 'We make cool shit that performs'. Attitude in the copy."
+    },
+    {
+      "id": "sfcompute",
+      "file": "references/found/sfcompute.jpg",
+      "source": "https://sfcompute.com",
+      "addedBy": "claude",
+      "collections": [
+        "Layout",
+        "Type"
+      ],
+      "steal": "Reads like a document: sidebar index, plain sentences, and a real data diagram as the only decoration. Substance as style."
+    },
+    {
+      "id": "tldraw",
+      "file": "references/found/tldraw.jpg",
+      "source": "https://tldraw.dev",
+      "addedBy": "claude",
+      "collections": [
+        "Interaction",
+        "Layout"
+      ],
+      "steal": "A working canvas in the hero that you can draw on straight away: the demo is the pitch."
+    },
+    {
+      "id": "railway",
+      "file": "references/found/railway.jpg",
+      "source": "https://railway.com",
+      "addedBy": "claude",
+      "collections": [
+        "Colour"
+      ],
+      "steal": "An illustrated night sky behind real product UI: a mood that belongs to one company only. Take the idea of a world, not the purple."
+    },
+    {
+      "id": "zed",
+      "file": "references/found/zed.jpg",
+      "source": "https://zed.dev",
+      "addedBy": "claude",
+      "collections": [
+        "Layout"
+      ],
+      "steal": "A faint blueprint grid with measured margins makes the page feel engineered. The old ADAI site already did this, so use sparingly."
+    },
+    {
+      "id": "browser-company",
+      "file": "references/found/browser-company.jpg",
+      "source": "https://thebrowser.company",
+      "addedBy": "claude",
+      "collections": [
+        "Avoid"
+      ],
+      "steal": "Nothing to steal: cream ground, small serif italic, tiny spaced caps. Elegant here, but it is now the default look of every generated site. Kept as the thing not to make."
+    },
+    {
+      "id": "margin",
+      "file": "references/found/margin.jpg",
+      "source": "https://margin.adai.systems",
+      "addedBy": "claude",
+      "collections": [
+        "Type",
+        "Colour",
+        "Layout"
+      ],
+      "steal": "Alex's own project and the clearest signal of his taste: a dark instrument, one cool hue and one warm probe, mono for every fact, nothing decorative. Atlas takes its tone from this."
+    },
+    {
+      "id": "igloo",
+      "file": "references/found/igloo.jpg",
+      "source": "https://www.igloo.inc",
+      "addedBy": "claude",
+      "collections": [
+        "Interaction",
+        "Motion"
+      ],
+      "steal": "The hero is a fine wireframe constellation you can move. Proof that a web of thin lines can carry a whole first screen."
+    },
+    {
+      "id": "linear",
+      "file": "references/found/linear.jpg",
+      "source": "https://linear.app",
+      "addedBy": "claude",
+      "collections": [
+        "Type",
+        "Layout"
+      ],
+      "steal": "A plain sentence set large in a refined sans, then the product itself. Calm, dark, expensive."
+    },
+    {
+      "id": "resend",
+      "file": "references/found/resend.jpg",
+      "source": "https://resend.com",
+      "addedBy": "claude",
+      "collections": [
+        "Colour",
+        "Type"
+      ],
+      "steal": "Near-black with one lit object and a single white button. The call to action is never in doubt."
+    },
+    {
+      "id": "koto",
+      "file": "references/found/koto.jpg",
+      "source": "https://koto.studio",
+      "addedBy": "claude",
+      "collections": [
+        "Colour"
+      ],
+      "steal": "Full-bleed generative colour as the brand. Take the idea that colour can be made in code, not the stripes."
+    },
+    {
+      "id": "instrument",
+      "file": "references/found/instrument.jpg",
+      "source": "https://www.instrument.com",
+      "addedBy": "claude",
+      "collections": [
+        "Layout"
+      ],
+      "steal": "An agency that leads with its work playing in a frame, with the route to enquiry always one click away."
+    },
+    {
+      "id": "cursor",
+      "file": "references/found/cursor.jpg",
+      "source": "https://cursor.com",
+      "addedBy": "claude",
+      "collections": [
+        "Layout"
+      ],
+      "steal": "One sentence, two buttons, then the product. The clearest funnel of the set."
+    }
   ]
 }

@@ -1,6 +1,6 @@
 # Phase 3: three directions
 
-> **Outcome.** Alex asked for the build to continue without a checkpoint, so the mix recommended below was built: A as the base, C's lineage map as the archive, B's scale on the contact band. The three prototypes are kept at `/directions` on preview deployments and return 404 in production.
+> **Outcome.** None of these is the site. Alex turned down all three as designs on 15 November 2026 but liked the interactivity, above all the web. The site was rebuilt as Atlas: see `design/README.md`. This file is kept as a record, and the prototypes live in the git history before commit `4b3ef98`.
 
 Compared live at `/directions`. Each direction is a real, scrollable homepage built from `content/projects.ts`. Screenshots are in `design/screenshots/`.
 

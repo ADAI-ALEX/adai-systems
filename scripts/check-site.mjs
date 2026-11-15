@@ -69,7 +69,8 @@ for (const route of routes) {
 // 2. Every link goes somewhere.
 for (const [href, from] of links) {
   if (href.startsWith("mailto:")) {
-    ok(`link ${href}`, href === "mailto:alex@adai.systems");
+    if (!href.includes("?")) ok(`link ${href}`, href === "mailto:alex@adai.systems");
+    else ok("link mailto with a prefilled brief", href.startsWith("mailto:alex@adai.systems?subject="));
     continue;
   }
   if (href.startsWith("#")) continue;
@@ -87,68 +88,69 @@ const context = await browser.newContext({ viewport: { width: 1440, height: 900 
 const page = await context.newPage();
 const errors = [];
 page.on("pageerror", (error) => errors.push(String(error)));
+
+// The web on the home page.
 await page.goto(base, { waitUntil: "networkidle" });
-await page.fill("#shell-input", "open glimmer");
+await page.waitForTimeout(1200);
+ok("web: every node is also a plain link", (await page.locator(".web-links a").count()) === 19, `${await page.locator(".web-links a").count()} links`);
+const painted = await page.locator(".web canvas").evaluate((canvas) => {
+  const data = canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height).data;
+  let lit = 0;
+  for (let index = 3; index < data.length; index += 400) if (data[index] > 0) lit++;
+  return lit;
+});
+ok("web: the canvas has drawn", painted > 50, `${painted} sampled pixels`);
+await page.locator('.web-links a[data-node="margin"]').focus();
+await page.waitForTimeout(250);
+ok("web: focusing a link shows that node's card", (await page.locator(".web-card-title").textContent()) === "Margin");
 await page.keyboard.press("Enter");
-ok("shell: open glimmer prints the project", await page.locator(".shell-log").getByText("Rust, Burn, Metal, Ratatui").isVisible());
-ok("shell: it links to the case study", (await page.locator('.shell-log a[href="/work/glimmer"]').count()) === 1);
-await page.fill("#shell-input", "stevie 8");
-await page.keyboard.press("Enter");
-await page.waitForTimeout(3300);
-ok("shell: stevie 8 types the real reply", await page.locator(".shell-log").getByText("8 times 9").isVisible());
-await page.fill("#shell-input", "nonsense");
-await page.keyboard.press("Enter");
-ok("shell: unknown command is handled", await page.locator(".shell-log").getByText("command not found: nonsense").isVisible());
-ok("privacy: the page has no form element", (await page.locator("form").count()) === 0);
+await page.waitForURL("**/work/margin");
+ok("web: a node opens its case study", (await page.locator("h1").textContent()) === "Margin");
+ok("home: no form element anywhere", (await page.locator("form").count()) === 0);
 
-const node = page.getByRole("button", { name: /^Lockout\./ });
-await node.scrollIntoViewIfNeeded();
-await page.waitForTimeout(600);
-await node.click();
-ok("map: selecting a disc fills the inspector", (await page.locator(".inspect h3").textContent()) === "Lockout");
-const before = await node.boundingBox();
-await page.mouse.move(before.x + before.width / 2, before.y + 20);
-await page.mouse.down();
-await page.mouse.move(before.x - 120, before.y - 90, { steps: 10 });
-await page.mouse.up();
-await page.waitForTimeout(300);
-ok("map: a disc can be dragged", Math.abs((await node.boundingBox()).x - before.x) > 40);
-await page.locator(".inspect").getByRole("link", { name: /case study/ }).click();
-await page.waitForURL("**/work/lockout");
-ok("map: the inspector opens the case study", page.url().endsWith("/work/lockout"));
+// The portfolio grid.
+await page.goto(`${base}/work`, { waitUntil: "networkidle" });
+const all = await page.locator(".wk-card").count();
+await page.locator(".wk-filters button", { hasText: "Research" }).click();
+await page.waitForTimeout(200);
+const some = await page.locator(".wk-card").count();
+ok("work: a filter narrows the grid", some > 0 && some < all, `${all} then ${some}`);
 
-await page.locator("body").click({ position: { x: 4, y: 300 } });
-await page.keyboard.press("2");
-await page.waitForURL("**/work");
-ok("keys: 2 opens the archive", page.url().endsWith("/work"));
-await page.getByRole("button", { name: "research" }).click();
-ok("archive: filter narrows the table", (await page.locator(".ls-table tbody tr").count()) === 5);
-await page.locator(".ls-table tbody a").first().click();
-await page.waitForURL("**/work/glimmer");
-ok("archive: a row opens its case study", (await page.locator("h1").textContent()) === "Glimmer");
+// A case study: the video, the gallery and STEVIE.
+await page.goto(`${base}/work/margin`, { waitUntil: "networkidle" });
+ok("case study: the demo video waits to be asked", (await page.locator("video").getAttribute("preload")) === "none");
+await page.locator(".cs-tile").first().click();
+ok("gallery: selecting an image opens the lightbox", await page.locator("dialog.cs-box").evaluate((dialog) => dialog.open));
+await page.keyboard.press("ArrowRight");
+await page.keyboard.press("Escape");
+await page.waitForTimeout(200);
+ok("gallery: Escape closes it", !(await page.locator("dialog.cs-box").evaluate((dialog) => dialog.open)));
+await page.goto(`${base}/work/glimmer`, { waitUntil: "networkidle" });
+await page.locator(".st-prompts button").nth(7).click();
+await page.waitForTimeout(4000);
+ok("stevie: the real reply is typed out exactly", (await page.locator(".st-sr").textContent())?.includes("8 times 9") ?? false);
 
-// 4. The tweaks bar (never present in production builds).
-await page.goto(`${base}/?tweaks=1`, { waitUntil: "networkidle" });
-const bar = page.locator(".tweaks");
-if (await bar.count()) {
-  const root = page.locator("#site");
-  await bar.locator("select").first().selectOption("paper");
-  ok("tweaks: a palette changes the page", (await root.evaluate((el) => getComputedStyle(el).backgroundColor)) === "rgb(243, 241, 234)");
-  await bar.getByText("Surfaces").click();
-  await bar.locator("label", { hasText: "Corner radius" }).locator("input").fill("20");
-  ok("tweaks: a slider writes its variable", (await root.evaluate((el) => el.style.getPropertyValue("--radius"))) === "20px");
-  await page.reload({ waitUntil: "networkidle" });
-  ok("tweaks: settings survive a refresh", (await page.locator("#site").evaluate((el) => el.style.getPropertyValue("--radius"))) === "20px");
-  await page.locator(".tweaks").getByRole("button", { name: "Surprise me" }).click();
-  await page.locator(".tweaks").getByRole("button", { name: "Reset" }).click();
-  ok("tweaks: reset restores the baked design", (await page.locator("#site").evaluate((el) => el.getAttribute("style") || "")) === "");
-  const count = await page.locator(".tweaks header p").textContent();
-  ok("tweaks: control count", /^7\d controls/.test(count ?? ""), count ?? "");
-} else {
-  console.log("note  tweaks bar not present in this build (expected in production)");
-}
-await page.goto(base, { waitUntil: "networkidle" });
-ok("tweaks: absent without ?tweaks=1", (await page.locator(".tweaks, .tweaks-tab").count()) === 0);
+// The brief builder.
+await page.goto(`${base}/start?type=products`, { waitUntil: "networkidle" });
+ok("start: ?type= preselects the service", (await page.locator('button[aria-pressed="true"]').first().textContent())?.includes("Apps and products") ?? false);
+await page.locator("textarea").fill("A booking tool for a small clinic.");
+const mailto = await page.locator('a.btn-primary[href^="mailto:"]').first().getAttribute("href");
+ok("start: the email link carries the brief", (mailto ?? "").startsWith("mailto:alex@adai.systems?subject=") && decodeURIComponent(mailto ?? "").includes("A booking tool for a small clinic."));
+ok("start: no form element, nothing to submit", (await page.locator("form").count()) === 0);
+const stored = await page.evaluate(() => window.localStorage.length + window.sessionStorage.length + document.cookie.length);
+ok("privacy: nothing stored in the browser", stored === 0, `${stored}`);
+
+// Navigation on a phone.
+const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+const small = await phone.newPage();
+await small.goto(base, { waitUntil: "networkidle" });
+await small.getByRole("button", { name: "Menu" }).click();
+ok("menu: opens on a phone", await small.locator("#site-nav a", { hasText: "Services" }).isVisible());
+await small.locator("#site-nav a", { hasText: "Services" }).click();
+await small.waitForURL("**/services");
+ok("menu: closes after choosing a page", !(await small.locator("#site-nav a", { hasText: "Research" }).isVisible()));
+await phone.close();
+
 ok("no page errors during interaction", errors.length === 0, errors.join(" | "));
 
 await browser.close();
