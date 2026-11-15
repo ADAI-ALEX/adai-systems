@@ -8,7 +8,7 @@
   - the renderer isn't a software rasteriser (SwiftShader or llvmpipe);
   - `Save-Data` is off and `?nowebgl` isn't set.
 
-  Otherwise `html.gl-fallback` is set and every `MascotAnchor` shows the rendered poster.
+  Otherwise `html.gl-fallback` is set and every `MascotAnchor` collapses, so the layout closes up around the text. No flat image stands in for Auri.
 - **Start-up** (`World.init`) yields to the main thread between steps (environment map, mascot, glyph atlas, async shader compile), so no single task blocks input for long.
 - **Frame:**
   1. key light with a 1024² soft shadow that follows Auri's scale;
@@ -16,7 +16,7 @@
   3. 16-tap cell reduction, addressed in screen pixels, storing average colour and max coverage;
   4. per-cell composite (glyph or 3D) with tone mapping (Neutral) straight to the canvas.
 
-  The glyph reveal grows from the cursor to the projected bounds of the whole character, and `?glyphdebug` exposes any uncovered 3D pixel.
+  A small glyph lens follows the cursor near Auri (radius scales with Auri, capped at 22 % of the viewport height), and `?glyphdebug` exposes any uncovered 3D pixel inside it.
 
   The device pixel ratio is capped at 1.5 on desktop and 1.25 on coarse pointers. A frame-time watchdog steps it down (to 0.85) or back up.
 - **Pausing.** Rendering stops when the tab is hidden. Under reduced motion it renders only when something changes.
@@ -72,7 +72,7 @@ Without throttling the first frame is at about 0.27 s. Four things keep this smo
 - the WebGL chunk downloads straight after first paint;
 - initialisation waits for load and idle;
 - the glyph font warms while the character builds;
-- the poster matches the first live frame and fades out only after the canvas has faded in (450 ms), so there is no flash and no loading screen.
+- the mascot area stays empty until the first frame, then the canvas fades in over 700 ms while Auri rises and settles (about 0.9 s), so there is no flash, no flat stand-in and no loading screen.
 
 ## Performance budget (spec §10) vs actual
 

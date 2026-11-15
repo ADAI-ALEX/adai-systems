@@ -86,9 +86,10 @@ test('header shows the real ADAI wordmark asset', async ({ page }) => {
 });
 
 test('brief builder writes the email and nothing is sent', async ({ page }) => {
-  const requests: string[] = [];
-  page.on('request', (r) => { if (!r.url().startsWith('http://localhost:4322')) requests.push(r.url()); });
   await page.goto('/start?type=automation', { waitUntil: 'networkidle' });
+  // From here on, filling in the brief must not send anything anywhere.
+  const requests: string[] = [];
+  page.on('request', (r) => { if (!r.url().startsWith('data:')) requests.push(r.url()); });
   await expect(page.locator('input[name="need"][value="automation"]')).toBeChecked();
   await expect(page.locator('[data-state]')).toHaveText('Keep going');
   await page.fill('#what', 'Watch our recordings folder and write a report for each call.');

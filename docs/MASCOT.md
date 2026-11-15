@@ -69,7 +69,7 @@ All code is in `src/gl/mascot/`.
 - **Page events.** Any script can send `window.dispatchEvent(new CustomEvent('adai:mascot', { detail: { expression, gesture, pose, hue } }))`. The demos and the brief builder use this.
 
 ### Reduced motion
-With `prefers-reduced-motion`, or the header toggle:
+With `prefers-reduced-motion` set in the operating system:
 - no idle motion, gestures, springs, glide or glyph animation;
 - Auri holds a static pose and renders only when something changes.
 
@@ -80,21 +80,21 @@ Code: `src/gl/passes/`.
 2. A reduction pass reads each glyph cell in **screen pixels**, on exactly the grid the composite draws, and stores the cell's average colour and its **maximum** coverage. Any cell the silhouette touches counts as part of it.
 3. The composite decides **per cell**: either glyph or 3D, never a blend. Glyphs come from a ramp set in IBM Plex Mono (`· . : - ~ + = * o x % # @`), and the densest glyph is the ADAI mark itself.
 
-**The reveal.** While the cursor is over Auri, or briefly after a tap on touch screens, a dissolve disc grows from the cursor over 0.7 s:
-- every frame, its target radius is the distance to the furthest corner of Auri's **projected bounding box** (hands, antenna and gestures included);
-- at full activation, coverage is forced complete;
+**The lens.** While the cursor is over or near Auri (or briefly after a tap on touch screens), a small circular glyph lens follows the cursor:
+- its radius is `clamp(frameHeight / viewportHeight × 0.32, 0.08, 0.22)` of the viewport height, so it scales with Auri but never covers the whole character;
+- it opens over about 0.22 s and closes over about 0.3 s, and its centre is damped so it trails the cursor softly;
+- only the area inside the lens turns into glyphs; the rest of Auri stays 3D;
 - glyphs are only drawn where the rendered silhouette is, so the effect never bleeds into the background.
 
-### Coverage fix (revision 2)
+### Rendering accuracy (kept from revision 2)
 
-The first version left pieces of the 3D model visible, most noticeably on the left. The causes were:
-- a fixed-size circular lens that could never cover the whole character;
+An earlier version left slivers of the 3D model visible inside the glyph area. The causes were:
 - a deliberate 12 % "ghost" of the 3D render under the glyphs;
 - a coverage gate that let thin edge slivers (hands, silhouette edges) pass through;
 - a grid mismatch between the two passes that drifted by a few pixels across the screen;
 - partial cells cross-fading between the two layers.
 
-All five are fixed. `?glyphdebug` paints any 3D pixel left uncovered at full activation magenta. The automated test and `scripts/glyph-probe.mjs --metric` count **0** at every probed position (face left, centre and right, head top, body, both hands). Before and after: `docs/screenshots/glyph-before-after.png`.
+All four are fixed, and the lens keeps those fixes: inside the lens every cell is either fully glyph or empty, so no 3D surface shows through. `?glyphdebug` paints any 3D pixel left uncovered in the lens core magenta. The automated test and `scripts/glyph-probe.mjs --metric` count **0** at every probed position (face left edge, centre and right edge, antenna, ear, body, both hands).
 
 ## 4. Asset pipeline (replaceable without touching the site)
 
@@ -109,7 +109,7 @@ World.loadMascot() ── gltf ok? ──► GltfMascot (authored)  ──┐
 
 **Scripts:**
 - `npm run mascot:glb`: exports the live procedural Auri as `assets-src/mascot/auri-blockout.glb` (2 MB), with named nodes per the contract below. It's the **starting blockout for Blender**: correct proportions and naming, ready to retopologise, UV, rig and animate.
-- `npm run poster`: renders `public/mascot/poster.{png,webp}` from the site's own renderer. It's the still shown before WebGL starts and whenever WebGL is unavailable. Re-run it after changing Auri.
+- `npm run still`: renders `docs/assets/auri.{png,webp}` from the site's own renderer, for the README and press use. The website itself never shows a flat image of Auri.
 
 Both scripts need the dev server (`npm run dev`) running.
 
@@ -148,7 +148,7 @@ Optimise with `gltf-transform optimize --compress meshopt --texture-compress ktx
 4. **UV and textures:** a subtle colour variation on the silicone, and a plush fibre normal. Bake to KTX2.
 5. **Rig:** root, spine, neck, head, hands, and a two-bone sprout chain. Do not bake look-at; the site does it.
 6. **Animate** the clips in the contract. Keep them additive-friendly and avoid root motion.
-7. **Swap.** Drop `adi.glb` in `public/mascot/`, set the manifest, re-run `npm run poster`, then run the tests.
+7. **Swap.** Drop `adi.glb` in `public/mascot/`, set the manifest, re-run `npm run still`, then run the tests.
 
 AI image-to-3D output (e.g. Higgsfield `generate_3d`) is a **blockout only**. It still needs steps 3 to 6.
 
