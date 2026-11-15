@@ -1,0 +1,1 @@
+{ "renderer": "procedural", "note": "Set renderer to \"gltf\" and src to an authored GLB that follows docs/MASCOT.md to replace the procedural Adi." }

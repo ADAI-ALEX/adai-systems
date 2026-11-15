@@ -121,5 +121,6 @@ export function createMaterials(hue: THREE.Color) {
     clearcoatRoughness: 0.05,
   });
 
+  silicone.name = 'silicone'; plush.name = 'plush'; cushion.name = 'cushion'; glow.name = 'glow'; core.name = 'core';
   return { silicone, plush, cushion, glow, core, textures: [siliconeNormal, plushNormal] };
 }

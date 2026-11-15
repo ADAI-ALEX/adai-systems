@@ -51,6 +51,10 @@ export interface MascotRig {
   gesture(name: GestureName): void;
   react(name: 'poke' | 'startle' | 'notice'): void;
   setHue(color: THREE.Color): void;
+  /** Which side of Adi the page content is on (for pointing and presenting). */
+  setFacing(side: 1 | -1): void;
+  /** The current (blended) accent colour, used for lights and glyph tint. */
+  readonly currentHue: THREE.Color;
   update(input: RigInput): void;
   dispose(): void;
 }

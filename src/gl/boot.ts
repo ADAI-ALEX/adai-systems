@@ -6,6 +6,10 @@ export async function boot(stage: HTMLElement) {
   if (world) return world;
   world = new World(stage);
   await world.init();
-  (window as unknown as { adai?: { mascot: (c: MascotCommand) => void } }).adai = { mascot: (c) => world?.command(c) };
+  (window as unknown as { adai?: object }).adai = {
+    mascot: (c: MascotCommand) => world?.command(c),
+    /** Dev tool: export the live mascot as a GLB blockout (used by scripts/export-mascot-glb.mjs). */
+    exportGlb: () => world?.exportGlb(),
+  };
   return world;
 }

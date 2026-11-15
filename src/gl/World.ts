@@ -9,6 +9,7 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { ProceduralMascot } from './mascot/ProceduralMascot';
+import type { MascotRig } from './mascot/rig';
 import { getPose, type Pose } from './mascot/poses';
 import type { ExpressionName, GestureName, HueName } from './mascot/rig';
 import { GlyphPipeline } from './passes/GlyphPipeline';
@@ -23,6 +24,24 @@ const clamp = (v: number, a: number, b: number) => Math.min(Math.max(v, a), b);
 const easeInBack = (x: number) => { const c = 1.70158; x = clamp(x, 0, 1); return (c + 1) * x * x * x - c * x * x; };
 const easeOutBack = (x: number) => { const c = 1.9; x = clamp(x, 0, 1); return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
 
+/**
+ * Pick the mascot implementation from /mascot/manifest.json. An authored GLB is used when the manifest
+ * says so and it loads; anything else falls back to the procedural Adi, so the site never breaks.
+ */
+async function loadMascot(coarse: boolean): Promise<MascotRig> {
+  try {
+    const res = await fetch('/mascot/manifest.json', { cache: 'force-cache' });
+    const manifest = res.ok ? await res.json() : null;
+    if (manifest?.renderer === 'gltf' && manifest.src) {
+      const { GltfMascot } = await import('./mascot/GltfMascot');
+      return await GltfMascot.load(manifest);
+    }
+  } catch (err) {
+    console.warn('[adai] authored mascot unavailable, using the procedural one', err);
+  }
+  return new ProceduralMascot({ detail: coarse ? 0.6 : 1 });
+}
+
 export type MascotCommand = { pose?: string; expression?: ExpressionName; hold?: number; gesture?: GestureName; hue?: HueName };
 
 interface Anchor { el: HTMLElement; pose: Pose; poseName: string; facing: 1 | -1; hue: HueName }
@@ -31,7 +50,7 @@ export class World {
   private renderer: THREE.WebGLRenderer;
   private scene = new THREE.Scene();
   private camera = new THREE.PerspectiveCamera(26, 1, 0.1, 60);
-  private mascot!: ProceduralMascot;
+  private mascot!: MascotRig;
   private pipeline!: GlyphPipeline;
   private clock = { elapsedTime: 0, last: performance.now(), getDelta() { const n = performance.now(); const d = (n - this.last) / 1000; this.last = n; this.elapsedTime += d; return d; } };
   private rimLight = new THREE.PointLight('#f3e6cf', 30, 14, 1.4);
@@ -95,7 +114,7 @@ export class World {
     this.scene.add(key, key.target, fill, this.rimLight);
 
     const coarse = matchMedia('(pointer: coarse)').matches;
-    this.mascot = new ProceduralMascot({ detail: coarse ? 0.6 : 1 });
+    this.mascot = await loadMascot(coarse);
     this.scene.add(this.mascot.object);
     this.camera.position.set(0, 0, 11);
     this.camera.lookAt(0, 0, 0);
@@ -377,6 +396,24 @@ export class World {
   stop() {
     this.running = false;
     cancelAnimationFrame(this.raf);
+  }
+
+  /** Exports the current mascot (geometry and node names, no shaders) as a binary glTF, base64-encoded. */
+  async exportGlb(): Promise<string> {
+    const { GLTFExporter } = await import('three/examples/jsm/exporters/GLTFExporter.js');
+    const clone = this.mascot.object.clone(true);
+    clone.position.set(0, 0, 0); clone.rotation.set(0, 0, 0); clone.scale.setScalar(1);
+    clone.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh) return;
+      const src = m.material as THREE.MeshStandardMaterial;
+      // Plain PBR stand-ins so the file opens cleanly in Blender; the real look is the web shader.
+      m.material = new THREE.MeshStandardMaterial({ name: src.name || 'silicone', color: (src.color ?? new THREE.Color('#e4d9c6')).clone(), roughness: src.roughness ?? 0.5, emissive: (src.emissive ?? new THREE.Color(0)).clone() });
+    });
+    const buffer = (await new GLTFExporter().parseAsync(clone, { binary: true })) as ArrayBuffer;
+    let bin = ''; const bytes = new Uint8Array(buffer);
+    for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    return btoa(bin);
   }
 
   dispose() {

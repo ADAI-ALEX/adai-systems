@@ -135,6 +135,12 @@ export class ProceduralMascot implements MascotRig {
     this.springR.pos.copy(HAND_REST_R);
     this.sproutSpring.pos.set(0, 0, 0);
 
+    // Names follow the GLB contract in docs/MASCOT.md, so the exported blockout is ready for Blender.
+    this.object.name = 'Adi_root'; this.bounce.name = 'bounce'; this.bodyPivot.name = 'body_pivot';
+    body.name = 'body'; core.name = 'core'; this.neck.name = 'neck'; this.head.name = 'head';
+    headMesh.name = 'head_shell'; visor.name = 'visor'; earL.name = 'ear_L'; earR.name = 'ear_R';
+    this.sprout.name = 'sprout'; stalk.name = 'sprout_stalk'; this.bulb.name = 'sprout_bulb';
+    this.handL.name = 'hand_L'; this.handR.name = 'hand_R'; handMeshL.name = 'hand_L_mesh'; handMeshR.name = 'hand_R_mesh';
     this.bounce.add(this.bodyPivot, this.neck, this.handL, this.handR);
     this.object.add(this.bounce);
     this.object.traverse((o) => {
