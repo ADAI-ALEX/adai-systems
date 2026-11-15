@@ -548,6 +548,9 @@
   }
 }
 @media (max-width: 34rem) {
+  .site .web[data-mode="full"] {
+    height: min(118vw, 30rem);
+  }
   .site .steps {
     grid-template-columns: minmax(0, 1fr);
   }

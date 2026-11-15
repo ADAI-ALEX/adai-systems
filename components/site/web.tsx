@@ -71,7 +71,7 @@ function build(): { nodes: WebNode[]; edges: Edge[] } {
     edges.push({ a: core.slug, b: `aspect:${service.slug}`, kind: "trunk", aspect: service.slug });
 
     const members = byDate.filter((project) => project.aspect === service.slug);
-    const spread = Math.min(84, 22 * members.length);
+    const spread = Math.min(96, 24 * members.length);
     members.forEach((project, index) => {
       const offset = members.length === 1 ? 0 : (index / (members.length - 1) - 0.5) * spread;
       const theta = angle + rad(offset);
@@ -184,7 +184,8 @@ export function Web({ mode = "hero" }: { mode?: "hero" | "full" }) {
       } else {
         centreX = width * 0.5;
         centreY = height * 0.5;
-        unit = Math.min(width * 0.4, height * 0.42);
+        unit = wide ? Math.min(width * 0.33, height * 0.46) : Math.min(width * 0.36, height * 0.44);
+        view.pitch = wide ? 0.34 : 0.2;
       }
       draw(0);
     };
@@ -323,6 +324,7 @@ export function Web({ mode = "hero" }: { mode?: "hero" | "full" }) {
 
       // Nodes, far to near.
       const order = [...at.values()].sort((a, b) => a.scale - b.scale);
+      const labels: { text: string; x: number; y: number; r: number; right: boolean; colour: string; alpha: number; font: string; rank: number }[] = [];
       context.textBaseline = "middle";
       for (const item of order) {
         const { node, sx, sy, r } = item;
@@ -392,14 +394,40 @@ export function Web({ mode = "hero" }: { mode?: "hero" | "full" }) {
         const show =
           node.kind === "aspect" ||
           (node.kind === "project" && (mode === "full" || isActive || (activeNode?.aspect && node.aspect === activeNode.aspect) || (only && node.aspect === only)));
-        if (!show || width < 520 && node.kind === "project" && !isActive && !focusOn) continue;
-        const right = sx >= centreX;
-        context.globalAlpha = on ? (node.kind === "aspect" ? 0.95 : 0.82) : 0.25;
-        context.fillStyle = node.kind === "aspect" ? hue : palette.bone;
-        context.font = node.kind === "aspect" ? `500 ${width < 520 ? 11 : 12}px ${monoFamily}` : `500 ${width < 520 ? 11 : 13}px ${family}`;
-        context.textAlign = right ? "left" : "right";
-        const text = node.kind === "aspect" ? (width < 700 ? (node.short ?? node.label) : node.label).toUpperCase() : node.label;
-        context.fillText(text, sx + (right ? r + 9 : -r - 9), sy);
+        if (!show || (width < 520 && mode === "hero" && node.kind === "project" && !isActive && !focusOn)) continue;
+        labels.push({
+          text: node.kind === "aspect" ? (width < 700 ? (node.short ?? node.label) : node.label).toUpperCase() : node.label,
+          x: sx,
+          y: sy,
+          r,
+          right: sx >= centreX,
+          colour: node.kind === "aspect" ? hue : palette.bone,
+          alpha: on ? (node.kind === "aspect" ? 0.95 : 0.82) : 0.25,
+          font: node.kind === "aspect" ? `500 ${width < 520 ? 10 : 12}px ${monoFamily}` : `500 ${width < 520 ? 11 : 13}px ${family}`,
+          rank: isActive ? 0 : node.kind === "aspect" ? 1 : 2 - node.size * 0.1,
+        });
+      }
+
+      // Place labels most important first, nudging any that would sit on top of another.
+      const taken: { x0: number; y0: number; x1: number; y1: number }[] = [];
+      labels.sort((a, b) => a.rank - b.rank);
+      for (const label of labels) {
+        context.font = label.font;
+        const span = context.measureText(label.text).width;
+        const x = label.x + (label.right ? label.r + 9 : -label.r - 9);
+        let chosen: number | null = null;
+        for (const shift of [0, 14, -14, 28, -28]) {
+          const box = { x0: label.right ? x : x - span, y0: label.y + shift - 8, x1: label.right ? x + span : x, y1: label.y + shift + 8 };
+          if (taken.some((other) => box.x0 < other.x1 + 4 && box.x1 > other.x0 - 4 && box.y0 < other.y1 && box.y1 > other.y0)) continue;
+          taken.push(box);
+          chosen = shift;
+          break;
+        }
+        if (chosen === null) continue;
+        context.globalAlpha = label.alpha;
+        context.fillStyle = label.colour;
+        context.textAlign = label.right ? "left" : "right";
+        context.fillText(label.text, x, label.y + chosen);
       }
       context.globalAlpha = 1;
     }
