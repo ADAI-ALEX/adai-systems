@@ -19,6 +19,8 @@ import { motionAllowed } from '@/scripts/motion';
 const HUES: Record<HueName, string> = { agents: '#f2b560', automation: '#5cd6c4', products: '#ff7d61', research: '#8db3ff', studio: '#f3e6cf' };
 const MASCOT_HEIGHT = 2.55; // rig units, floor to sprout tip
 const MASCOT_CENTER_Y = 1.25;
+/** Let the browser breathe between heavy start-up steps, so no single task blocks input for long. */
+const yieldToMain = () => new Promise<void>((r) => setTimeout(r, 0));
 const damp = (a: number, b: number, l: number, dt: number) => a + (b - a) * (1 - Math.exp(-l * dt));
 const clamp = (v: number, a: number, b: number) => Math.min(Math.max(v, a), b);
 const easeInBack = (x: number) => { const c = 1.70158; x = clamp(x, 0, 1); return (c + 1) * x * x * x - c * x * x; };
@@ -65,6 +67,9 @@ export class World {
   private poseAura = 0.8;
   private sweep = { t: -1, start: 0 };
   private transition = { at: -10, teleport: false, jumped: true };
+  private lastInput = performance.now() / 1000;
+  private asleep = false;
+  private wasNear = false;
   private turn = 0;
   private dpr = 1.5;
   private dprCap = 1.5;
@@ -97,6 +102,7 @@ export class World {
     this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     pmrem.dispose();
     this.scene.environmentIntensity = 0.5;
+    await yieldToMain();
 
     const key = this.key;
     key.position.set(-3.5, 5, 6);
@@ -115,11 +121,13 @@ export class World {
 
     const coarse = matchMedia('(pointer: coarse)').matches;
     this.mascot = await loadMascot(coarse);
+    await yieldToMain();
     this.scene.add(this.mascot.object);
     this.camera.position.set(0, 0, 11);
     this.camera.lookAt(0, 0, 0);
 
     const atlas = await createGlyphAtlas(64);
+    await yieldToMain();
     this.pipeline = new GlyphPipeline(this.renderer, atlas);
     this.dprCap = coarse ? 1.25 : 1.5;
     this.dpr = Math.min(window.devicePixelRatio || 1, this.dprCap);
@@ -128,8 +136,9 @@ export class World {
     this.bindEvents();
     this.resize();
     this.ro.observe(document.documentElement);
-    // compile shaders before the first visible frame
-    this.renderer.compile(this.scene, this.camera);
+    // compile shaders before the first visible frame (async where the driver supports it)
+    await yieldToMain();
+    await this.renderer.compileAsync(this.scene, this.camera);
     this.update(0.016, true);
     this.stage.classList.add('is-ready');
     document.documentElement.classList.add('gl-ready');
@@ -206,6 +215,10 @@ export class World {
       if (this.pointer.x >= 0) this.pointer.speed = Math.hypot(dx, dy) / dt / innerWidth;
       this.pointer.x = e.clientX; this.pointer.y = e.clientY; this.pointer.last = now;
       this.pointer.touched = e.pointerType !== 'mouse';
+      this.wake();
+      const near = this.isNearMascot(e.clientX, e.clientY, 1.4);
+      if (near && !this.wasNear && this.pointer.speed < 4.5) this.mascot.react('notice');
+      this.wasNear = near;
       if (this.pointer.speed > 4.5 && this.isNearMascot(e.clientX, e.clientY, 1.6)) this.mascot.react('startle');
       this.dirty = true;
     }, { passive: true });
@@ -214,7 +227,8 @@ export class World {
       if (t.closest('a, button, input, textarea, select, label, summary, [role="button"]')) return;
       if (this.hitTest(e.clientX, e.clientY)) { this.mascot.react('poke'); this.dirty = true; }
     }, { passive: true });
-    on('scroll', () => { this.dirty = true; }, { passive: true });
+    on('scroll', () => { this.dirty = true; this.wake(); }, { passive: true });
+    on('keydown', () => this.wake());
     on('adai:motion', (e) => { this.motion = e.detail.allowed; this.dirty = true; if (this.motion) this.start(); });
     on('adai:mascot', (e) => this.command(e.detail));
     const vis = () => { if (document.hidden) this.stop(); else this.start(); };
@@ -231,6 +245,24 @@ export class World {
       el.addEventListener('pointerenter', enter);
       el.addEventListener('focus', enter);
     });
+  }
+
+  /** Any input wakes Adi up; a long quiet spell makes Adi doze off (motion permitting). */
+  private wake() {
+    this.lastInput = performance.now() / 1000;
+    if (this.asleep) {
+      this.asleep = false;
+      if (this.active) this.mascot.setBaseExpression(this.active.pose.expression);
+      this.mascot.react('startle');
+    }
+  }
+
+  private checkSleep() {
+    if (!this.motion || this.asleep || this.posterMode) return;
+    if (performance.now() / 1000 - this.lastInput > 28) {
+      this.asleep = true;
+      this.mascot.setBaseExpression('sleepy');
+    }
   }
 
   private screenOfHead() {
@@ -333,6 +365,7 @@ export class World {
     }
     const idle = anchor?.pose.idleLook;
     if (idle && attention < 1) { lx = lx * attention + idle.x * (1 - attention) * 0.6; ly = ly * attention + idle.y * (1 - attention) * 0.6; }
+    this.checkSleep();
     this.mascot.update({ dt, time: now, look: { x: clamp(lx, -1, 1), y: clamp(ly, -1, 1) }, attention: Math.max(attention, idle ? 0.6 : 0), motion: this.motion });
 
     this.hue.copy(this.mascot.currentHue);

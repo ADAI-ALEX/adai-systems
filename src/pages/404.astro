@@ -13,7 +13,7 @@ import { byDateDesc } from '@/content/projects';
         <div class="actions"><a class="btn" href="/">Go home</a><a class="btn btn--ghost" href="/work">See all the work</a><a class="btn btn--ghost" href="/start">Start a project</a></div>
         <ul class="list">{byDateDesc.map((p) => <li><a href={`/work/${p.slug}`}>{p.title}</a></li>)}</ul>
       </div>
-      <MascotAnchor pose="lost" class="nf-mascot" />
+      <MascotAnchor pose="lost" class="nf-mascot" eager />
     </div>
   </section>
 </Base>

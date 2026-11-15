@@ -63,9 +63,9 @@ function normalMap(size: number, seed: number, scale: number, strength: number, 
 export type MascotMaterials = ReturnType<typeof createMaterials>;
 
 export function createMaterials(hue: THREE.Color) {
-  const siliconeNormal = normalMap(256, 3, 8, 2.2);
+  const siliconeNormal = normalMap(128, 3, 8, 2.2);
   siliconeNormal.repeat.set(3, 2);
-  const plushNormal = normalMap(256, 11, 48, 2.0, 0.6);
+  const plushNormal = normalMap(128, 11, 32, 2.0, 0.6);
   plushNormal.repeat.set(6, 4);
 
   const silicone = new THREE.MeshPhysicalMaterial({
