@@ -1,0 +1,42 @@
+---
+import { site } from '@/content/site';
+import { footerNav } from '@/lib/nav';
+const year = new Date().getFullYear();
+---
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="top">
+      <div class="lockup">
+        <img draggable="false" src="/brand/adai-wordmark-white.svg" alt="ADAI Systems" width="220" height="77" loading="lazy" decoding="async" />
+        <p class="mute">{site.description}</p>
+      </div>
+      <nav aria-label="Footer">
+        <ul>{footerNav.map((item) => <li><a href={item.href}>{item.label}</a></li>)}</ul>
+      </nav>
+      <div class="contact">
+        <p class="mono mute">Email</p>
+        <a class="email" href={`mailto:${site.email}`}>{site.email}</a>
+        <p class="mute small">{site.contactLine}</p>
+      </div>
+    </div>
+    <div class="bottom">
+      <p class="mono mute">© {year} {site.name}. {site.operator}</p>
+      <p class="mono mute"><a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · No cookies, no tracking.</p>
+    </div>
+  </div>
+</footer>
+<style>
+  .site-footer { position: relative; z-index: 1; border-top: 1px solid var(--line); background: var(--ink-0); padding-block: clamp(3rem, 2rem + 4vw, 5rem) 2rem; }
+  .top { display: grid; gap: 2.5rem; grid-template-columns: 1fr; }
+  @media (min-width: 860px) { .top { grid-template-columns: 1.4fr 1fr 1fr; } }
+  .lockup img { width: 200px; height: auto; margin-bottom: 1.25rem; opacity: 0.95; }
+  .lockup p { max-width: 36ch; }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.15rem; }
+  ul a { display: inline-flex; min-height: 40px; align-items: center; text-decoration: none; color: var(--bone-dim); }
+  ul a:hover { color: var(--bone); }
+  .email { font-size: var(--step-1); font-weight: 600; font-stretch: 112%; text-decoration: none; display: inline-block; margin: 0.25rem 0 0.5rem; }
+  .email:hover { color: var(--amber); }
+  .small { font-size: 0.9rem; }
+  .bottom { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; }
+  .bottom a { color: var(--bone-dim); }
+</style>

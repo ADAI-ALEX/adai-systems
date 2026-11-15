@@ -1,0 +1,95 @@
+---
+import Base from '@/layouts/Base.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import MascotAnchor from '@/components/MascotAnchor.astro';
+import Mark from '@/components/Mark.astro';
+import { breadcrumbLd } from '@/lib/seo';
+import { MASCOT } from '@/lib/mascot';
+const expressionList = ['neutral', 'happy', 'curious', 'surprised', 'thinking', 'focused', 'talking', 'excited', 'confused', 'proud', 'sleepy'];
+const gestures = ['wave', 'point', 'think', 'cheer', 'present', 'shrug', 'nod'];
+const hues = [{ id: 'studio', label: 'Studio' }, { id: 'agents', label: 'Agents' }, { id: 'automation', label: 'Automation' }, { id: 'products', label: 'Apps' }, { id: 'research', label: 'Research' }];
+const traits = [
+  { t: 'Born from the ADAI mark', d: `The mark is a chat bubble with two round eyes. ${MASCOT.name} keeps those eyes, same spacing and same size within the face, and wears the speech bubble as a glowing emblem on the chest.` },
+  { t: 'A face that reads at any size', d: 'Two round eyes in a calm, centred visor. They blink, squint, smile, widen and look where you look, so the face still reads when it is only a few glyphs wide.' },
+  { t: 'Soft, not mechanical', d: 'Satin silicone for the head and hands, a soft-touch body, felt ear cushions. No joints, no panels, no screws. Everything moves on springs, so it follows through like something physical.' },
+  { t: 'One signature accent', d: 'A deep indigo on the antenna tip and the ear cushions. Everything else stays warm cream, so the accent reads as a signature rather than decoration.' },
+  { t: 'It changes colour with the work', d: 'The eyes, the chest bubble and the glow in the antenna take the colour of the kind of work on screen: amber for agents, aqua for automation, coral for apps, sky for research.' },
+  { t: 'It is also made of letters', d: `Hover over ${MASCOT.name} and the whole character dissolves into typographic glyphs from the ADAI ramp, ending in the ADAI mark itself.` },
+];
+---
+<Base title={`Meet ${MASCOT.name}`} path={MASCOT.path} description={`${MASCOT.name} is the ADAI Systems character: a soft, sculpted companion built in real-time 3D, with a typographic glyph renderer.`} mascot={{ mode: 'hero', pose: 'intro' }} jsonLd={[breadcrumbLd([{ name: 'Home', path: '/' }, { name: `Meet ${MASCOT.name}`, path: MASCOT.path }])]}>
+  <section class="page-hero">
+    <div class="wrap hero-grid">
+      <div class="stack" style="--stack:1.25rem">
+        <p class="eyebrow">The ADAI character</p>
+        <h1>Meet {MASCOT.name}.</h1>
+        <p class="lead">A soft companion grown out of the ADAI mark, drawn live in your browser. Try the controls: everything {MASCOT.name} does on this site comes from the same handful of expressions and gestures.</p>
+        <div class="controls panel" data-controls>
+          <p class="mono mute">Expression</p>
+          <div class="chips">{expressionList.map((e) => <button type="button" class="chip" data-expression={e}>{e}</button>)}</div>
+          <p class="mono mute">Gesture</p>
+          <div class="chips">{gestures.map((g) => <button type="button" class="chip" data-gesture={g}>{g}</button>)}</div>
+          <p class="mono mute">Colour of the work</p>
+          <div class="chips">{hues.map((h) => <button type="button" class="chip hue-chip" data-hue={h.id} data-set-hue={h.id}>{h.label}</button>)}</div>
+          <p class="mono mute fine" data-gl-note>Needs WebGL. Without it, you will see a still of {MASCOT.name} instead.</p>
+        </div>
+      </div>
+      <MascotAnchor pose="intro" class="adi-stage" />
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="traits-title">
+    <div class="wrap">
+      <SectionHead id="traits-title" title={`Where ${MASCOT.name} comes from`} lead={`${MASCOT.name} grew out of the ADAI mark below. The character keeps its eyes and its idea, and nothing else is borrowed.`} />
+      <div class="origin" data-reveal>
+        <Mark size={120} title="The ADAI mark" />
+        <span class="arrow-big" aria-hidden="true">→</span>
+        <p class="mono mute">Circle, speech bubble, two eyes. The eyes became the face; the bubble became the light on the chest.</p>
+      </div>
+      <div class="grid traits">
+        {traits.map((t, i) => (
+          <article class="trait panel" data-reveal style={`--reveal-delay:${i * 60}ms`}>
+            <h3>{t.t}</h3>
+            <p class="mute">{t.d}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .page-hero { padding-top: calc(var(--header-h) + clamp(2rem, 1rem + 3vw, 4rem)); padding-bottom: 2rem; }
+  .hero-grid { display: grid; gap: 1.5rem; grid-template-columns: 1fr; align-items: center; }
+  @media (min-width: 960px) { .hero-grid { grid-template-columns: 1fr 1fr; } }
+  :global(.adi-stage) { height: min(76vh, 720px); }
+  @media (max-width: 959px) { :global(.adi-stage) { height: 46vh; order: -1; } }
+  .controls { padding: 1.25rem; display: grid; gap: 0.6rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.4rem; }
+  .chip { min-height: 40px; padding: 0 0.85rem; border-radius: 999px; border: 1px solid var(--line-strong); background: transparent; color: var(--bone-dim); cursor: pointer; font-size: 0.88rem; text-transform: capitalize; }
+  .chip:hover { border-color: var(--bone); color: var(--bone); }
+  .chip.is-on { background: var(--bone); color: var(--ink-0); }
+  .hue-chip::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--hue); margin-right: 0.45rem; }
+  .fine { font-size: 0.72rem; }
+  :global(html.gl-ready) [data-gl-note] { display: none; }
+  .origin { display: flex; flex-wrap: wrap; align-items: center; gap: 1.5rem; margin-bottom: 3rem; color: var(--amber); }
+  .arrow-big { font-size: 2.5rem; color: var(--mute); }
+  .origin p { max-width: 36ch; }
+  .traits { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+  .trait { padding: 1.5rem; display: grid; gap: 0.75rem; align-content: start; }
+  .trait h3 { font-size: var(--step-1); font-stretch: 112%; }
+</style>
+<script>
+  import { mascot } from '@/scripts/mascot-bus';
+  import type { ExpressionName, GestureName, HueName } from '@/gl/mascot/rig';
+  const root = document.querySelector<HTMLElement>('[data-controls]');
+  root?.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button');
+    if (!b) return;
+    if (b.dataset.expression) {
+      root.querySelectorAll('[data-expression]').forEach((x) => x.classList.toggle('is-on', x === b));
+      mascot({ expression: b.dataset.expression as ExpressionName, hold: 6 });
+    }
+    if (b.dataset.gesture) mascot({ gesture: b.dataset.gesture as GestureName });
+    if (b.dataset.setHue) mascot({ hue: b.dataset.setHue as HueName });
+  });
+</script>

@@ -1,0 +1,133 @@
+---
+import Base from '@/layouts/Base.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import ProcessSteps from '@/components/ProcessSteps.astro';
+import MascotAnchor from '@/components/MascotAnchor.astro';
+import HireBand from '@/components/HireBand.astro';
+import AgentDemo from '@/components/demos/AgentDemo.astro';
+import AutomationDemo from '@/components/demos/AutomationDemo.astro';
+import AppsDemo from '@/components/demos/AppsDemo.astro';
+import ResearchDemo from '@/components/demos/ResearchDemo.astro';
+import { services, type Service } from '@/content/services';
+import { getProject } from '@/content/projects';
+import { breadcrumbLd, serviceLd } from '@/lib/seo';
+
+export function getStaticPaths() {
+  return services.map((service) => ({ params: { path: service.path }, props: { service } }));
+}
+interface Props { service: Service }
+const { service } = Astro.props;
+const demos = { agents: AgentDemo, automation: AutomationDemo, products: AppsDemo, research: ResearchDemo };
+const Demo = demos[service.slug];
+const og: Record<string, string> = { agents: 'service-ai-agents', automation: 'service-automation', products: 'service-apps', research: 'service-prototypes' };
+const others = services.filter((s) => s.slug !== service.slug);
+---
+<Base
+  title={service.title}
+  path={`/services/${service.path}`}
+  description={`${service.promise} ${service.intro}`}
+  ogImage={`/og/${og[service.slug]}.png`}
+  hue={service.slug}
+  mascot={{ mode: 'hero', pose: service.slug, hue: service.slug }}
+  jsonLd={[serviceLd(service), breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'Services', path: '/services' }, { name: service.title, path: `/services/${service.path}` }])]}
+>
+  <div data-hue={service.slug}>
+    <section class="page-hero">
+      <div class="wrap hero-grid">
+        <div class="stack" style="--stack:1.25rem">
+          <Breadcrumbs items={[{ name: 'Services', href: '/services' }, { name: service.title }]} />
+          <h1>{service.title}</h1>
+          <p class="promise">{service.promise}</p>
+          <p class="lead">{service.intro}</p>
+          <div class="actions">
+            <a class="btn btn--hue" href={`/start?type=${service.slug}`} data-mascot-react="excited">Start a project <span class="arrow" aria-hidden="true">→</span></a>
+            <a class="btn btn--ghost" href="#proof">See the proof</a>
+          </div>
+        </div>
+        <MascotAnchor pose={service.slug} class="page-mascot" facing={-1} />
+      </div>
+    </section>
+
+    <section class="section--tight" aria-labelledby="builds-title">
+      <div class="wrap split-top">
+        <div>
+          <h2 id="builds-title" class="h2s">What you get</h2>
+          <p class="mute small">Each line is something a named project already does. Select it to see the proof.</p>
+        </div>
+        <ul class="builds">
+          {service.builds.map((b, i) => (
+            <li data-reveal style={`--reveal-delay:${i * 60}ms`}>
+              <span class="tick" aria-hidden="true"></span>
+              <span>{b.text}</span>
+              <a class="mono proof" href={`/work/${b.proof}`}>{getProject(b.proof).title} <span aria-hidden="true">↗</span></a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <section class="section--tight" aria-labelledby="demo-title">
+      <div class="wrap">
+        <SectionHead id="demo-title" title="See how it works" />
+        <Demo />
+      </div>
+    </section>
+
+    <section class="section--tight" aria-labelledby="fit-title">
+      <div class="wrap split-top">
+        <h2 id="fit-title" class="h2s">A good fit when</h2>
+        <ul class="fit">{service.fit.map((f) => <li data-reveal>{f}</li>)}</ul>
+      </div>
+    </section>
+
+    <section class="section" id="proof" aria-labelledby="proof-title">
+      <div class="wrap">
+        <SectionHead id="proof-title" eyebrow="Proof" title="The projects behind it" />
+        <div class="grid proof-grid">{service.proof.map((slug) => <ProjectCard project={getProject(slug)} />)}</div>
+      </div>
+    </section>
+
+    <section class="section--tight" aria-labelledby="process-title">
+      <div class="wrap">
+        <SectionHead id="process-title" title="How a project runs" />
+        <ProcessSteps />
+      </div>
+    </section>
+
+    <section class="section--tight" aria-label="Other services">
+      <div class="wrap others">
+        {others.map((s) => (
+          <a href={`/services/${s.path}`} class="other" data-hue={s.slug}><span class="mono mute">Also</span><strong>{s.title}</strong><span class="hue">{s.promise}</span></a>
+        ))}
+      </div>
+    </section>
+  </div>
+  <HireBand service={service.slug} />
+</Base>
+<style>
+  .page-hero { padding-top: calc(var(--header-h) + clamp(2rem, 1rem + 3vw, 4rem)); background: radial-gradient(55% 70% at 80% 30%, color-mix(in srgb, var(--hue) 10%, transparent), transparent 70%); }
+  .hero-grid { display: grid; gap: 1rem; grid-template-columns: 1fr; align-items: center; }
+  @media (min-width: 900px) { .hero-grid { grid-template-columns: 1.35fr 0.65fr; } }
+  :global(.page-mascot) { height: 440px; }
+  @media (max-width: 899px) { :global(.page-mascot) { height: 260px; order: -1; } }
+  .promise { color: var(--hue); font-size: var(--step-3); font-weight: 620; font-stretch: 115%; letter-spacing: -0.03em; line-height: 1.05; max-width: 20ch; }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  .split-top { display: grid; gap: 1.5rem 4rem; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { .split-top { grid-template-columns: 0.4fr 0.6fr; } }
+  .h2s { font-size: var(--step-3); }
+  .small { font-size: 0.92rem; margin-top: 0.75rem; }
+  .builds, .fit { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+  .builds li { display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 1rem; padding: 1.1rem 0; border-top: 1px solid var(--line); }
+  .builds .tick { grid-row: span 2; width: 22px; height: 22px; margin-top: 2px; border-radius: 7px; background: color-mix(in srgb, var(--hue) 18%, transparent); border: 1px solid var(--hue); }
+  .proof { color: var(--hue); text-decoration: none; font-size: 0.76rem; }
+  .proof:hover { text-decoration: underline; }
+  .fit li { padding: 1.1rem 0; border-top: 1px solid var(--line); font-size: var(--step-1); }
+  .fit li::before { content: '→'; color: var(--hue); margin-right: 0.75rem; }
+  .proof-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); grid-auto-rows: 1fr; }
+  .others { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+  .other { display: grid; gap: 0.4rem; padding: 1.25rem; border-radius: var(--radius-m); border: 1px solid var(--line); text-decoration: none; transition: border-color var(--dur-2); }
+  .other:hover { border-color: var(--hue); }
+  .other strong { font-stretch: 112%; }
+</style>

@@ -1,0 +1,52 @@
+---
+import Base from '@/layouts/Base.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import MascotAnchor from '@/components/MascotAnchor.astro';
+import HireBand from '@/components/HireBand.astro';
+import ResearchDemo from '@/components/demos/ResearchDemo.astro';
+import { research, getProject } from '@/content/projects';
+import { copy } from '@/content/site';
+import { breadcrumbLd } from '@/lib/seo';
+const glimmer = getProject('glimmer');
+---
+<Base
+  title="Research"
+  path="/research"
+  description="Projects that exist to answer a question: reinforcement learning, acoustic levitation, holographic displays, spatial capture and a language model trained from scratch."
+  ogImage="/og/research.png"
+  hue="research"
+  mascot={{ mode: 'hero', pose: 'research', hue: 'research' }}
+  jsonLd={[breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'Research', path: '/research' }])]}
+>
+  <div data-hue="research">
+    <section class="page-hero">
+      <div class="wrap hero-grid">
+        <div class="stack" style="--stack:1.25rem">
+          <p class="eyebrow" data-reveal>Research</p>
+          <h1 data-reveal>{copy.research.title}</h1>
+          <p class="lead" data-reveal>{copy.research.body}</p>
+        </div>
+        <MascotAnchor pose="research" class="page-mascot" facing={-1} />
+      </div>
+    </section>
+    <section class="section--tight" aria-labelledby="rp-title"><h2 id="rp-title" class="sr-only">Research projects</h2><div class="wrap grid cards">{research.map((p) => <ProjectCard project={p} />)}</div></section>
+    <section class="section" aria-labelledby="stevie-title">
+      <div class="wrap">
+        <SectionHead id="stevie-title" eyebrow={glimmer.title} title="A model built from nothing, asked a few questions" lead={glimmer.pitch} />
+        <ResearchDemo />
+        <p class="more"><a class="link-arrow" href="/work/glimmer">Read the Glimmer case study <span aria-hidden="true">→</span></a></p>
+      </div>
+    </section>
+  </div>
+  <HireBand service="research" title="Need to know if it can be done?" />
+</Base>
+<style>
+  .page-hero { padding-top: calc(var(--header-h) + clamp(2rem, 1rem + 4vw, 5rem)); }
+  .hero-grid { display: grid; gap: 1rem; grid-template-columns: 1fr; align-items: center; }
+  @media (min-width: 900px) { .hero-grid { grid-template-columns: 1.4fr 0.6fr; } }
+  :global(.page-mascot) { height: 420px; }
+  @media (max-width: 899px) { :global(.page-mascot) { height: 240px; order: -1; } }
+  .cards { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); grid-auto-rows: 1fr; }
+  .more { margin-top: 1.5rem; }
+</style>

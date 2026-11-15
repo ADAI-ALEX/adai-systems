@@ -1,0 +1,39 @@
+---
+import type { Service } from '@/content/services';
+interface Props { service: Service; index: number; compact?: boolean }
+const { service, index, compact = false } = Astro.props;
+const icons: Record<string, string> = {
+  agents: 'M4 12a8 8 0 0 1 8-8h0a8 8 0 0 1 8 8v0a8 8 0 0 1-8 8H6l-2 2v-10Z M9 11h.01 M15 11h.01',
+  automation: 'M4 7h10 M14 7l-3-3 M14 7l-3 3 M20 17H10 M10 17l3-3 M10 17l3 3',
+  products: 'M8 3h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z M11 18h2',
+  research: 'M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2h12.4a1.5 1.5 0 0 0 1.3-2L14 9V3 M8.5 3h7 M7.5 15h9',
+};
+---
+<article class:list={['svc', { compact }]} data-hue={service.slug} data-reveal style={`--reveal-delay:${index * 80}ms`} data-service-card={service.slug}>
+  <a href={`/services/${service.path}`} class="svc-link">
+    <div class="svc-top">
+      <span class="icon" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d={icons[service.slug]} /></svg></span>
+      <span class="mono mute">{String(index + 1).padStart(2, '0')}</span>
+    </div>
+    <h3>{service.title}</h3>
+    <p class="promise">{service.promise}</p>
+    {!compact && (
+      <ul class="builds">
+        {service.builds.slice(0, 3).map((b) => <li>{b.text}</li>)}
+      </ul>
+    )}
+    <span class="link-arrow">Explore {service.short.toLowerCase()} <span aria-hidden="true">→</span></span>
+  </a>
+</article>
+<style>
+  .svc { position: relative; border-radius: var(--radius-l); border: 1px solid var(--line); background: linear-gradient(180deg, color-mix(in srgb, var(--hue) 7%, transparent), transparent 55%), var(--ink-1); transition: border-color var(--dur-2), transform var(--dur-3) var(--ease-out), background-color var(--dur-2); }
+  .svc:hover, .svc:focus-within { border-color: color-mix(in srgb, var(--hue) 60%, transparent); transform: translateY(-4px); }
+  .svc-link { display: grid; gap: 1rem; align-content: start; height: 100%; padding: clamp(1.25rem, 1rem + 1vw, 2rem); text-decoration: none; color: inherit; }
+  .svc-top { display: flex; justify-content: space-between; align-items: center; }
+  .icon { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; color: var(--hue); background: color-mix(in srgb, var(--hue) 12%, transparent); border: 1px solid color-mix(in srgb, var(--hue) 30%, transparent); }
+  h3 { font-size: var(--step-2); }
+  .promise { color: var(--hue); font-weight: 560; font-size: var(--step-1); line-height: 1.3; }
+  .builds { margin: 0; padding: 0 0 0 1.1rem; display: grid; gap: 0.5rem; color: var(--bone-dim); font-size: 0.95rem; }
+  .builds li::marker { color: var(--hue); }
+  .link-arrow { margin-top: auto; }
+</style>

@@ -1,0 +1,91 @@
+---
+/**
+ * Illustrative pipeline of the Call Recording Analyser: a watched folder, on-device transcription,
+ * analysis, and a written report (CSV and HTML). File names are made up and labelled as such.
+ */
+const stages = [
+  { key: 'queued', label: 'Watched folder' },
+  { key: 'transcribe', label: 'Transcribe on this machine' },
+  { key: 'analyse', label: 'Analyse' },
+  { key: 'report', label: 'Report written' },
+];
+---
+<div class="demo auto panel" data-hue="automation" data-auto-demo>
+  <div class="demo-bar">
+    <div class="who"><span class="dot" aria-hidden="true"></span><span class="mono">Folder watcher</span><span class="mono mute">· illustrative</span></div>
+    <button class="btn btn--hue btn--small" type="button" data-add>Drop in a recording</button>
+  </div>
+  <div class="lanes" role="list" aria-label="Pipeline stages">
+    {stages.map((s, i) => (
+      <div class="lane" role="listitem" data-lane={s.key}>
+        <p class="lane-title mono"><span>{String(i + 1).padStart(2, '0')}</span> {s.label}</p>
+        <ul class="files" data-files={s.key} aria-live="polite"></ul>
+      </div>
+    ))}
+  </div>
+  <p class="note mono mute">The shape of the <a href="/work/call-analyser">Call Recording Analyser</a>: it watches a folder of call recordings, transcribes them on the machine, and writes a report for each one as CSV and HTML. It runs on locked-down Windows PCs without admin rights. File names here are made up.</p>
+</div>
+<style>
+  .demo { padding: clamp(1rem, 0.8rem + 1vw, 1.75rem); display: grid; gap: 1rem; }
+  .demo-bar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .who { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--hue); box-shadow: 0 0 0 4px color-mix(in srgb, var(--hue) 22%, transparent); }
+  .lanes { display: grid; gap: 0.6rem; grid-template-columns: repeat(2, 1fr); }
+  @media (min-width: 640px) { .lanes { grid-template-columns: repeat(4, 1fr); } }
+  .lane { min-height: 15rem; padding: 0.75rem; border-radius: 16px; background: var(--ink-2); border: 1px solid var(--line); display: grid; align-content: start; gap: 0.6rem; }
+  .lane-title { font-size: 0.72rem; color: var(--bone-dim); line-height: 1.35; }
+  .lane-title span { color: var(--hue); }
+  .files { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; }
+  .files :global(li) { position: relative; overflow: hidden; padding: 0.45rem 0.55rem; border-radius: 10px; font-family: var(--font-mono); font-size: 0.72rem; background: var(--ink-3); border: 1px solid var(--line); animation: pop 380ms var(--ease-out); }
+  .files :global(li .bar) { position: absolute; left: 0; bottom: 0; height: 2px; background: var(--hue); animation: fill var(--t, 1.2s) linear forwards; }
+  .files :global(li.done) { border-color: color-mix(in srgb, var(--hue) 50%, transparent); color: var(--hue); }
+  .files :global(li small) { display: block; color: var(--mute); font-size: 0.66rem; }
+  @keyframes pop { from { opacity: 0; transform: translateY(6px) scale(0.98); } }
+  @keyframes fill { from { width: 0; } to { width: 100%; } }
+  .note { font-size: 0.74rem; line-height: 1.5; }
+  .note a { color: var(--hue); }
+</style>
+<script>
+  import { motionAllowed } from '@/scripts/motion';
+  import { mascot } from '@/scripts/mascot-bus';
+  const root = document.querySelector<HTMLElement>('[data-auto-demo]');
+  if (root) {
+    const lanes = ['queued', 'transcribe', 'analyse', 'report'];
+    const list = (k: string) => root.querySelector<HTMLUListElement>(`[data-files="${k}"]`)!;
+    let n = 0;
+    const add = () => {
+      n += 1;
+      const name = `call-${String(100 + n).padStart(3, '0')}.wav`;
+      const li = document.createElement('li');
+      li.textContent = name;
+      const fast = !motionAllowed();
+      const move = (stage: number) => {
+        li.remove();
+        li.querySelector('.bar')?.remove();
+        if (stage === 3) {
+          li.classList.add('done');
+          li.innerHTML = `${name}<small>report.html · rows.csv</small>`;
+          list('report').prepend(li);
+          mascot({ expression: 'happy', hold: 1.2 });
+          return;
+        }
+        const bar = document.createElement('span');
+        bar.className = 'bar';
+        const t = stage === 1 ? 1.6 : 1.1;
+        bar.style.setProperty('--t', `${t}s`);
+        li.appendChild(bar);
+        list(lanes[stage]).appendChild(li);
+        if (stage === 1) mascot({ expression: 'focused', hold: 1.8 });
+        if (fast) move(stage + 1); else setTimeout(() => move(stage + 1), t * 1000);
+      };
+      move(0);
+    };
+    root.querySelector('[data-add]')?.addEventListener('click', add);
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      add(); setTimeout(add, motionAllowed() ? 900 : 0); setTimeout(add, motionAllowed() ? 1800 : 0);
+    }, { threshold: 0.4 });
+    io.observe(root);
+  }
+</script>

@@ -1,0 +1,45 @@
+---
+import Base from '@/layouts/Base.astro';
+import MascotAnchor from '@/components/MascotAnchor.astro';
+import ProcessSteps from '@/components/ProcessSteps.astro';
+import { site } from '@/content/site';
+import { breadcrumbLd } from '@/lib/seo';
+---
+<Base title="Contact" path="/contact" description={`Email ${site.email}. ${site.contactLine}`} ogImage="/og/contact.png" mascot={{ mode: 'hero', pose: 'cta' }} jsonLd={[breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'Contact', path: '/contact' }])]}>
+  <section class="page-hero">
+    <div class="wrap hero-grid">
+      <div class="stack" style="--stack:1.5rem">
+        <p class="eyebrow">Contact</p>
+        <h1>Say hello.</h1>
+        <p class="lead">{site.contactLine} Write about a project, a question about something in the archive, or anything else.</p>
+        <a class="big-email" href={`mailto:${site.email}`} data-mascot-react="excited">{site.email}</a>
+        <div class="actions">
+          <a class="btn" href="/start">Write a project brief <span class="arrow" aria-hidden="true">→</span></a>
+          <button class="btn btn--ghost" type="button" data-copy-email>Copy the address</button>
+        </div>
+        <p class="mono mute">{site.operator}</p>
+      </div>
+      <MascotAnchor pose="cta" class="page-mascot" />
+    </div>
+  </section>
+  <section class="section--tight"><div class="wrap"><h2 class="h2s">What happens after you write</h2><ProcessSteps /></div></section>
+</Base>
+<style>
+  .page-hero { padding-top: calc(var(--header-h) + clamp(2rem, 1rem + 4vw, 5rem)); }
+  .hero-grid { display: grid; gap: 1rem; grid-template-columns: 1fr; align-items: center; }
+  @media (min-width: 900px) { .hero-grid { grid-template-columns: 1.3fr 0.7fr; } }
+  :global(.page-mascot) { height: 460px; }
+  @media (max-width: 899px) { :global(.page-mascot) { height: 240px; order: -1; } }
+  .big-email { font-size: var(--step-3); font-weight: 640; font-stretch: 118%; letter-spacing: -0.03em; text-decoration: none; overflow-wrap: anywhere; }
+  .big-email:hover { color: var(--amber); }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  .h2s { font-size: var(--step-3); margin-bottom: 1.5rem; }
+</style>
+<script>
+  import { mascot } from '@/scripts/mascot-bus';
+  const b = document.querySelector<HTMLButtonElement>('[data-copy-email]');
+  b?.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText('alex@adai.systems'); b.textContent = 'Copied'; mascot({ expression: 'happy', hold: 1.2, gesture: 'nod' }); } catch { b.textContent = 'alex@adai.systems'; }
+    setTimeout(() => (b.textContent = 'Copy the address'), 2000);
+  });
+</script>

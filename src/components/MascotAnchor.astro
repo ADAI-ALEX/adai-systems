@@ -1,0 +1,15 @@
+---
+/**
+ * An empty box that tells the WebGL world where the mascot should stand for this section and how to behave.
+ * There is no flat stand-in image: the space stays clean until the real 3D character is ready, and if
+ * WebGL is unavailable the box collapses so the page reads as a normal text layout.
+ */
+interface Props { pose: string; hue?: string; facing?: 1 | -1; class?: string; eager?: boolean }
+const { pose, hue, facing = -1, class: cls } = Astro.props;
+---
+<div class:list={['mascot-anchor', cls]} data-mascot-anchor data-pose={pose} data-hue={hue} data-facing={String(facing)} aria-hidden="true"></div>
+<style>
+  .mascot-anchor { position: relative; width: 100%; min-height: 280px; }
+  /* Graceful fallback without WebGL: no placeholder art, the layout simply closes up around the copy. */
+  :global(html.gl-fallback) .mascot-anchor { display: none; }
+</style>

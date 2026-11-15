@@ -1,0 +1,60 @@
+---
+/** STEVIE's real replies: first sample, unedited, exactly as published in the Glimmer repository. */
+import { stevie } from '@/content/projects';
+---
+<div class="demo research panel" data-hue="research" data-research-demo>
+  <div class="demo-bar">
+    <div class="who"><span class="dot" aria-hidden="true"></span><span class="mono">Ask STEVIE</span><span class="mono mute">· a model trained from random weights on one laptop</span></div>
+  </div>
+  <div class="prompts" role="group" aria-label="Prompts">
+    {stevie.map((s, i) => <button type="button" class="prompt" data-prompt={i} aria-pressed={i === 0 ? 'true' : 'false'}>{s.prompt}</button>)}
+  </div>
+  <div class="reply" aria-live="polite">
+    <p class="mono mute" data-q>{stevie[0].prompt}</p>
+    <p class="answer" data-a>{stevie[0].reply}</p>
+  </div>
+  <p class="note mono mute">Replies are the first sample for each held-out prompt, unedited, from the <a href="/work/glimmer">Glimmer</a> repository. They are shown because they are honest about where a small model lands, not because they are good answers.</p>
+  <script type="application/json" data-replies set:html={JSON.stringify(stevie)} />
+</div>
+<style>
+  .demo { padding: clamp(1rem, 0.8rem + 1vw, 1.75rem); display: grid; gap: 1.1rem; }
+  .who { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--hue); box-shadow: 0 0 0 4px color-mix(in srgb, var(--hue) 22%, transparent); }
+  .prompts { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .prompt { min-height: 44px; padding: 0.45rem 0.9rem; border-radius: 999px; border: 1px solid var(--line-strong); background: transparent; color: var(--bone-dim); cursor: pointer; font-size: 0.9rem; text-align: left; transition: background-color var(--dur-2), color var(--dur-2), border-color var(--dur-2); }
+  .prompt:hover { border-color: var(--hue); color: var(--bone); }
+  .prompt[aria-pressed='true'] { background: color-mix(in srgb, var(--hue) 18%, transparent); border-color: var(--hue); color: var(--bone); }
+  .reply { min-height: 9.5rem; padding: 1.25rem; border-radius: 18px; background: var(--ink-2); border: 1px solid var(--line); display: grid; gap: 0.6rem; align-content: start; }
+  .answer { font-size: var(--step-2); line-height: 1.25; color: var(--hue); font-stretch: 108%; letter-spacing: -0.015em; }
+  .answer.typing::after { content: '▍'; animation: blink 0.9s steps(1) infinite; margin-left: 2px; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .note { font-size: 0.74rem; line-height: 1.5; }
+  .note a { color: var(--hue); }
+</style>
+<script>
+  import { motionAllowed } from '@/scripts/motion';
+  import { mascot } from '@/scripts/mascot-bus';
+  const root = document.querySelector<HTMLElement>('[data-research-demo]');
+  if (root) {
+    const data: { prompt: string; reply: string }[] = JSON.parse(root.querySelector('[data-replies]')!.textContent!);
+    const q = root.querySelector<HTMLElement>('[data-q]')!, a = root.querySelector<HTMLElement>('[data-a]')!;
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-prompt]')];
+    let timer = 0;
+    buttons.forEach((b) => b.addEventListener('click', () => {
+      const item = data[Number(b.dataset.prompt)];
+      buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      q.textContent = item.prompt;
+      clearInterval(timer);
+      if (!motionAllowed()) { a.textContent = item.reply; return; }
+      mascot({ expression: 'thinking', hold: 1.2 });
+      a.textContent = ''; a.classList.add('typing');
+      let i = 0;
+      setTimeout(() => {
+        timer = window.setInterval(() => {
+          a.textContent = item.reply.slice(0, ++i);
+          if (i >= item.reply.length) { clearInterval(timer); a.classList.remove('typing'); mascot({ expression: 'confused', hold: 1.6 }); }
+        }, 28);
+      }, 650);
+    }));
+  }
+</script>

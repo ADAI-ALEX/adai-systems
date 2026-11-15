@@ -1,0 +1,155 @@
+---
+import Base from '@/layouts/Base.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import StatusPill from '@/components/StatusPill.astro';
+import Plate from '@/components/Plate.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import HireBand from '@/components/HireBand.astro';
+import { linksOf, neighboursOf, projects, type Project } from '@/content/projects';
+import { services } from '@/content/services';
+import { aspectLabel } from '@/lib/hues';
+import { breadcrumbLd, projectLd } from '@/lib/seo';
+
+export function getStaticPaths() {
+  return projects.map((project) => ({ params: { slug: project.slug }, props: { project } }));
+}
+interface Props { project: Project }
+const { project } = Astro.props;
+const { previous, next } = neighboursOf(project.slug);
+const connected = linksOf(project.slug);
+const service = project.aspect ? services.find((s) => s.slug === project.aspect) : undefined;
+const story = project.story ?? {};
+const phones = project.media?.filter((m) => m.type === 'phone') ?? [];
+const screens = project.media?.filter((m) => m.type !== 'phone') ?? [];
+const og = `/og/${project.slug}.png`;
+const need: Record<string, string> = { agents: 'Need an agent like this?', automation: 'Need automation like this?', products: 'Need an app like this?', research: 'Need a prototype like this?' };
+const description = project.summary.length > 158 ? project.summary.slice(0, 155).replace(/\s\S*$/, '') + '…' : project.summary;
+---
+<Base
+  title={`${project.title}: ${project.pitch.replace(/\.$/, '')}`}
+  path={`/work/${project.slug}`}
+  description={description}
+  ogImage={og}
+  hue={project.aspect}
+  jsonLd={[projectLd(project), breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'Work', path: '/work' }, { name: project.title, path: `/work/${project.slug}` }])]}
+>
+  <article class="case" data-hue={project.aspect}>
+    <header class="case-hero">
+      <div class="wrap stack" style="--stack:1.25rem">
+        <Breadcrumbs items={[{ name: 'Work', href: '/work' }, { name: project.title }]} />
+        <h1>{project.title}</h1>
+        <p class="pitch">{project.pitch}</p>
+        <dl class="facts-strip">
+          <div><dt>Status</dt><dd><StatusPill project={project} /></dd></div>
+          <div><dt>When</dt><dd>{project.dateLabel}</dd></div>
+          <div><dt>Kind</dt><dd>{project.kindLabel}</dd></div>
+          {project.aspect && <div><dt>Work</dt><dd>{aspectLabel[project.aspect]}</dd></div>}
+          <div class="wide"><dt>Stack</dt><dd>{project.stack.join(', ')}</dd></div>
+        </dl>
+        {project.links && project.links.length > 0 && (
+          <div class="links">{project.links.map((l, i) => <a class:list={['btn', i > 0 && 'btn--ghost']} href={l.href} rel="noopener">{l.label} <span aria-hidden="true">↗</span></a>)}</div>
+        )}
+      </div>
+    </header>
+
+    <section class="lead-media wrap" aria-label="Media">
+      {project.video ? (
+        <figure class="frame video">
+          <video controls preload="none" playsinline poster={project.video.poster} width={project.video.width} height={project.video.height}>
+            <source src={project.video.src} type="video/mp4" />
+          </video>
+          <figcaption class="mono mute">{project.video.label} · {project.video.seconds} seconds</figcaption>
+        </figure>
+      ) : screens[0] ? (
+        <figure class:list={['frame', 'hero-shot', screens[0].type === 'pixel' && 'frame--pixel']}>
+          <img draggable="false" src={screens[0].src} alt={screens[0].alt} width={screens[0].width} height={screens[0].height} decoding="async" fetchpriority="high" />
+          {screens[0].type === 'concept' && <figcaption class="mono">Concept illustration</figcaption>}
+        </figure>
+      ) : phones.length ? (
+        <div class="phone-row">{phones.slice(0, 4).map((m) => <div class="phone"><img draggable="false" src={m.src} alt={m.alt} width={m.width} height={m.height} decoding="async" /></div>)}</div>
+      ) : (
+        <div class="frame plate-frame"><Plate project={project} size="l" /></div>
+      )}
+      {project.disclosure && <p class="disclosure mono">{project.disclosure}</p>}
+    </section>
+
+    <div class="wrap body">
+      <section class="row"><h2>What it is</h2><div class="prose"><p>{project.summary}</p>{project.points && <ul>{project.points.map((pt) => <li>{pt}</li>)}</ul>}</div></section>
+      {story.problem && <section class="row"><h2>Why it exists</h2><div class="prose"><p>{story.problem}</p></div></section>}
+      {story.built && <section class="row"><h2>What was built</h2><div class="prose"><ul>{story.built.map((b) => <li>{b}</li>)}</ul></div></section>}
+      {story.how && <section class="row"><h2>How it works</h2><div class="prose"><ul>{story.how.map((b) => <li>{b}</li>)}</ul></div></section>}
+      {project.facts && project.facts.length > 0 && (
+        <section class="row"><h2>The numbers</h2><dl class="numbers">{project.facts.map((f) => <div><dt class="mono mute">{f.label}</dt><dd>{f.value}</dd></div>)}</dl></section>
+      )}
+      {screens.length > (project.video ? 0 : 1) && (
+        <section class="row gallery-row"><h2>Screens</h2>
+          <div class="gallery">{screens.slice(project.video ? 0 : 1).map((m) => (
+            <figure class:list={['frame', m.type === 'pixel' && 'frame--pixel']}><img draggable="false" src={m.src} alt={m.alt} width={m.width} height={m.height} loading="lazy" decoding="async" /><figcaption class="mono mute">{m.alt}</figcaption></figure>
+          ))}</div>
+        </section>
+      )}
+      {phones.length > 4 && (
+        <section class="row"><h2>More screens</h2><div class="phone-row small">{phones.slice(4).map((m) => <div class="phone"><img draggable="false" src={m.src} alt={m.alt} width={m.width} height={m.height} loading="lazy" decoding="async" /></div>)}</div></section>
+      )}
+      {story.outcome && <section class="row"><h2>Where it stands</h2><div class="prose"><p>{story.outcome}</p></div></section>}
+      {story.honest && <section class="row honest"><h2>Said plainly</h2><div class="prose"><ul>{story.honest.map((b) => <li>{b}</li>)}</ul></div></section>}
+    </div>
+
+    {connected.length > 0 && (
+      <section class="section--tight wrap" aria-labelledby="connected">
+        <h2 id="connected" class="sub">Connected work</h2>
+        <div class="grid connected">{connected.slice(0, 3).map(({ project: p, why }) => (
+          <div class="conn"><p class="mono mute why">{why}</p><ProjectCard project={p} /></div>
+        ))}</div>
+      </section>
+    )}
+
+    <nav class="wrap pager" aria-label="Older and newer projects">
+      {previous ? <a href={`/work/${previous.slug}`} class="pg"><span class="mono mute">← Older</span><strong>{previous.title}</strong></a> : <span></span>}
+      {next ? <a href={`/work/${next.slug}`} class="pg next"><span class="mono mute">Newer →</span><strong>{next.title}</strong></a> : <span></span>}
+    </nav>
+  </article>
+  <HireBand title={service ? need[service.slug] : undefined} service={service?.slug} />
+</Base>
+<style>
+  .case-hero { padding-top: calc(var(--header-h) + clamp(2rem, 1rem + 3vw, 4rem)); padding-bottom: 2.5rem; background: radial-gradient(60% 80% at 80% 0%, color-mix(in srgb, var(--hue) 10%, transparent), transparent 70%); }
+  .case-hero h1 { font-size: min(var(--step-5), 10.4vw); }
+  .pitch { font-size: var(--step-2); color: var(--hue); max-width: 30ch; line-height: 1.2; font-stretch: 108%; }
+  .facts-strip { display: flex; flex-wrap: wrap; gap: 1.5rem 2.5rem; margin: 0.5rem 0 0; padding: 1.25rem 0; border-block: 1px solid var(--line); }
+  .facts-strip dt { font-family: var(--font-mono); font-size: 0.72rem; color: var(--mute); margin-bottom: 0.25rem; }
+  .facts-strip dd { margin: 0; }
+  .facts-strip .wide { flex: 1 1 260px; }
+  .links { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  .lead-media { margin-block: 1rem 3rem; }
+  .video video { width: 100%; height: auto; background: #000; }
+  .video figcaption, .hero-shot figcaption { padding: 0.6rem 1rem; }
+  .hero-shot img { width: 100%; height: auto; }
+  .plate-frame { min-height: 340px; }
+  .phone-row { display: flex; gap: clamp(0.5rem, 2vw, 1.5rem); justify-content: center; flex-wrap: wrap; }
+  .phone-row .phone { width: clamp(140px, 22%, 260px); }
+  .phone-row.small .phone { width: clamp(120px, 18%, 200px); }
+  .disclosure { margin-top: 0.85rem; color: var(--hue); }
+  .row { display: grid; gap: 1rem 3rem; grid-template-columns: 1fr; padding-block: 2.5rem; border-top: 1px solid var(--line); }
+  @media (min-width: 900px) { .row { grid-template-columns: 0.35fr 0.65fr; } }
+  .row h2 { font-size: var(--step-2); }
+  .prose { display: grid; gap: 1rem; max-width: 68ch; color: var(--bone-dim); }
+  .prose ul { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.65rem; }
+  .prose li::marker { color: var(--hue); }
+  .honest .prose { color: var(--bone); }
+  .numbers { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.25rem; margin: 0; }
+  .numbers dd { margin: 0.25rem 0 0; font-size: var(--step-2); font-weight: 620; font-stretch: 115%; }
+  .gallery-row { grid-template-columns: 1fr !important; }
+  .gallery { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); }
+  .gallery figure { margin: 0; }
+  .gallery img { width: 100%; height: auto; }
+  .gallery figcaption { padding: 0.6rem 0.85rem; font-size: 0.72rem; line-height: 1.4; }
+  .sub { font-size: var(--step-3); margin-bottom: 1.5rem; }
+  .connected { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+  .conn { display: grid; grid-template-rows: auto 1fr; }
+  .why { margin-bottom: 0.6rem; min-height: 2.6em; }
+  .pager { display: flex; justify-content: space-between; gap: 1rem; padding-block: 2rem 1rem; }
+  .pg { display: grid; gap: 0.25rem; text-decoration: none; padding: 1rem 1.25rem; border-radius: var(--radius-m); border: 1px solid var(--line); min-width: 40%; }
+  .pg:hover { border-color: var(--bone); }
+  .pg.next { text-align: right; }
+  .pg strong { font-stretch: 112%; }
+</style>

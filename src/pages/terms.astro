@@ -1,0 +1,28 @@
+---
+import { MASCOT } from '@/lib/mascot';
+import Base from '@/layouts/Base.astro';
+import Legal from '@/components/Legal.astro';
+import { site } from '@/content/site';
+---
+<Base title="Terms" path="/terms" description="Terms of use for www.adai.systems, a public archive of the work of ADAI Systems." ogImage="/og/home.png">
+  <Legal title="Terms of use" updated="15 November 2026">
+    <p slot="intro">These terms cover the use of www.adai.systems. They are not the terms of any product listed on it.</p>
+    <h2>What this site is</h2>
+    <p>www.adai.systems is a public archive of the work of {site.name}. {site.operator} There are no accounts, no payments and nothing sold here.</p>
+    <h2>What is published here</h2>
+    <p>Project entries describe work the studio has done, including work that has been discontinued, paused or kept private. They are descriptions of what a project was, not offers, commitments or a promise that anything listed will be built, resumed or made available.</p>
+    <p>A project marked <strong>discontinued</strong> is not in active development, even where a link to it still resolves. Demonstrations on the site that are marked as illustrative are examples of how a project works, not records of real events.</p>
+    <h2>Accuracy</h2>
+    <p>The archive is kept accurate to the studio's own record of it. Dates and statuses are as recorded; nothing here should be read as audited or independently verified. If something on the site looks wrong, <a href={`mailto:${site.email}`}>tell the studio</a> and it will be corrected.</p>
+    <h2>Intellectual property</h2>
+    <p>The {site.name} name, mark, the character {MASCOT.name}, written content and the design of this site belong to their owner. You are welcome to read, link to and quote from the site; nothing on it transfers any rights in the work it describes.</p>
+    <h2>Links out</h2>
+    <p>The site links to separate sites operated for individual products. Those sites have their own terms, and following a link takes you outside the scope of this document.</p>
+    <h2>No warranty</h2>
+    <p>The site is provided as it is. The studio does not warrant that it will be uninterrupted or error-free, and does not accept liability for decisions taken on the basis of a project description published here.</p>
+    <h2>Governing law</h2>
+    <p>To be confirmed alongside the registered details of the operating entity, which are not published on this site yet. See the <a href="/privacy">privacy notice</a> for the same point.</p>
+    <h2>Changes</h2>
+    <p>These terms describe the site as it currently stands. The date at the top is the current revision.</p>
+  </Legal>
+</Base>
