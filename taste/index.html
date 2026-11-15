@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Taste vault (local only)</title>
+<style>
+  :root { --bg: #101010; --ink: #f2f0ea; --dim: #8d8a82; --line: #2a2a2a; --hot: #ffd400; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 ui-monospace, "SF Mono", Menlo, monospace; }
+  header { padding: 28px 24px 12px; display: flex; flex-wrap: wrap; gap: 12px 32px; align-items: baseline; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--bg); z-index: 2; }
+  h1 { font: 700 22px/1 ui-sans-serif, system-ui, sans-serif; margin: 0; letter-spacing: -0.02em; }
+  header p { margin: 0; color: var(--dim); font-size: 13px; }
+  nav { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+  button { font: inherit; font-size: 13px; color: var(--ink); background: none; border: 1px solid var(--line); padding: 6px 12px; cursor: pointer; }
+  button[aria-pressed="true"] { background: var(--hot); color: #000; border-color: var(--hot); }
+  button:focus-visible { outline: 2px solid var(--hot); outline-offset: 2px; }
+  main { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 1px; background: var(--line); }
+  figure { margin: 0; background: var(--bg); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  figure img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; display: block; background: #000; }
+  figure .missing { aspect-ratio: 16 / 10; display: grid; place-items: center; color: var(--dim); border: 1px dashed var(--line); font-size: 12px; text-align: center; padding: 12px; }
+  figcaption { display: grid; gap: 6px; }
+  .row { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; color: var(--dim); }
+  .row a { color: var(--ink); }
+  .who { text-transform: uppercase; letter-spacing: 0.08em; }
+  .who[data-who="alex"] { color: var(--hot); }
+  .steal { margin: 0; font: 15px/1.4 ui-sans-serif, system-ui, sans-serif; }
+  .tags { font-size: 12px; color: var(--dim); }
+  [data-avoid="true"] img { filter: grayscale(1); opacity: 0.6; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Taste vault</h1>
+  <p id="count"></p>
+  <nav id="filters" aria-label="Collections"></nav>
+</header>
+<main id="grid"></main>
+<script>
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  fetch("/taste/vault.json").then((r) => r.json()).then((vault) => {
+    const grid = document.getElementById("grid"), filters = document.getElementById("filters"), count = document.getElementById("count");
+    let active = "All";
+    const mine = vault.items.filter((i) => i.addedBy === "alex").length;
+    count.textContent = `${vault.items.length} references. ${mine} picked by Alex, ${vault.items.length - mine} sourced by Claude. Local only.`;
+    const draw = () => {
+      grid.innerHTML = vault.items.filter((i) => active === "All" || i.collections.includes(active)).map((i) => `
+        <figure data-avoid="${i.collections.includes("Avoid")}">
+          <img src="/${esc(i.file)}" alt="Screenshot of ${esc(new URL(i.source).hostname)}" loading="lazy" onerror="this.outerHTML='<div class=missing>Image not on this machine. Run: node scripts/capture-references.mjs ${esc(i.id)}</div>'">
+          <figcaption>
+            <div class="row"><a href="${esc(i.source)}" rel="noreferrer">${esc(new URL(i.source).hostname)}</a><span class="who" data-who="${esc(i.addedBy)}">${i.addedBy === "alex" ? "Alex's pick" : "Claude's addition"}</span></div>
+            <p class="steal">${esc(i.steal)}</p>
+            <div class="tags">${i.collections.map(esc).join(" · ")}</div>
+          </figcaption>
+        </figure>`).join("");
+    };
+    filters.innerHTML = ["All", ...vault.collections].map((c) => `<button type="button" aria-pressed="${c === active}">${c}</button>`).join("");
+    filters.addEventListener("click", (e) => {
+      if (e.target.tagName !== "BUTTON") return;
+      active = e.target.textContent;
+      [...filters.children].forEach((b) => b.setAttribute("aria-pressed", b.textContent === active));
+      draw();
+    });
+    draw();
+  });
+</script>
+</body>
+</html>

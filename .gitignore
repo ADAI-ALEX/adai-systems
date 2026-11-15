@@ -39,3 +39,26 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# private recon notes (this repo is public)
+*.private.md
+
+# reference screenshots of other people's sites: local only
+/references/**/*.png
+/references/**/*.jpg
+/references/**/*.jpeg
+/references/**/*.webp
+
+# playwright output
+/test-results
+
+# installed agent skills (third-party code; restore from skills-lock.json)
+/.agents
+/.claude
+
+# large review screenshots: regenerate with scripts/shoot.mjs
+/design/screenshots/*-768.jpg
+/design/screenshots/*-390.jpg
+
+# full QA screenshot set: regenerate with `npm run check -- --shots`
+/design/screenshots/site

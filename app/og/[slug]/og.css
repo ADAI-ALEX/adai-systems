@@ -1,0 +1,169 @@
+/* Share cards. This route sits outside the site frame, so it carries its own copy of the Atlas tokens. */
+
+.og-page {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  background: #06080b;
+}
+
+.og {
+  --ink-0: #06080b;
+  --ink-2: #11151c;
+  --line: #1e242e;
+  --line-2: #2c3441;
+  --bone: #eceae4;
+  --mute: #9aa2af;
+  --faint: #7d8695;
+  --amber: #f2b560;
+  --aqua: #5cd6c4;
+  --coral: #ff7d61;
+  --sky: #8db3ff;
+  --hue: var(--bone);
+
+  position: relative;
+  display: grid;
+  grid-template-columns: 760px minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  column-gap: 48px;
+  box-sizing: border-box;
+  width: 1200px;
+  height: 630px;
+  padding: 56px 72px 64px;
+  overflow: hidden;
+  background:
+    radial-gradient(760px 420px at 100% 100%, color-mix(in srgb, var(--hue) 13%, transparent), transparent 70%),
+    var(--ink-0);
+  color: var(--bone);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.og[data-hue="agents"],
+.og [data-hue="agents"] { --hue: var(--amber); }
+.og[data-hue="automation"],
+.og [data-hue="automation"] { --hue: var(--aqua); }
+.og[data-hue="products"],
+.og [data-hue="products"] { --hue: var(--coral); }
+.og[data-hue="research"],
+.og [data-hue="research"] { --hue: var(--sky); }
+
+/* A hairline in the card's hue along the top edge. */
+.og::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: var(--hue);
+}
+
+.og-top {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.og-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 28px;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+.og-path {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 19px;
+  color: var(--faint);
+}
+
+.og-copy {
+  grid-column: 1;
+  align-self: end;
+  display: grid;
+  gap: 24px;
+  min-height: 0;
+}
+.og-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 -4px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 20px;
+  color: var(--mute);
+}
+.og-meta::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--hue);
+}
+.og-title {
+  margin: 0;
+  font-stretch: 118%;
+  font-variation-settings: "wdth" 118;
+  font-weight: 560;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+.og-title[data-size="s"] {
+  font-size: 128px;
+}
+.og-title[data-size="m"] {
+  font-size: 92px;
+}
+.og-title[data-size="l"] {
+  font-size: 76px;
+}
+.og-line {
+  margin: 0;
+  font-size: 27px;
+  line-height: 1.35;
+  color: var(--mute);
+  text-wrap: pretty;
+}
+
+/* The web motif. */
+.og-web {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+  justify-self: end;
+  width: 320px;
+  height: 320px;
+  overflow: visible;
+}
+.og-ring {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.og-branch line {
+  stroke: var(--hue);
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
+.og-branch line.og-cross {
+  stroke: var(--line-2);
+  opacity: 1;
+}
+.og-branch[data-dim] {
+  opacity: 0.28;
+}
+.og-node {
+  fill: var(--hue);
+}
+.og-here {
+  fill: var(--ink-0);
+  stroke: var(--hue);
+  stroke-width: 3;
+}
+.og-centre {
+  fill: var(--bone);
+  stroke: var(--ink-0);
+  stroke-width: 4;
+}
