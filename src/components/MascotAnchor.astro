@@ -22,5 +22,5 @@ const { pose, hue, facing = -1, class: cls, poster = true, label, eager = false 
   :global(html.gl-ready) .mascot-poster { opacity: 0; }
   :global(html.gl-fallback) .mascot-label { display: none; }
   .mascot-label { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); color: var(--mute); text-align: center; white-space: nowrap; font-size: 0.72rem; }
-  @media (max-width: 700px) { .mascot-label { white-space: normal; width: 100%; } }
+  @media (max-width: 959px), (pointer: coarse) { .mascot-label { display: none; } }
 </style>

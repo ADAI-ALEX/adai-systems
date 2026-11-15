@@ -17,8 +17,8 @@ import { createGlyphAtlas } from './passes/glyphAtlas';
 import { motionAllowed } from '@/scripts/motion';
 
 const HUES: Record<HueName, string> = { agents: '#f2b560', automation: '#5cd6c4', products: '#ff7d61', research: '#8db3ff', studio: '#f3e6cf' };
-const MASCOT_HEIGHT = 2.55; // rig units, floor to sprout tip
-const MASCOT_CENTER_Y = 1.25;
+const MASCOT_HEIGHT = 3.0; // rig units, measured floor (y = -0.08) to the top of the sprout bulb (y = 2.92)
+const MASCOT_CENTER_Y = 1.42;
 /** Let the browser breathe between heavy start-up steps, so no single task blocks input for long. */
 const yieldToMain = () => new Promise<void>((r) => setTimeout(r, 0));
 const damp = (a: number, b: number, l: number, dt: number) => a + (b - a) * (1 - Math.exp(-l * dt));
@@ -315,7 +315,7 @@ export class World {
     let pop = 1;
     if (anchor) {
       const r = anchor.el.getBoundingClientRect();
-      const targetH = Math.min(r.height, r.width * 1.1, H * 0.74) * 0.86;
+      const targetH = Math.min(r.height, r.width * 1.25, H * 0.86) * 0.97;
       const cy = (r.top + r.bottom) / 2;
       const cx = (r.left + r.right) / 2;
       const since = now - this.transition.at;
