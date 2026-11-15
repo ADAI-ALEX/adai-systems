@@ -1,0 +1,88 @@
+---
+/**
+ * Illustrative replay of the voice agent's flow (ask, look up, quote, confirm, book, and handling an
+ * interruption). The capabilities are the ones documented for the Voice Agent project; the dialogue is
+ * a made-up example and is labelled as such on the page.
+ */
+const turns = [
+  { who: 'caller', text: 'Hi, could I book someone in for Saturday morning?' },
+  { who: 'agent', text: 'Of course. What do you need doing, and what is the postcode?' },
+  { who: 'caller', text: 'A standard visit, it is the usual address on my account.' },
+  { who: 'tool', text: 'lookup_customer → account found' },
+  { who: 'tool', text: 'check_availability(Sat, morning) → 2 slots' },
+  { who: 'agent', text: 'I have 9:30 or 11:00 on Saturday. A standard visit is quoted from your price list, so', interrupted: true },
+  { who: 'caller', text: 'Sorry, 9:30 please.' },
+  { who: 'agent', text: 'No problem, 9:30 it is. To finish the quote: it is the standard rate on your plan. Shall I book it?' },
+  { who: 'caller', text: 'Yes please.' },
+  { who: 'tool', text: 'create_booking(Sat 09:30) → confirmed' },
+  { who: 'agent', text: 'Booked for Saturday at 9:30. You will get a confirmation shortly.' },
+];
+---
+<div class="demo agent panel" data-hue="agents" data-agent-demo>
+  <div class="demo-bar">
+    <div class="who">
+      <span class="dot" aria-hidden="true"></span>
+      <span class="mono">Phone agent</span>
+      <span class="mono mute">· illustrative replay</span>
+    </div>
+    <button class="btn btn--hue btn--small" type="button" data-play>Play the call</button>
+  </div>
+  <ol class="turns" aria-live="polite" data-turns>
+    {turns.map((t, i) => (
+      <li class:list={['turn', `turn--${t.who}`, { interrupted: t.interrupted }]} data-turn={i} data-who={t.who}>
+        <span class="role mono">{t.who === 'tool' ? 'tool call' : t.who === 'agent' ? 'agent' : 'caller'}</span>
+        <p>{t.text}{t.interrupted && <span class="cut mono"> [caller interrupts]</span>}</p>
+      </li>
+    ))}
+  </ol>
+  <p class="note mono mute">A made-up example of the flow the <a href="/work/voice-agent">voice agent</a> runs: ask, look up, quote, confirm and book in one call, and pick the thread back up after an interruption. Not a recording, and not a real business.</p>
+</div>
+<style>
+  .demo { padding: clamp(1rem, 0.8rem + 1vw, 1.75rem); display: grid; gap: 1rem; }
+  .demo-bar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .who { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--hue); box-shadow: 0 0 0 4px color-mix(in srgb, var(--hue) 22%, transparent); }
+  .turns { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; min-height: 22rem; align-content: start; }
+  .turn { display: grid; gap: 0.2rem; max-width: 88%; padding: 0.7rem 0.9rem; border-radius: 16px; background: var(--ink-2); border: 1px solid var(--line); transition: opacity 400ms var(--ease-out), transform 400ms var(--ease-out); }
+  .turn p { font-size: 0.97rem; line-height: 1.45; }
+  .turn--agent { justify-self: end; background: color-mix(in srgb, var(--hue) 12%, var(--ink-2)); border-color: color-mix(in srgb, var(--hue) 35%, transparent); }
+  .turn--tool { justify-self: center; max-width: 100%; padding: 0.35rem 0.75rem; background: transparent; border-style: dashed; }
+  .turn--tool p { font-family: var(--font-mono); font-size: 0.78rem; color: var(--hue); }
+  .role { font-size: 0.68rem; color: var(--mute); text-transform: uppercase; letter-spacing: 0.08em; }
+  .cut { color: var(--coral); font-size: 0.75rem; }
+  :global(.js) [data-agent-demo].is-armed .turn:not(.is-shown) { opacity: 0; transform: translateY(8px); }
+  .note { font-size: 0.74rem; line-height: 1.5; }
+  .note a { color: var(--hue); }
+</style>
+<script>
+  import { motionAllowed } from '@/scripts/motion';
+  import { mascot } from '@/scripts/mascot-bus';
+  const root = document.querySelector<HTMLElement>('[data-agent-demo]');
+  if (root) {
+    const turns = [...root.querySelectorAll<HTMLElement>('[data-turn]')];
+    const btn = root.querySelector<HTMLButtonElement>('[data-play]')!;
+    let timer = 0, playing = false;
+    const showAll = () => turns.forEach((t) => t.classList.add('is-shown'));
+    const play = () => {
+      if (!motionAllowed()) { showAll(); mascot({ expression: 'happy', hold: 2 }); return; }
+      clearTimeout(timer); playing = true;
+      root.classList.add('is-armed');
+      turns.forEach((t) => t.classList.remove('is-shown'));
+      btn.textContent = 'Playing…';
+      let i = 0;
+      const next = () => {
+        if (i >= turns.length) { playing = false; btn.textContent = 'Play again'; mascot({ expression: 'happy', hold: 2.2, gesture: 'nod' }); return; }
+        const t = turns[i++];
+        t.classList.add('is-shown');
+        const who = t.dataset.who;
+        mascot({ expression: who === 'agent' ? 'talking' : who === 'tool' ? 'focused' : 'curious', hold: 1.6 });
+        timer = window.setTimeout(next, who === 'tool' ? 900 : 1500 + (t.textContent?.length ?? 0) * 12);
+      };
+      next();
+    };
+    btn.addEventListener('click', play);
+    // Auto-play once when the demo first scrolls into view.
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting && !playing) { play(); io.disconnect(); } }, { threshold: 0.5 });
+    if (motionAllowed()) io.observe(root);
+  }
+</script>

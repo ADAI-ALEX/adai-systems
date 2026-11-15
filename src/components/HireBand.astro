@@ -1,0 +1,31 @@
+---
+import { copy, site } from '@/content/site';
+import MascotAnchor from './MascotAnchor.astro';
+interface Props { withMascot?: boolean; title?: string; body?: string; service?: string }
+const { withMascot = false, title = copy.hire.lead, body = copy.hire.body, service } = Astro.props;
+const href = service ? `/start?type=${service}` : '/start';
+---
+<section class="hire section" aria-labelledby="hire-title">
+  <div class="wrap hire-grid">
+    <div class="hire-copy" data-reveal>
+      <h2 id="hire-title">{title}</h2>
+      <p class="lead">{body}</p>
+      <div class="hire-actions">
+        <a class="btn" href={href} data-mascot-react="excited">{copy.hire.cta} <span class="arrow" aria-hidden="true">→</span></a>
+        <a class="btn btn--ghost" href={`mailto:${site.email}`}>{site.email}</a>
+      </div>
+      <p class="mono mute">{site.contactLine}</p>
+    </div>
+    {withMascot && <MascotAnchor pose="cta" class="hire-mascot" />}
+  </div>
+</section>
+<style>
+  .hire { overflow: clip; }
+  .hire::before { content: ''; position: absolute; inset: 8% 4%; border-radius: 48px; border: 1px solid var(--line); background: radial-gradient(70% 90% at 80% 50%, rgb(242 181 96 / 0.08), transparent 70%), linear-gradient(180deg, rgb(255 255 255 / 0.03), transparent); pointer-events: none; }
+  .hire-grid { position: relative; display: grid; gap: 2rem; align-items: center; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { .hire-grid { grid-template-columns: 1.2fr 0.8fr; } }
+  .hire-copy { display: grid; gap: 1.25rem; padding-block: 2rem; }
+  .hire-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  :global(.hire-mascot) { height: min(62vh, 560px); }
+  @media (max-width: 899px) { :global(.hire-mascot) { height: 46vh; order: -1; } }
+</style>

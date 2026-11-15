@@ -1,0 +1,21 @@
+---
+import { process } from '@/content/services';
+interface Props { detailed?: boolean }
+const { detailed = false } = Astro.props;
+---
+<ol class:list={['steps', { detailed }]}>
+  {process.map((step, i) => (
+    <li class="step" data-reveal style={`--reveal-delay:${i * 90}ms`}>
+      <span class="num mono">{String(i + 1).padStart(2, '0')}</span>
+      <h3>{step.title}</h3>
+      <p class="mute">{step.body}</p>
+    </li>
+  ))}
+</ol>
+<style>
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); counter-reset: s; }
+  .step { position: relative; display: grid; gap: 0.75rem; align-content: start; padding: 1.5rem; border-radius: var(--radius-l); border: 1px solid var(--line); background: linear-gradient(180deg, rgb(255 255 255 / 0.03), transparent); }
+  .step::after { content: ''; position: absolute; left: 1.5rem; right: 1.5rem; top: 0; height: 2px; background: linear-gradient(90deg, var(--amber), var(--aqua), var(--coral), var(--sky)); opacity: 0.5; border-radius: 2px; }
+  .num { color: var(--amber); font-size: 0.85rem; }
+  .step h3 { font-size: var(--step-1); font-stretch: 112%; }
+</style>

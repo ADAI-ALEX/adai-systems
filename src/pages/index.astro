@@ -1,0 +1,192 @@
+---
+import Base from '@/layouts/Base.astro';
+import MascotAnchor from '@/components/MascotAnchor.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import ServiceCard from '@/components/ServiceCard.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import ProcessSteps from '@/components/ProcessSteps.astro';
+import HireBand from '@/components/HireBand.astro';
+import AgentDemo from '@/components/demos/AgentDemo.astro';
+import AutomationDemo from '@/components/demos/AutomationDemo.astro';
+import AppsDemo from '@/components/demos/AppsDemo.astro';
+import ResearchDemo from '@/components/demos/ResearchDemo.astro';
+import { copy, site } from '@/content/site';
+import { services } from '@/content/services';
+import { counts, getProject, selected, showcase } from '@/content/projects';
+
+const chapters = [
+  { service: services[0], demo: AgentDemo, side: 'right' as const },
+  { service: services[1], demo: AutomationDemo, side: 'left' as const },
+  { service: services[2], demo: AppsDemo, side: 'right' as const },
+  { service: services[3], demo: ResearchDemo, side: 'left' as const },
+];
+const stats = [
+  { value: counts.total, label: 'projects since December 2024' },
+  { value: counts.running, label: 'running today' },
+  { value: counts.openSource, label: 'open source' },
+  { value: counts.research, label: 'research projects' },
+];
+---
+<Base
+  title="Home"
+  path="/"
+  description={site.description + ' AI agents, automation, apps and research prototypes, with every project shown.'}
+  mascot={{ mode: 'story', pose: 'hero' }}
+>
+  <!-- HERO -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow hero-eyebrow" data-reveal>Independent technology studio · since {site.founded}</p>
+        <h1 id="hero-title" data-reveal style="--reveal-delay:80ms">{site.headline}</h1>
+        <p class="lead" data-reveal style="--reveal-delay:160ms">{copy.hero.sub}</p>
+        <div class="hero-actions" data-reveal style="--reveal-delay:240ms">
+          <a class="btn" href="/start" data-mascot-react="excited">{copy.hero.primary} <span class="arrow" aria-hidden="true">→</span></a>
+          <a class="btn btn--ghost" href="/work">{copy.hero.secondary}</a>
+        </div>
+        <ul class="hero-services" data-reveal style="--reveal-delay:320ms" aria-label="Services">
+          {services.map((s) => (
+            <li data-hue={s.slug}><a href={`/services/${s.path}`} class="pill">{s.title}</a></li>
+          ))}
+        </ul>
+      </div>
+      <MascotAnchor pose="hero" class="hero-mascot" label="This is Adi. Move your cursor, or give Adi a poke." />
+    </div>
+    <a class="scroll-cue mono" href="#services">Scroll to see what Adi can show you <span aria-hidden="true">↓</span></a>
+  </section>
+
+  <!-- SERVICES OVERVIEW -->
+  <section class="section services" id="services" aria-labelledby="services-title">
+    <div class="wrap">
+      <div class="services-head">
+        <SectionHead id="services-title" eyebrow="Services" title={copy.services.title} lead={copy.services.body} />
+        <MascotAnchor pose="services" class="services-mascot" facing={-1} />
+      </div>
+      <div class="grid services-grid">
+        {services.map((s, i) => <ServiceCard service={s} index={i} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- STORY CHAPTERS: one per service, each with a live demonstration -->
+  {chapters.map(({ service, demo: Demo, side }, i) => (
+    <section class:list={['section', 'chapter', `chapter--${side}`]} data-hue={service.slug} aria-labelledby={`ch-${service.slug}`}>
+      <div class="wrap chapter-grid">
+        <div class="chapter-copy">
+          <p class="eyebrow" data-reveal>{String(i + 1).padStart(2, '0')} · {service.title}</p>
+          <h2 id={`ch-${service.slug}`} data-reveal>{service.promise}</h2>
+          <p class="lead" data-reveal>{service.intro}</p>
+          <ul class="proofs" data-reveal>
+            {service.builds.slice(0, 3).map((b) => (
+              <li><span>{b.text}</span> <a href={`/work/${b.proof}`} class="proof mono">{getProject(b.proof).title} <span aria-hidden="true">↗</span></a></li>
+            ))}
+          </ul>
+          <div class="chapter-demo" data-reveal><Demo /></div>
+          <a class="link-arrow" href={`/services/${service.path}`}>All about {service.title.toLowerCase()} <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="chapter-stage">
+          <MascotAnchor pose={service.slug} class="chapter-mascot" facing={side === 'right' ? -1 : 1} />
+        </div>
+      </div>
+    </section>
+  ))}
+
+  <!-- SELECTED WORK -->
+  <section class="section work" aria-labelledby="work-title">
+    <div class="wrap">
+      <div class="work-head">
+        <SectionHead id="work-title" eyebrow="Proof" title={copy.showcase.title} lead={copy.showcase.body} />
+        <MascotAnchor pose="work" class="work-mascot" />
+      </div>
+      <div class="grid showcase">
+        {showcase.map((p, i) => <ProjectCard project={p} size={i < 2 ? 'l' : 's'} />)}
+      </div>
+      <h3 class="more-title">More from the archive</h3>
+      <div class="grid more">
+        {selected.map((p) => <ProjectCard project={p} />)}
+      </div>
+      <div class="center-cta"><a class="btn btn--ghost" href="/work">See all {counts.total} projects <span class="arrow" aria-hidden="true">→</span></a></div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section class="section process" aria-labelledby="process-title">
+    <div class="wrap">
+      <div class="process-head">
+        <SectionHead id="process-title" eyebrow="How it works" title={copy.process.title} lead={copy.process.body} />
+        <MascotAnchor pose="process" class="process-mascot" facing={-1} />
+      </div>
+      <ProcessSteps />
+      <div class="stats" data-reveal>
+        {stats.map((s) => (
+          <p class="stat"><strong>{s.value}</strong><span class="mono mute">{s.label}</span></p>
+        ))}
+      </div>
+      <a class="link-arrow" href="/process">How ADAI works, in detail <span aria-hidden="true">→</span></a>
+    </div>
+  </section>
+
+  <HireBand withMascot />
+</Base>
+
+<style>
+  .hero { position: relative; min-height: 100svh; display: grid; align-items: center; padding-top: var(--header-h); overflow: clip; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(60% 70% at 72% 52%, rgb(243 230 207 / 0.07), transparent 70%), radial-gradient(40% 50% at 10% 90%, rgb(141 179 255 / 0.05), transparent 70%); pointer-events: none; }
+  .hero-grid { position: relative; display: grid; gap: 1rem; grid-template-columns: 1fr; align-items: center; }
+  @media (min-width: 960px) { .hero-grid { grid-template-columns: 1.05fr 0.95fr; } }
+  .hero-copy { display: grid; gap: 1.5rem; padding-block: 2rem; }
+  .hero-eyebrow { color: var(--bone-dim); }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  .hero-services { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; margin: 0.5rem 0 0; padding: 0; }
+  .hero-services a { text-decoration: none; min-height: 36px; }
+  .hero-services a:hover { border-color: var(--hue); color: var(--bone); }
+  :global(.hero-mascot) { height: min(78vh, 760px); }
+  @media (max-width: 959px) {
+    .hero { align-items: start; }
+    :global(.hero-mascot) { order: -1; height: 42vh; min-height: 300px; margin-top: 1rem; }
+    .hero-copy { padding-top: 0; }
+  }
+  .scroll-cue { position: absolute; left: 50%; bottom: 1.5rem; transform: translateX(-50%); color: var(--mute); text-decoration: none; font-size: 0.75rem; }
+  .scroll-cue:hover { color: var(--bone); }
+  @media (max-width: 959px) { .scroll-cue { display: none; } }
+
+  .services-head, .work-head, .process-head { display: grid; gap: 1rem; grid-template-columns: 1fr; align-items: end; }
+  @media (min-width: 960px) { .services-head, .work-head, .process-head { grid-template-columns: 1.4fr 0.6fr; } }
+  :global(.services-mascot), :global(.work-mascot), :global(.process-mascot) { height: 300px; }
+  @media (max-width: 959px) { :global(.services-mascot), :global(.work-mascot), :global(.process-mascot) { height: 220px; order: -1; } }
+  .services-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+
+  .chapter { border-top: 1px solid var(--line); }
+  .chapter::before { content: ''; position: absolute; inset: 0; background: radial-gradient(50% 60% at var(--glow-x, 80%) 40%, color-mix(in srgb, var(--hue) 9%, transparent), transparent 70%); pointer-events: none; }
+  .chapter--left { --glow-x: 20%; }
+  .chapter-grid { position: relative; display: grid; gap: 2rem; grid-template-columns: 1fr; }
+  @media (min-width: 1040px) {
+    .chapter-grid { grid-template-columns: 1.35fr 0.65fr; align-items: start; }
+    .chapter--left .chapter-stage { order: -1; }
+    .chapter--left .chapter-grid { grid-template-columns: 0.65fr 1.35fr; }
+  }
+  .chapter-copy { display: grid; gap: 1.5rem; align-content: start; }
+  .chapter-copy h2 { font-size: var(--step-4); max-width: 16ch; }
+  .chapter-stage { position: relative; }
+  :global(.chapter-mascot) { position: sticky; top: calc(var(--header-h) + 4vh); height: min(72vh, 640px); }
+  @media (max-width: 1039px) {
+    .chapter-stage { order: -1; }
+    :global(.chapter-mascot) { position: relative; top: 0; height: 36vh; min-height: 260px; }
+  }
+  .proofs { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; max-width: 60ch; }
+  .proofs li { padding-left: 1.25rem; position: relative; color: var(--bone-dim); }
+  .proofs li::before { content: ''; position: absolute; left: 0; top: 0.65em; width: 7px; height: 7px; border-radius: 2px; background: var(--hue); }
+  .proof { display: inline-block; margin-left: 0.35rem; color: var(--hue); text-decoration: none; font-size: 0.78rem; }
+  .proof:hover { text-decoration: underline; }
+  .chapter-demo { margin-top: 0.5rem; }
+
+  .showcase { grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); }
+  @media (min-width: 900px) { .showcase { grid-template-columns: repeat(6, 1fr); } .showcase > :global(:nth-child(1)), .showcase > :global(:nth-child(2)) { grid-column: span 3; } .showcase > :global(:nth-child(n + 3)) { grid-column: span 3; } }
+  .more-title { margin: 4rem 0 1.5rem; font-size: var(--step-2); }
+  .more { grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+  .center-cta { display: flex; justify-content: center; margin-top: 3rem; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 1rem; margin: 3rem 0 2rem; padding: 1.5rem 0; border-block: 1px solid var(--line); }
+  .stat { display: grid; gap: 0.25rem; }
+  .stat strong { font-size: var(--step-4); font-weight: 650; font-stretch: 120%; letter-spacing: -0.04em; line-height: 1; }
+</style>

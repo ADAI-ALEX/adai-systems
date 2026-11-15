@@ -1,0 +1,10 @@
+---
+import type { Project } from '@/content/projects';
+interface Props { project: Project }
+const { project } = Astro.props;
+const live = ['active', 'live', 'open-source'].includes(project.status);
+---
+<span class:list={['pill', 'status', { live }]} data-hue={project.aspect}>{project.statusLabel}</span>
+<style>
+  .status.live::before { box-shadow: 0 0 0 3px color-mix(in srgb, var(--hue) 25%, transparent); }
+</style>

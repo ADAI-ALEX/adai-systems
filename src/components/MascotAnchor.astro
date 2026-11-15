@@ -1,0 +1,25 @@
+---
+/**
+ * An empty box that tells the WebGL world where Adi should stand for this section and how to behave.
+ * Holds a static poster that shows when WebGL is unavailable (or before it starts).
+ */
+interface Props { pose: string; hue?: string; facing?: 1 | -1; class?: string; poster?: boolean; label?: string }
+const { pose, hue, facing = -1, class: cls, poster = true, label } = Astro.props;
+---
+<div class:list={['mascot-anchor', cls]} data-mascot-anchor data-pose={pose} data-hue={hue} data-facing={String(facing)}>
+  {poster && (
+    <picture class="mascot-poster" aria-hidden="true">
+      <source srcset="/mascot/poster.webp" type="image/webp" />
+      <img src="/mascot/poster.png" alt="" width="900" height="1000" loading="lazy" decoding="async" />
+    </picture>
+  )}
+  {label && <p class="mascot-label mono">{label}</p>}
+</div>
+<style>
+  .mascot-anchor { position: relative; width: 100%; min-height: 280px; }
+  .mascot-poster { position: absolute; inset: 0; display: grid; place-items: center; opacity: 1; transition: opacity 600ms var(--ease-out); pointer-events: none; }
+  .mascot-poster img { max-height: 100%; width: auto; object-fit: contain; filter: drop-shadow(0 30px 40px rgb(0 0 0 / 0.45)); }
+  :global(html.gl-ready) .mascot-poster { opacity: 0; }
+  .mascot-label { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); color: var(--mute); text-align: center; white-space: nowrap; font-size: 0.72rem; }
+  @media (max-width: 700px) { .mascot-label { white-space: normal; width: 100%; } }
+</style>
