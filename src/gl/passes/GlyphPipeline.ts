@@ -24,6 +24,7 @@ export interface GlyphParams {
   hue: THREE.Color;
   mascotScreen: THREE.Vector2;
   mascotRadius: number;
+  shadow: number;
   shadowScreen: THREE.Vector2;
   pointer: THREE.Vector2;
   time: number;
@@ -83,6 +84,7 @@ export class GlyphPipeline {
         uHue: { value: new THREE.Color() },
         uMascot: { value: new THREE.Vector2(0.7, 0.5) },
         uMascotRadius: { value: 0.3 },
+        uShadowAmount: { value: 1 },
         uShadow: { value: new THREE.Vector2(0.7, 0.2) },
         uTime: { value: 0 },
       },
@@ -91,7 +93,7 @@ export class GlyphPipeline {
         precision highp float;
         varying vec2 vUv;
         uniform sampler2D tScene, tCells, tAtlas;
-        uniform float uCount, uCellPx, uLensRadius, uLensAmount, uGlyphAmount, uAura, uSweep, uMascotRadius, uTime;
+        uniform float uShadowAmount, uCount, uCellPx, uLensRadius, uLensAmount, uGlyphAmount, uAura, uSweep, uMascotRadius, uTime;
         uniform vec2 uRes, uGrid, uPointer, uMascot, uShadow;
         uniform vec3 uHue;
 
@@ -156,7 +158,7 @@ export class GlyphPipeline {
           col.rgb += uHue * halo * (1.0 - col.a);
           col.a += halo * 0.6 * (1.0 - col.a);
           vec2 ds = (uv - uShadow) * vec2(aspect, 1.0) / vec2(uMascotRadius * 0.85, uMascotRadius * 0.16);
-          float shadow = exp(-dot(ds, ds) * 1.6) * 0.55;
+          float shadow = exp(-dot(ds, ds) * 1.6) * 0.55 * uShadowAmount;
           col.a += shadow * (1.0 - col.a);
 
           gl_FragColor = col;
@@ -215,6 +217,7 @@ export class GlyphPipeline {
     (u.uHue.value as THREE.Color).copy(p.hue);
     u.uMascot.value.copy(p.mascotScreen);
     u.uMascotRadius.value = p.mascotRadius;
+    u.uShadowAmount.value = p.shadow;
     u.uShadow.value.copy(p.shadowScreen);
     u.uTime.value = p.motion ? p.time : 0;
     this.quad.material = this.compositeMat;

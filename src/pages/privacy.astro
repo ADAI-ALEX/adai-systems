@@ -1,0 +1,29 @@
+---
+import Base from '@/layouts/Base.astro';
+import Legal from '@/components/Legal.astro';
+import { site } from '@/content/site';
+---
+<Base title="Privacy" path="/privacy" description="How adai.systems handles data. The site sets no cookies, runs no analytics and collects nothing about visitors." ogImage="/og/home.png">
+  <Legal title="Privacy notice" updated="15 November 2026">
+    <p slot="intro">This notice covers www.adai.systems. It does not cover the products linked from it. Lockout and FitDawg publish their own policies.</p>
+    <h2>Who operates this site</h2>
+    <p>{site.operator} Questions about this notice can go to <a href={`mailto:${site.email}`}>{site.email}</a>.</p>
+    <h2>What this site collects</h2>
+    <p>Nothing. There are no analytics, no tracking pixels, no advertising tags, no embedded third-party scripts and no accounts. The site sets no cookies. Fonts, images and videos are served from this site itself.</p>
+    <p>One small thing is kept in your browser, and only if you ask for it: if you switch motion off with the button in the header, that choice is remembered in this tab's session storage so the next page stays still. It is never sent anywhere, and it is cleared when you close the tab.</p>
+    <p>Nothing you type on this site is sent to the studio by the site. The project brief page has fields you can fill in, and what you type there stays in your own browser: it is used only to write an email for you, which opens in your own mail client and is sent only if you send it. The only way to send anything to the studio from this site is by email.</p>
+    <h2>The 3D character</h2>
+    <p>Adi, the character on this site, is drawn by your own device using WebGL. Its reactions to your cursor, scrolling and clicks happen entirely in the page and are not recorded or sent anywhere.</p>
+    <h2>Hosting</h2>
+    <p>The site is served by a hosting provider, which, like any web host, keeps operational server logs. Those logs can include an IP address, a browser user-agent string and the time of a request, and exist for security, abuse prevention and keeping the service running. The studio does not use them to build a profile of anyone, and does not combine them with anything else.</p>
+    <h2>Email</h2>
+    <p>If you email the address above, that message and your address are used to reply to you and are kept as ordinary correspondence. They are not added to a mailing list, and they are not passed to anyone else.</p>
+    <h2>Links to other sites</h2>
+    <p>Project pages link out to <a href="/work/lockout">Lockout</a>, <a href="/work/fitdawg">FitDawg</a> and other project sites. Those are separate sites with their own privacy practices, and this notice stops at the link.</p>
+    <h2>Your rights</h2>
+    <p>Where the studio holds personal data about you (in practice, only an email exchange you started) you can ask what is held, ask for it to be corrected, or ask for it to be deleted. Email the address above and it will be handled.</p>
+    <p>The operating entity's registered address and company number are not published on this page. They have not been recorded here rather than guessed at, and will be added when they are confirmed.</p>
+    <h2>Changes</h2>
+    <p>This notice describes the site as it is currently built. If the site ever starts collecting something, this page changes at the same time. The date at the top is the current revision.</p>
+  </Legal>
+</Base>

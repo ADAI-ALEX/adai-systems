@@ -25,7 +25,6 @@ export function createFaceMaterial() {
     uniforms,
     transparent: true,
     depthWrite: true,
-    extensions: {},
     vertexShader: /* glsl */ `
       varying vec3 vLocal;
       varying vec3 vNormalV;
@@ -78,9 +77,10 @@ export function createFaceMaterial() {
         vec2 q = p - c;
         float open = max(e.x, 0.05);
         float dEll = (length(vec2(q.x, q.y / open)) - r) * min(1.0, open);
-        vec2 qa = q - vec2(0.0, -r * 0.45);
-        float ring = abs(length(qa) - r * 0.82) - r * 0.17;
-        ring = max(ring, -qa.y + r * 0.02);
+        // Smiling closed eye: a filled crescent (a disc minus a lower disc), so there is no hole.
+        float dA = length(q - vec2(0.0, -r * 0.2)) - r * 0.95;
+        float dB = length(q - vec2(0.0, -r * 0.62)) - r * 0.93;
+        float ring = max(dA, -dB);
         float d = mix(dEll, ring, uHappy);
         float a = e.z * side;
         vec2 n = vec2(sin(a), cos(a));
@@ -119,7 +119,7 @@ export function createFaceMaterial() {
         vec3 eyeEdge = mix(eyeCore, uHue, 0.55);
         float depthIn = smoothstep(0.0, -0.12, d);
         vec3 eyeCol = mix(eyeEdge, eyeCore, depthIn) * (1.6 * uGlow);
-        float halo = exp(-max(d, 0.0) * 26.0) * 0.38 * uGlow * (1.0 - 0.6 * uHappy);
+        float halo = exp(-max(d, 0.0) * 26.0) * 0.38 * uGlow * (1.0 - 0.9 * uHappy);
         col += uHue * halo * 0.6;
         // Tiny specular catch-lights keep the eyes alive
         vec2 hl = vec2(-0.055, 0.07) * mix(uEyeL.y, uEyeR.y, step(0.0, p.x));

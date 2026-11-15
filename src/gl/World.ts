@@ -52,6 +52,8 @@ export class World {
   private visible = 0;
   private raf = 0;
   private motion = motionAllowed();
+  /** ?poster renders Adi alone on transparency, for the static fallback image. */
+  private posterMode = new URLSearchParams(location.search).has('poster');
   private raycaster = new THREE.Raycaster();
   private ro: ResizeObserver;
   private disposers: (() => void)[] = [];
@@ -191,8 +193,8 @@ export class World {
       if (this.hitTest(e.clientX, e.clientY)) { this.mascot.react('poke'); this.dirty = true; }
     }, { passive: true });
     on('scroll', () => { this.dirty = true; }, { passive: true });
-    on('adai:motion', ((e: CustomEvent) => { this.motion = e.detail.allowed; this.dirty = true; if (this.motion) this.start(); }) as never);
-    on('adai:mascot', ((e: CustomEvent<MascotCommand>) => this.command(e.detail)) as never);
+    on('adai:motion', (e) => { this.motion = e.detail.allowed; this.dirty = true; if (this.motion) this.start(); });
+    on('adai:mascot', (e) => this.command(e.detail));
     const vis = () => { if (document.hidden) this.stop(); else this.start(); };
     document.addEventListener('visibilitychange', vis);
     this.disposers.push(() => document.removeEventListener('visibilitychange', vis));
@@ -308,13 +310,14 @@ export class World {
       cellCss: 9,
       pointer: new THREE.Vector2(this.pointer.x / W, 1 - this.pointer.y / H),
       lensRadius: clamp((this.frame.h / H) * 0.32, 0.08, 0.22),
-      lensAmount: this.motion && near ? 1 : 0,
+      lensAmount: this.motion && near && !this.posterMode ? 1 : 0,
       glyphAmount: this.poseGlyph,
-      aura: this.poseAura,
+      aura: this.posterMode ? 0 : this.poseAura,
       sweep,
       hue: this.hue,
       mascotScreen: new THREE.Vector2(this.frame.cx / W, 1 - this.frame.cy / H),
       mascotRadius: (this.frame.h / H) * 0.5,
+      shadow: this.posterMode ? 0 : 1,
       shadowScreen: new THREE.Vector2(this.frame.cx / W, 1 - (this.frame.cy + this.frame.h * 0.49) / H),
       time: now,
       motion: this.motion,

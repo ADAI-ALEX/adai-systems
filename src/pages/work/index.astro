@@ -1,0 +1,77 @@
+---
+import Base from '@/layouts/Base.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import MascotAnchor from '@/components/MascotAnchor.astro';
+import HireBand from '@/components/HireBand.astro';
+import { byDateDesc, counts, filters } from '@/content/projects';
+import { copy } from '@/content/site';
+import { breadcrumbLd } from '@/lib/seo';
+
+const archive = byDateDesc.filter((p) => p.kind !== 'studio');
+const matches = (slug: string) => filters.filter((f) => f.test(archive.find((p) => p.slug === slug)!)).map((f) => f.id).join(' ');
+---
+<Base
+  title="Work"
+  path="/work"
+  description={`Every project ADAI Systems has built since December 2024: ${counts.total} in total, including AI agents, automation, apps and research. Nothing hidden because it was paused or dropped.`}
+  ogImage="/og/work.png"
+  mascot={{ mode: 'hero', pose: 'work' }}
+  jsonLd={[breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'Work', path: '/work' }])]}
+>
+  <section class="page-hero">
+    <div class="wrap hero-grid">
+      <div class="stack" style="--stack:1.25rem">
+        <p class="eyebrow" data-reveal>{counts.total} projects · {counts.running} running · {counts.openSource} open source</p>
+        <h1 data-reveal>{copy.archive.title}</h1>
+        <p class="lead" data-reveal>{copy.archive.body}</p>
+      </div>
+      <MascotAnchor pose="work" class="page-mascot" />
+    </div>
+  </section>
+
+  <section class="section--tight" aria-label="Archive">
+    <div class="wrap">
+      <div class="filters" role="group" aria-label="Filter projects" data-filters>
+        {filters.map((f, i) => (
+          <button type="button" class="filter" aria-pressed={i === 0 ? 'true' : 'false'} data-filter={f.id}>
+            {f.label} <span class="mono">{archive.filter(f.test).length}</span>
+          </button>
+        ))}
+      </div>
+      <p class="sr-only" aria-live="polite" data-filter-status></p>
+      <div class="grid archive" data-archive>
+        {archive.map((p) => (
+          <div class="archive-item" data-match={matches(p.slug)}><ProjectCard project={p} /></div>
+        ))}
+      </div>
+    </div>
+  </section>
+  <HireBand />
+</Base>
+<style>
+  .page-hero { padding-top: calc(var(--header-h) + clamp(2rem, 1rem + 4vw, 5rem)); }
+  .hero-grid { display: grid; gap: 1rem; grid-template-columns: 1fr; align-items: center; }
+  @media (min-width: 900px) { .hero-grid { grid-template-columns: 1.4fr 0.6fr; } }
+  :global(.page-mascot) { height: 340px; }
+  @media (max-width: 899px) { :global(.page-mascot) { height: 240px; order: -1; } }
+  .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; }
+  .filter { min-height: 44px; padding: 0 1rem; border-radius: 999px; border: 1px solid var(--line-strong); background: transparent; color: var(--bone-dim); cursor: pointer; font-weight: 560; display: inline-flex; gap: 0.5rem; align-items: center; }
+  .filter .mono { color: var(--mute); font-size: 0.75rem; }
+  .filter:hover { border-color: var(--bone); color: var(--bone); }
+  .filter[aria-pressed='true'] { background: var(--bone); color: var(--ink-0); border-color: var(--bone); }
+  .filter[aria-pressed='true'] .mono { color: var(--ink-3); }
+  .archive { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+  .archive-item[hidden] { display: none; }
+</style>
+<script>
+  const root = document.querySelector<HTMLElement>('[data-filters]');
+  const items = [...document.querySelectorAll<HTMLElement>('[data-archive] [data-match]')];
+  const status = document.querySelector<HTMLElement>('[data-filter-status]');
+  root?.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach((btn) => btn.addEventListener('click', () => {
+    const id = btn.dataset.filter!;
+    root.querySelectorAll('[data-filter]').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+    let n = 0;
+    items.forEach((el) => { const show = el.dataset.match!.split(' ').includes(id); el.hidden = !show; if (show) { n++; el.querySelector('[data-reveal]')?.classList.add('is-in'); } });
+    if (status) status.textContent = `${n} projects shown`;
+  }));
+</script>

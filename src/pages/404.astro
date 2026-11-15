@@ -1,0 +1,29 @@
+---
+import Base from '@/layouts/Base.astro';
+import MascotAnchor from '@/components/MascotAnchor.astro';
+import { byDateDesc } from '@/content/projects';
+---
+<Base title="Page not found" path="/404" description="This page does not exist. Here is everything that does." noindex mascot={{ mode: 'hero', pose: 'lost' }}>
+  <section class="nf">
+    <div class="wrap grid-nf">
+      <div class="stack" style="--stack:1.25rem">
+        <p class="eyebrow">404</p>
+        <h1>Adi looked everywhere.</h1>
+        <p class="lead">This page does not exist, or it moved. Everything that does exist is one click away.</p>
+        <div class="actions"><a class="btn" href="/">Go home</a><a class="btn btn--ghost" href="/work">See all the work</a><a class="btn btn--ghost" href="/start">Start a project</a></div>
+        <ul class="list">{byDateDesc.map((p) => <li><a href={`/work/${p.slug}`}>{p.title}</a></li>)}</ul>
+      </div>
+      <MascotAnchor pose="lost" class="nf-mascot" />
+    </div>
+  </section>
+</Base>
+<style>
+  .nf { padding: calc(var(--header-h) + 3rem) 0 5rem; min-height: 100svh; }
+  .grid-nf { display: grid; gap: 1rem; grid-template-columns: 1fr; align-items: center; }
+  @media (min-width: 900px) { .grid-nf { grid-template-columns: 1.3fr 0.7fr; } }
+  :global(.nf-mascot) { height: 460px; }
+  @media (max-width: 899px) { :global(.nf-mascot) { height: 240px; order: -1; } }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  .list { columns: 2 180px; padding: 0; list-style: none; margin-top: 1rem; }
+  .list a { display: inline-flex; min-height: 36px; align-items: center; color: var(--bone-dim); }
+</style>

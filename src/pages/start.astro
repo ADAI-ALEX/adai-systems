@@ -1,0 +1,185 @@
+---
+import Base from '@/layouts/Base.astro';
+import MascotAnchor from '@/components/MascotAnchor.astro';
+import { brief, services } from '@/content/services';
+import { copy, site } from '@/content/site';
+import { breadcrumbLd } from '@/lib/seo';
+---
+<Base
+  title="Start a project"
+  path="/start"
+  description="Write a project brief in a few minutes. The page writes the email for you; nothing is sent from here, it opens in your own mail app."
+  ogImage="/og/start.png"
+  mascot={{ mode: 'hero', pose: 'brief' }}
+  jsonLd={[breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'Start a project', path: '/start' }])]}
+>
+  <section class="page-hero">
+    <div class="wrap head">
+      <div class="stack" style="--stack:1rem">
+        <p class="eyebrow">Project brief</p>
+        <h1>{copy.start.title}</h1>
+        <p class="lead">{copy.start.body}</p>
+      </div>
+      <MascotAnchor pose="brief" class="start-mascot" />
+    </div>
+  </section>
+
+  <section class="section--tight builder-section">
+    <div class="wrap builder">
+      <form class="form" data-brief novalidate>
+        <fieldset>
+          <legend><span class="n mono">01</span> What do you need?</legend>
+          <div class="choices">
+            {services.map((s) => (
+              <label class="choice" data-hue={s.slug}><input type="checkbox" name="need" value={s.slug} data-title={s.title} /><span><strong>{s.title}</strong><small>{s.promise}</small></span></label>
+            ))}
+            <label class="choice"><input type="checkbox" name="need" value="unsure" data-title="Not sure yet" /><span><strong>Not sure yet</strong><small>Describe the problem and I will suggest the shape.</small></span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend><span class="n mono">02</span> Where are you now?</legend>
+          <div class="radios">{brief.stages.map((s, i) => <label class="radio"><input type="radio" name="stage" value={s} checked={i === 0} /><span>{s}</span></label>)}</div>
+        </fieldset>
+        <fieldset>
+          <legend><span class="n mono">03</span> When do you need it?</legend>
+          <div class="radios">{brief.timelines.map((s, i) => <label class="radio"><input type="radio" name="timeline" value={s} checked={i === 2} /><span>{s}</span></label>)}</div>
+        </fieldset>
+        <div class="field">
+          <label for="what"><span class="n mono">04</span> What should it do?</label>
+          <p class="hint mute" id="what-hint">A few lines is enough: who uses it, what it has to do, and anything it must work with.</p>
+          <textarea id="what" name="what" rows="6" aria-describedby="what-hint" placeholder="For example: answer our booking calls after hours and put the bookings in our calendar."></textarea>
+        </div>
+        <div class="field two">
+          <div><label for="name"><span class="n mono">05</span> Your name</label><input id="name" name="name" autocomplete="name" /></div>
+          <div><label for="org">Company <span class="mute">(optional)</span></label><input id="org" name="org" autocomplete="organization" /></div>
+        </div>
+      </form>
+
+      <aside class="preview panel" aria-labelledby="preview-title">
+        <div class="preview-head">
+          <h2 id="preview-title" class="mono">Your email</h2>
+          <span class="state mono" data-state aria-live="polite">Keep going</span>
+        </div>
+        <dl class="mail mono">
+          <div><dt>To</dt><dd>{site.email}</dd></div>
+          <div><dt>Subject</dt><dd data-subject>New project</dd></div>
+        </dl>
+        <pre class="body" data-body></pre>
+        <div class="send">
+          <a class="btn" href={`mailto:${site.email}`} data-mailto data-mascot-react="excited">Open in my mail app <span class="arrow" aria-hidden="true">→</span></a>
+          <button class="btn btn--ghost" type="button" data-copy>Copy the brief</button>
+        </div>
+        <p class="mono mute fine">Nothing is sent or stored by this page. The email opens in your own mail client, and you press send.</p>
+      </aside>
+    </div>
+  </section>
+</Base>
+<style>
+  .page-hero { padding-top: calc(var(--header-h) + clamp(1.5rem, 1rem + 3vw, 3.5rem)); }
+  .head { display: grid; gap: 1rem; grid-template-columns: 1fr; align-items: end; }
+  @media (min-width: 900px) { .head { grid-template-columns: 1.4fr 0.6fr; } }
+  :global(.start-mascot) { height: 300px; }
+  @media (max-width: 899px) { :global(.start-mascot) { height: 200px; order: -1; } }
+  .builder { display: grid; gap: 2rem; grid-template-columns: 1fr; align-items: start; }
+  @media (min-width: 1000px) { .builder { grid-template-columns: 1.1fr 0.9fr; } .preview { position: sticky; top: calc(var(--header-h) + 1rem); } }
+  .form { display: grid; gap: 2rem; }
+  fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 0.9rem; }
+  legend, .field label { font-size: var(--step-1); font-weight: 600; font-stretch: 110%; margin-bottom: 0.9rem; display: flex; gap: 0.75rem; align-items: baseline; }
+  .n { color: var(--amber); font-size: 0.8rem; }
+  .choices { display: grid; gap: 0.6rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+  .choice { position: relative; display: block; cursor: pointer; }
+  .choice input, .radio input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .choice span { display: grid; gap: 0.3rem; padding: 1rem 1.1rem; border-radius: var(--radius-m); border: 1px solid var(--line-strong); transition: border-color var(--dur-1), background-color var(--dur-1); min-height: 100%; }
+  .choice small { color: var(--mute); font-size: 0.86rem; line-height: 1.4; }
+  .choice:hover span { border-color: var(--bone-dim); }
+  .choice input:checked + span { border-color: var(--hue, var(--bone)); background: color-mix(in srgb, var(--hue, var(--bone)) 10%, transparent); }
+  .choice input:focus-visible + span, .radio input:focus-visible + span { outline: 2px solid var(--amber); outline-offset: 2px; }
+  .radios { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .radio span { display: inline-flex; align-items: center; min-height: 44px; padding: 0 1rem; border-radius: 999px; border: 1px solid var(--line-strong); cursor: pointer; }
+  .radio input:checked + span { background: var(--bone); color: var(--ink-0); border-color: var(--bone); }
+  .hint { font-size: 0.92rem; margin: -0.5rem 0 0.75rem; }
+  textarea, input:not([type='checkbox']):not([type='radio']) { width: 100%; padding: 0.85rem 1rem; border-radius: var(--radius-s); border: 1px solid var(--line-strong); background: var(--ink-1); color: var(--bone); font-size: 1rem; line-height: 1.5; min-height: 48px; }
+  textarea { resize: vertical; }
+  textarea:focus, input:focus { outline: 2px solid var(--amber); outline-offset: 1px; border-color: transparent; }
+  .two { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+  @media (min-width: 640px) { .two { grid-template-columns: 1fr 1fr; } }
+  .two label { font-size: var(--step-0) !important; }
+  .preview { padding: 1.5rem; display: grid; gap: 1rem; }
+  .preview-head { display: flex; justify-content: space-between; align-items: center; }
+  .preview-head h2 { font-size: 0.85rem; letter-spacing: 0.04em; color: var(--mute); font-weight: 500; }
+  .state { padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.72rem; border: 1px solid var(--line-strong); color: var(--mute); }
+  .state.ready { color: var(--ink-0); background: var(--aqua); border-color: var(--aqua); }
+  .mail { display: grid; gap: 0.4rem; margin: 0; font-size: 0.82rem; }
+  .mail div { display: grid; grid-template-columns: 4.5rem 1fr; gap: 0.5rem; }
+  .mail dt { color: var(--mute); }
+  .mail dd { margin: 0; overflow-wrap: anywhere; }
+  .body { margin: 0; min-height: 14rem; max-height: 26rem; overflow: auto; padding: 1rem; border-radius: var(--radius-s); background: var(--ink-0); border: 1px solid var(--line); font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.6; white-space: pre-wrap; color: var(--bone-dim); }
+  .send { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  .fine { font-size: 0.72rem; line-height: 1.5; }
+</style>
+<script>
+  import { mascot } from '@/scripts/mascot-bus';
+  const form = document.querySelector<HTMLFormElement>('[data-brief]')!;
+  const subjectEl = document.querySelector<HTMLElement>('[data-subject]')!;
+  const bodyEl = document.querySelector<HTMLElement>('[data-body]')!;
+  const stateEl = document.querySelector<HTMLElement>('[data-state]')!;
+  const mailto = document.querySelector<HTMLAnchorElement>('[data-mailto]')!;
+  const copyBtn = document.querySelector<HTMLButtonElement>('[data-copy]')!;
+  const email = mailto.getAttribute('href')!.replace('mailto:', '');
+
+  const type = new URLSearchParams(location.search).get('type');
+  if (type) form.querySelector<HTMLInputElement>(`input[name="need"][value="${CSS.escape(type)}"]`)?.click();
+
+  let wasReady = false;
+  let thinkTimer = 0;
+  const compose = () => {
+    const needs = [...form.querySelectorAll<HTMLInputElement>('input[name="need"]:checked')].map((i) => i.dataset.title!);
+    const stage = form.querySelector<HTMLInputElement>('input[name="stage"]:checked')?.value ?? '';
+    const timeline = form.querySelector<HTMLInputElement>('input[name="timeline"]:checked')?.value ?? '';
+    const what = (form.elements.namedItem('what') as HTMLTextAreaElement).value.trim();
+    const name = (form.elements.namedItem('name') as HTMLInputElement).value.trim();
+    const org = (form.elements.namedItem('org') as HTMLInputElement).value.trim();
+    const subject = needs.length ? `New project: ${needs.join(', ')}` : 'New project';
+    const lines = [
+      'Hi Alex,',
+      '',
+      needs.length ? `I need help with: ${needs.join(', ')}.` : 'I have a project in mind.',
+      `Where we are now: ${stage}.`,
+      `When: ${timeline}.`,
+      '',
+      'What it should do:',
+      what || '[a few lines about what it should do]',
+      '',
+      name ? `${name}${org ? `, ${org}` : ''}` : '[your name]',
+    ];
+    const body = lines.join('\n');
+    subjectEl.textContent = subject;
+    bodyEl.textContent = body;
+    mailto.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const ready = needs.length > 0 && what.length >= 20 && name.length > 0;
+    stateEl.textContent = ready ? 'Ready to send' : 'Keep going';
+    stateEl.classList.toggle('ready', ready);
+    if (ready && !wasReady) mascot({ pose: 'briefReady' });
+    if (!ready && wasReady) mascot({ pose: 'brief' });
+    wasReady = ready;
+    return { subject, body };
+  };
+  form.addEventListener('input', (e) => {
+    compose();
+    if ((e.target as HTMLElement).tagName === 'TEXTAREA' && !wasReady) {
+      clearTimeout(thinkTimer);
+      mascot({ expression: 'thinking', hold: 1.4 });
+      thinkTimer = window.setTimeout(() => mascot({ expression: 'curious', hold: 1 }), 1500);
+    }
+  });
+  form.addEventListener('change', (e) => { if ((e.target as HTMLInputElement).name === 'need') mascot({ expression: 'happy', hold: 0.9 }); });
+  copyBtn.addEventListener('click', async () => {
+    const { subject, body } = compose();
+    const text = `To: ${email}\nSubject: ${subject}\n\n${body}`;
+    try { await navigator.clipboard.writeText(text); copyBtn.textContent = 'Copied'; }
+    catch { const r = document.createRange(); r.selectNodeContents(bodyEl); getSelection()?.removeAllRanges(); getSelection()?.addRange(r); copyBtn.textContent = 'Selected: press Cmd/Ctrl+C'; }
+    mascot({ expression: 'excited', hold: 1.4 });
+    setTimeout(() => (copyBtn.textContent = 'Copy the brief'), 2200);
+  });
+  compose();
+</script>

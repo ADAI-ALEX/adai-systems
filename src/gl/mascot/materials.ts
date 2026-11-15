@@ -65,8 +65,8 @@ export type MascotMaterials = ReturnType<typeof createMaterials>;
 export function createMaterials(hue: THREE.Color) {
   const siliconeNormal = normalMap(256, 3, 8, 2.2);
   siliconeNormal.repeat.set(3, 2);
-  const plushNormal = normalMap(256, 11, 32, 3.0, 0.5);
-  plushNormal.repeat.set(4, 3);
+  const plushNormal = normalMap(256, 11, 48, 2.0, 0.6);
+  plushNormal.repeat.set(6, 4);
 
   const silicone = new THREE.MeshPhysicalMaterial({
     color: new THREE.Color('#e4d9c6'),
@@ -78,7 +78,7 @@ export function createMaterials(hue: THREE.Color) {
     clearcoat: 0.32,
     clearcoatRoughness: 0.38,
     normalMap: siliconeNormal,
-    normalScale: new THREE.Vector2(0.18, 0.18),
+    normalScale: new THREE.Vector2(0.07, 0.07),
     envMapIntensity: 0.9,
   });
 
@@ -89,7 +89,7 @@ export function createMaterials(hue: THREE.Color) {
     sheenColor: new THREE.Color('#fff2df'),
     sheenRoughness: 0.42,
     normalMap: plushNormal,
-    normalScale: new THREE.Vector2(0.22, 0.22),
+    normalScale: new THREE.Vector2(0.12, 0.12),
     envMapIntensity: 0.6,
   });
 

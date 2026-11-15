@@ -34,7 +34,7 @@ const web = (margin.media ?? []).slice(0, 4);
       </div>
     </div>
     <div class="dots" role="group" aria-label="Margin screens">
-      {web.map((m, i) => <button type="button" aria-label={`Show screen ${i + 1}`} aria-pressed={i === 0 ? 'true' : 'false'} data-shot={i}></button>)}
+      {web.map((_m, i) => <button type="button" aria-label={`Show screen ${i + 1}`} aria-pressed={i === 0 ? 'true' : 'false'} data-shot={i}></button>)}
     </div>
     <p class="caption">{margin.pitch} <a href="/work/margin" class="link-arrow">Case study <span aria-hidden="true">→</span></a></p>
   </div>

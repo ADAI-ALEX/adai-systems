@@ -1,0 +1,76 @@
+---
+import Base from '@/layouts/Base.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import ServiceCard from '@/components/ServiceCard.astro';
+import ProcessSteps from '@/components/ProcessSteps.astro';
+import MascotAnchor from '@/components/MascotAnchor.astro';
+import HireBand from '@/components/HireBand.astro';
+import { services } from '@/content/services';
+import { getProject } from '@/content/projects';
+import { breadcrumbLd, serviceLd } from '@/lib/seo';
+---
+<Base
+  title="Services"
+  path="/services"
+  description="AI agents and voice, automation and internal tools, apps and products, and research prototypes. Four kinds of work, each backed by projects you can open."
+  ogImage="/og/services.png"
+  mascot={{ mode: 'hero', pose: 'services' }}
+  jsonLd={[...services.map(serviceLd), breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'Services', path: '/services' }])]}
+>
+  <section class="page-hero">
+    <div class="wrap hero-grid">
+      <div class="stack" style="--stack:1.25rem">
+        <p class="eyebrow" data-reveal>Services</p>
+        <h1 data-reveal>Four kinds of work. All of it already built once.</h1>
+        <p class="lead" data-reveal>Every capability below is something a project in the archive already does. Pick the one closest to your problem, or start a brief and describe it in your own words.</p>
+        <div class="actions" data-reveal><a class="btn" href="/start" data-mascot-react="excited">Start a project <span class="arrow" aria-hidden="true">→</span></a></div>
+      </div>
+      <MascotAnchor pose="services" class="page-mascot" />
+    </div>
+  </section>
+
+  <section class="section--tight"><div class="wrap grid cards">{services.map((s, i) => <ServiceCard service={s} index={i} />)}</div></section>
+
+  <section class="section compare" aria-labelledby="compare-title">
+    <div class="wrap">
+      <SectionHead id="compare-title" title="Side by side" lead="What you get, when it fits, and the projects behind each one." />
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Services compared">
+        <table>
+          <thead><tr><th scope="col"><span class="sr-only">Question</span></th>{services.map((s) => <th scope="col" data-hue={s.slug}><a href={`/services/${s.path}`}>{s.title}</a></th>)}</tr></thead>
+          <tbody>
+            <tr><th scope="row">The promise</th>{services.map((s) => <td data-hue={s.slug} class="hue">{s.promise}</td>)}</tr>
+            <tr><th scope="row">A good fit when</th>{services.map((s) => <td><ul>{s.fit.map((f) => <li>{f}</li>)}</ul></td>)}</tr>
+            <tr><th scope="row">Proof</th>{services.map((s) => <td><ul>{s.proof.map((slug) => <li><a href={`/work/${slug}`}>{getProject(slug).title}</a></li>)}</ul></td>)}</tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="process-title">
+    <div class="wrap">
+      <SectionHead id="process-title" eyebrow="How it works" title="How a project runs" lead="Small steps, and something real to look at early." />
+      <ProcessSteps />
+    </div>
+  </section>
+  <HireBand withMascot />
+</Base>
+<style>
+  .page-hero { padding-top: calc(var(--header-h) + clamp(2rem, 1rem + 4vw, 5rem)); }
+  .hero-grid { display: grid; gap: 1rem; grid-template-columns: 1fr; align-items: center; }
+  @media (min-width: 900px) { .hero-grid { grid-template-columns: 1.4fr 0.6fr; } }
+  :global(.page-mascot) { height: 380px; }
+  @media (max-width: 899px) { :global(.page-mascot) { height: 240px; order: -1; } }
+  .actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .cards { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius-l); }
+  table { width: 100%; min-width: 900px; border-collapse: collapse; }
+  th, td { text-align: left; vertical-align: top; padding: 1.1rem 1.25rem; border-bottom: 1px solid var(--line); }
+  thead th { font-stretch: 112%; font-size: 1.05rem; }
+  thead th a { color: var(--hue); text-decoration: none; }
+  tbody th { font-family: var(--font-mono); font-size: 0.78rem; color: var(--mute); font-weight: 400; width: 12rem; }
+  td { color: var(--bone-dim); font-size: 0.95rem; }
+  td.hue { color: var(--hue); font-weight: 560; }
+  td ul { margin: 0; padding-left: 1rem; display: grid; gap: 0.4rem; }
+  tr:last-child th, tr:last-child td { border-bottom: 0; }
+</style>

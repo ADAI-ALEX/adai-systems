@@ -1,0 +1,103 @@
+---
+import Base from '@/layouts/Base.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import ProcessSteps from '@/components/ProcessSteps.astro';
+import MascotAnchor from '@/components/MascotAnchor.astro';
+import HireBand from '@/components/HireBand.astro';
+import { site } from '@/content/site';
+import { breadcrumbLd } from '@/lib/seo';
+
+// Every answer below restates something already published in the content files (services.ts process,
+// service intros, site copy). Nothing is promised that the archive does not show.
+const principles = [
+  { title: 'Something real, early', body: 'You get something you can click or call early on, not a slide deck. Decisions are made on the working thing.' },
+  { title: 'Limits stated plainly', body: 'Every case study ends with what the project does not do. Paused and discontinued work stays listed, labelled as such.' },
+  { title: 'Your data can stay with you', body: 'Speech and transcription can run on your own machines where privacy matters. The voice agent and the call analyser both do.' },
+  { title: 'You own the result', body: 'At the end you get the code, the documentation and a walkthrough. It is yours.' },
+];
+const faq = [
+  { q: 'Who will I work with?', a: 'Alex, who runs the studio. One person owns the result, from the first reply to the hand-over.' },
+  { q: 'What does it cost?', a: 'It depends on the scope. After the brief you get questions, then a written scope: what gets built, what does not, and what it will cost.' },
+  { q: 'Do I need a full specification?', a: 'No. A few lines describing what you need and what it has to do is enough to start. A spec or a design helps if you have one.' },
+  { q: 'Can you improve an existing system?', a: 'Yes. "There is an existing system to improve" is one of the starting points in the project brief.' },
+  { q: 'Can it run on locked-down machines?', a: 'Often, yes. The call analyser runs on locked-down Windows PCs without admin rights.' },
+  { q: 'Do I own the code?', a: 'Yes. You get the code, the documentation and a walkthrough.' },
+];
+---
+<Base
+  title="How it works"
+  path="/process"
+  description="How a project with ADAI Systems runs: send a brief, agree a written scope, see it working early, and get the code, documentation and a walkthrough at the end."
+  mascot={{ mode: 'hero', pose: 'process' }}
+  jsonLd={[
+    breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'How it works', path: '/process' }]),
+    { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) },
+  ]}
+>
+  <section class="page-hero">
+    <div class="wrap hero-grid">
+      <div class="stack" style="--stack:1.25rem">
+        <p class="eyebrow" data-reveal>How it works</p>
+        <h1 data-reveal>Small steps, and something real to look at early.</h1>
+        <p class="lead" data-reveal>From a few lines of brief to working software you own. Here is what happens, in order, and what you can expect at each step.</p>
+      </div>
+      <MascotAnchor pose="process" class="page-mascot" />
+    </div>
+  </section>
+
+  <section class="section--tight"><div class="wrap"><ProcessSteps detailed /></div></section>
+
+  <section class="section" aria-labelledby="principles-title">
+    <div class="wrap">
+      <SectionHead id="principles-title" title="How the work is done" />
+      <div class="grid principles">
+        {principles.map((p, i) => (
+          <article class="principle panel" data-reveal style={`--reveal-delay:${i * 70}ms`}>
+            <span class="mono mute">{String(i + 1).padStart(2, '0')}</span>
+            <h3>{p.title}</h3>
+            <p class="mute">{p.body}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section--tight" aria-labelledby="faq-title">
+    <div class="wrap faq-grid">
+      <h2 id="faq-title">Questions</h2>
+      <div class="faq">
+        {faq.map((f) => (
+          <details>
+            <summary>{f.q}<span class="plus" aria-hidden="true"></span></summary>
+            <p class="mute">{f.a}</p>
+          </details>
+        ))}
+        <p class="mono mute more">Anything else: <a href={`mailto:${site.email}`}>{site.email}</a></p>
+      </div>
+    </div>
+  </section>
+  <HireBand withMascot />
+</Base>
+<style>
+  .page-hero { padding-top: calc(var(--header-h) + clamp(2rem, 1rem + 4vw, 5rem)); }
+  .hero-grid { display: grid; gap: 1rem; grid-template-columns: 1fr; align-items: center; }
+  @media (min-width: 900px) { .hero-grid { grid-template-columns: 1.4fr 0.6fr; } }
+  :global(.page-mascot) { height: 400px; }
+  @media (max-width: 899px) { :global(.page-mascot) { height: 240px; order: -1; } }
+  .principles { grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+  .principle { padding: 1.5rem; display: grid; gap: 0.75rem; align-content: start; }
+  .principle h3 { font-size: var(--step-1); font-stretch: 112%; }
+  .faq-grid { display: grid; gap: 2rem 4rem; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { .faq-grid { grid-template-columns: 0.4fr 0.6fr; } }
+  .faq-grid h2 { font-size: var(--step-3); }
+  details { border-top: 1px solid var(--line); }
+  details:last-of-type { border-bottom: 1px solid var(--line); }
+  summary { display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 64px; cursor: pointer; list-style: none; font-size: var(--step-1); font-weight: 560; }
+  summary::-webkit-details-marker { display: none; }
+  .plus { position: relative; width: 16px; height: 16px; flex: none; }
+  .plus::before, .plus::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1.5px; background: var(--bone); transition: transform var(--dur-2) var(--ease-out); }
+  .plus::after { transform: rotate(90deg); }
+  details[open] .plus::after { transform: rotate(0deg); }
+  details p { padding: 0 0 1.25rem; max-width: 60ch; }
+  .more { margin-top: 1.5rem; }
+</style>
