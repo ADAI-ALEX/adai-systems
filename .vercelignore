@@ -1,0 +1,5 @@
+docs/
+tests/
+assets-src/
+test-results/
+playwright-report/
