@@ -27,7 +27,7 @@ const glimmer = getProject('glimmer');
           <h1 data-reveal>{copy.research.title}</h1>
           <p class="lead" data-reveal>{copy.research.body}</p>
         </div>
-        <MascotAnchor pose="research" class="page-mascot" eager facing={-1} />
+        <MascotAnchor pose="research" class="page-mascot" facing={-1} />
       </div>
     </section>
     <section class="section--tight" aria-labelledby="rp-title"><h2 id="rp-title" class="sr-only">Research projects</h2><div class="wrap grid cards">{research.map((p) => <ProjectCard project={p} />)}</div></section>

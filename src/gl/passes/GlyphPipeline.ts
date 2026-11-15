@@ -129,15 +129,16 @@ export class GlyphPipeline {
           vec4 cell = texture2D(tCells, (cellId + 0.5) / uGrid);
           float n = noise(cellId * 0.18 + vec2(uTime * 0.25, -uTime * 0.15));
 
-          // --- Reveal mask, decided per cell (a cell is either glyph or 3D, never a blend of both).
-          // The reveal is a disc that grows from the cursor; at full activation its radius exceeds the
-          // projected bounds of the whole character, and uRevealFull forces complete coverage.
+          // --- Lens mask, decided per cell (a cell is either glyph or 3D, never a blend of both).
+          // A small circle that follows the cursor (the original interaction): full glyphs in its core,
+          // a dithered cell-by-cell edge towards its rim, normal 3D outside it.
           float dist = length((cellCentre - uPointer) * vec2(aspect, 1.0));
-          float front = 1.0 - smoothstep(uRevealRadius - uRevealEdge, uRevealRadius, dist + (n - 0.5) * uRevealEdge);
-          float reveal = max(front * step(1e-4, uRevealRadius), uRevealFull);
+          float lens = uRevealRadius > 1e-4 ? 1.0 - smoothstep(uRevealRadius * 0.45, uRevealRadius, dist) : 0.0;
           float sweepBand = uSweep < -0.5 ? 0.0 : 1.0 - smoothstep(0.0, 0.18, abs(cellCentre.y - uSweep));
-          float dissolve = smoothstep(0.42, 0.58, (uGlyphAmount + sweepBand) * 0.92 + (n - 0.5) * 0.45);
-          float mask = step(0.5, max(reveal, dissolve));
+          float m = clamp(lens + uGlyphAmount + sweepBand, 0.0, 1.5);
+          float mask = step(0.5, smoothstep(0.42, 0.58, m * 0.92 + (n - 0.5) * 0.45));
+          // Inside the lens core every cell must be glyphs: the debug view paints any 3D pixel there magenta.
+          float core = step(dist, uRevealRadius * 0.4) * step(1e-4, uRevealRadius);
 
           // --- Glyphs, drawn wherever the rendered silhouette touches the cell (alpha-derived mask)
           vec3 cellCol = cell.rgb;
@@ -153,7 +154,7 @@ export class GlyphPipeline {
           // Inside the mask the 3D pixels are replaced outright (no ghost, no coverage gate), so no
           // sliver of the model can show through, even where the taps missed thin geometry.
           vec4 col = mix(scene, glyphOut, mask);
-          if (uDebug > 0.5 && scene.a > 0.02 && mask < 0.5 && uRevealFull > 0.5) { gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0); return; }
+          if (uDebug > 0.5 && scene.a > 0.02 && mask < 0.5 && core > 0.5) { gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0); return; }
 
           // --- Ambient glyph aura in the section hue, only where the mascot is not
           vec2 dm = (uv - uMascot) * vec2(aspect, 1.0);

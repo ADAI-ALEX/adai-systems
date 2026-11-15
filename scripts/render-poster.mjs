@@ -1,4 +1,4 @@
-// Renders Adi's fallback poster from the site's own WebGL renderer (no external art involved).
+// Renders a still of Auri from the site's own WebGL renderer, for the README (the site itself shows no flat stand-in).
 // Needs the dev or preview server running. Usage: node scripts/render-poster.mjs [baseUrl]
 import { chromium } from '@playwright/test';
 import fs from 'node:fs';
@@ -15,8 +15,8 @@ const box = await page.locator('[data-mascot-anchor]').first().boundingBox();
 const pad = 20, top = 90;
 const clip = { x: Math.max(0, box.x - pad), y: Math.max(0, box.y - top), width: box.width + pad * 2, height: box.height + top + pad };
 const png = await page.screenshot({ clip, omitBackground: true });
-fs.mkdirSync('public/mascot', { recursive: true });
-fs.writeFileSync('public/mascot/poster.png', png);
+fs.mkdirSync('docs/assets', { recursive: true });
+fs.writeFileSync('docs/assets/auri.png', png);
 // Encode WebP in the browser (no native tooling needed)
 const webp = await page.evaluate(async (b64) => {
   const img = new Image(); img.src = 'data:image/png;base64,' + b64; await img.decode();
@@ -25,6 +25,6 @@ const webp = await page.evaluate(async (b64) => {
   c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
   return c.toDataURL('image/webp', 0.86).split(',')[1];
 }, png.toString('base64'));
-fs.writeFileSync('public/mascot/poster.webp', Buffer.from(webp, 'base64'));
-console.log('poster', clip, fs.statSync('public/mascot/poster.png').size, fs.statSync('public/mascot/poster.webp').size);
+fs.writeFileSync('docs/assets/auri.webp', Buffer.from(webp, 'base64'));
+console.log('auri still', clip);
 await browser.close();

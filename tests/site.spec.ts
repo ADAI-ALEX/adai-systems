@@ -42,6 +42,12 @@ test('no horizontal scroll at 375px on any page', async ({ page }) => {
   expect(wide).toEqual([]);
 });
 
+test('no flat 2D mascot image anywhere; the 3D character appears once ready', async ({ page }) => {
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  expect(await page.locator('img[src*="/mascot/"], picture.mascot-poster, .mascot-anchor img').count()).toBe(0);
+  await expect(page.locator('h1')).toBeVisible();
+});
+
 test('home: WebGL world boots and the mascot is drawn', async ({ page }) => {
   await page.goto('/', { waitUntil: 'networkidle' });
   await page.waitForFunction(() => document.documentElement.classList.contains('gl-ready'), null, { timeout: 15_000 });
@@ -52,7 +58,7 @@ test('no WebGL: poster fallback is shown and the page still works', async ({ pag
   await page.goto('/?nowebgl', { waitUntil: 'networkidle' });
   await expect(page.locator('html')).toHaveClass(/gl-fallback/);
   await expect(page.locator('[data-gl-stage] canvas')).toHaveCount(0);
-  await expect(page.locator('.hero-mascot .mascot-poster img')).toBeVisible();
+  await expect(page.locator('.hero-mascot')).toBeHidden(); // the mascot space closes up: no flat stand-in
   await expect(page.getByRole('link', { name: 'Start a project' }).first()).toBeVisible();
 });
 
@@ -145,15 +151,16 @@ test('visual assets cannot be dragged; display headings are not selectable but b
   expect(await page.locator('#what').evaluate((el) => getComputedStyle(el).userSelect)).not.toBe('none');
 });
 
-test('favicon: white circle, black bubble outline, black eyes, no orange', async ({ page, request }) => {
+test('favicon is the original ADAI icon, inverted (white character, black face), no orange', async ({ page, request }) => {
   await page.goto('/');
   await expect(page.locator('link[rel="icon"][type="image/svg+xml"]')).toHaveAttribute('href', '/favicon.svg');
   await expect(page.locator('link[rel="icon"][href="/favicon.ico"]')).toHaveCount(1);
   await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href', '/apple-touch-icon.png');
   const svg = await (await request.get('/favicon.svg')).text();
-  expect(svg).toContain('<circle cx="123.23" cy="123.23" r="123.23" fill="#ffffff"/>');
-  expect(svg).toContain('stroke="#000000"');
-  expect(svg.toLowerCase()).not.toMatch(/#f2|amber|orange|prefers-color-scheme/);
+  const original = 'M123.22,0A123.22,123.22,0,1,0,246.46,123.22,123.21,123.21,0,0,0,123.22,0Zm82.92,159.84';
+  expect(svg).toContain(`<path fill="#ffffff" d="${original}`); // the original character shape, now white
+  expect(svg).toContain('<path fill="#000000" d="M206.14,159.84a52.3,52.3'); // its bubble interior, solid black
+  expect(svg.toLowerCase()).not.toMatch(/#f2|amber|orange|prefers-color-scheme|stroke=/);
   for (const f of ['/favicon.ico', '/apple-touch-icon.png', '/icon-192.png', '/icon-512.png', '/site.webmanifest']) expect((await request.get(f)).status()).toBe(200);
 });
 
@@ -163,7 +170,7 @@ test('mascot name comes from one place', async ({ page }) => {
   await expect(page.locator('footer')).toContainText(`Meet ${MASCOT.name}`);
 });
 
-test('glyph reveal fully covers the mascot silhouette (no 3D pixels left)', async ({ page }) => {
+test('cursor glyph lens: no 3D pixels inside the lens core anywhere around the character', async ({ page }) => {
   await page.goto('/?glyphdebug', { waitUntil: 'networkidle' });
   await page.waitForFunction(() => document.documentElement.classList.contains('gl-ready'), null, { timeout: 15_000 });
   await page.mouse.move(150, 450);

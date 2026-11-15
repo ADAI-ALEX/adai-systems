@@ -150,7 +150,7 @@ p { margin: 0; text-wrap: pretty; }
 
 /* WebGL stage */
 .gl-stage { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-.gl-stage canvas { width: 100% !important; height: 100% !important; opacity: 0; transition: opacity 450ms var(--ease-out); }
+.gl-stage canvas { width: 100% !important; height: 100% !important; opacity: 0; transition: opacity 700ms var(--ease-out); }
 .gl-stage.is-ready canvas { opacity: 1; }
 .page { position: relative; z-index: 1; }
 

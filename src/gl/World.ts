@@ -67,11 +67,11 @@ export class World {
   private poseAura = 0.8;
   private sweep = { t: -1, start: 0 };
   private transition = { at: -10, teleport: false, jumped: true };
+  private entranceAt = -1;
   private lastInput = performance.now() / 1000;
   private bounds = new THREE.Box3();
   private projected = new THREE.Vector3();
   private reveal = 0;
-  private revealTarget = 0;
   private revealOrigin = new THREE.Vector2(-1, -1);
   private revealPulseUntil = -1;
   /** ?glyphdebug paints any 3D pixel left uncovered at full glyph activation magenta (for tests). */
@@ -154,6 +154,7 @@ export class World {
     performance.mark('adai:gl-compiled');
     this.update(0.016, true);
     performance.mark('adai:gl-first-frame');
+    this.entranceAt = this.clock.elapsedTime;
     this.stage.classList.add('is-ready');
     document.documentElement.classList.add('gl-ready');
     this.start();
@@ -359,10 +360,14 @@ export class World {
     // Place the rig so its visual centre lands on the frame centre.
     const visibleH = 2 * this.camera.position.z * Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2));
     const wpp = visibleH / H;
+    // Entrance: the first appearance settles in (slight rise and scale) while the canvas fades in.
+    const ent = this.entranceAt < 0 || !this.motion ? 1 : clamp((now - this.entranceAt) / 0.9, 0, 1);
+    const entEase = 1 - Math.pow(1 - ent, 3);
+    pop *= 0.94 + 0.06 * entEase;
     const scale = ((this.frame.h * wpp) / MASCOT_HEIGHT) * Math.max(pop, 0.001);
     const obj = this.mascot.object;
     obj.scale.setScalar(scale);
-    obj.position.set((this.frame.cx - W / 2) * wpp, (H / 2 - this.frame.cy) * wpp - MASCOT_CENTER_Y * scale, 0);
+    obj.position.set((this.frame.cx - W / 2) * wpp, (H / 2 - this.frame.cy) * wpp - MASCOT_CENTER_Y * scale - (1 - entEase) * 0.04 * this.frame.h * wpp, 0);
     obj.rotation.y = this.turn;
     const centre = new THREE.Vector3(obj.position.x, obj.position.y + MASCOT_CENTER_Y * scale, 0);
     this.key.target.position.copy(centre);
@@ -419,37 +424,38 @@ export class World {
   }
 
   /**
-   * The glyph reveal. While the cursor is over Auri (or briefly after a tap on touch screens), a disc grows
-   * from the cursor until its radius exceeds the distance to the furthest corner of Auri's projected
-   * bounding box (hands, antenna and all), at which point coverage is forced complete. Leaving reverses it.
-   * The disc only reveals glyphs where the rendered silhouette is, so it never spills into the background.
+   * The glyph lens: a small circle that follows the cursor over Auri (the original interaction and radius).
+   * Inside it Auri is drawn as glyphs, outside it in 3D. It glides after the cursor and grows/shrinks
+   * smoothly on enter/leave. Coverage inside the circle is exact (cell grid shared with the reduction pass,
+   * silhouette-derived coverage, per-cell switching), so no 3D shows through within it.
    */
   private updateReveal(dt: number, W: number, H: number) {
-    // Projected screen bounds of the whole character, recomputed every frame (it moves, turns and gestures).
-    this.bounds.setFromObject(this.mascot.object);
-    const b = this.bounds, v = this.projected;
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    for (let i = 0; i < 8; i++) {
-      v.set(i & 1 ? b.max.x : b.min.x, i & 2 ? b.max.y : b.min.y, i & 4 ? b.max.z : b.min.z).project(this.camera);
-      const sx = (v.x * 0.5 + 0.5) * W, sy = (-v.y * 0.5 + 0.5) * H;
-      minX = Math.min(minX, sx); maxX = Math.max(maxX, sx); minY = Math.min(minY, sy); maxY = Math.max(maxY, sy);
-    }
-    const now = this.clock.elapsedTime;
     const px = this.pointer.x, py = this.pointer.y;
-    const insetX = (maxX - minX) * 0.1, insetY = (maxY - minY) * 0.06;
-    const over = px >= 0 && px > minX + insetX && px < maxX - insetX && py > minY + insetY && py < maxY - insetY;
-    const holding = this.revealTarget > 0 && px > minX - 12 && px < maxX + 12 && py > minY - 12 && py < maxY + 12;
-    const active = this.motion && !this.posterMode && ((over && !this.pointer.touched) || holding || now < this.revealPulseUntil);
-    this.revealTarget = active ? 1 : 0;
-    if (active && px >= 0) this.revealOrigin.set(px, py);
-    // Linear progress (0.7 s in, 0.5 s out), eased when turned into a radius.
-    this.reveal = clamp(this.reveal + (active ? dt / 0.7 : -dt / 0.5), 0, 1);
-    const ox = this.revealOrigin.x, oy = this.revealOrigin.y;
-    let far = 0;
-    for (const [cx, cy] of [[minX, minY], [maxX, minY], [minX, maxY], [maxX, maxY]]) far = Math.max(far, Math.hypot(cx - ox, cy - oy));
-    const cover = far / H + 0.04; // height units, as the shader measures distance
-    const e = this.reveal < 0.5 ? 4 * this.reveal ** 3 : 1 - (-2 * this.reveal + 2) ** 3 / 2;
-    return { radius: this.reveal > 0 ? 0.03 + (cover - 0.03) * e : 0, edge: Math.max(0.05, cover * 0.18), full: this.reveal >= 0.999 ? 1 : 0 };
+    const now = this.clock.elapsedTime;
+    // Near = within reach of the head (original rule) or anywhere over Auri's projected bounds.
+    let over = false;
+    if (px >= 0) {
+      this.bounds.setFromObject(this.mascot.object);
+      const b = this.bounds, v = this.projected;
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (let i = 0; i < 8; i++) {
+        v.set(i & 1 ? b.max.x : b.min.x, i & 2 ? b.max.y : b.min.y, i & 4 ? b.max.z : b.min.z).project(this.camera);
+        const sx = (v.x * 0.5 + 0.5) * W, sy = (-v.y * 0.5 + 0.5) * H;
+        minX = Math.min(minX, sx); maxX = Math.max(maxX, sx); minY = Math.min(minY, sy); maxY = Math.max(maxY, sy);
+      }
+      over = px > minX && px < maxX && py > minY && py < maxY;
+    }
+    const near = px >= 0 && (this.isNearMascot(px, py, 1.25) || over) && !this.pointer.touched;
+    const active = this.motion && !this.posterMode && (near || now < this.revealPulseUntil);
+    this.reveal = clamp(this.reveal + (active ? dt / 0.22 : -dt / 0.3), 0, 1);
+    if (px >= 0) {
+      if (this.revealOrigin.x < 0) this.revealOrigin.set(px, py);
+      this.revealOrigin.x = damp(this.revealOrigin.x, px, 18, dt);
+      this.revealOrigin.y = damp(this.revealOrigin.y, py, 18, dt);
+    }
+    const base = clamp((this.frame.h / H) * 0.32, 0.08, 0.22);
+    const e = 1 - Math.pow(1 - this.reveal, 3);
+    return { radius: this.reveal > 0 ? base * e : 0, edge: 0, full: 0 };
   }
 
   private loop = () => {

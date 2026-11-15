@@ -1,23 +1,15 @@
 ---
 /**
  * An empty box that tells the WebGL world where the mascot should stand for this section and how to behave.
- * Holds a static poster that shows when WebGL is unavailable (or before it starts).
+ * There is no flat stand-in image: the space stays clean until the real 3D character is ready, and if
+ * WebGL is unavailable the box collapses so the page reads as a normal text layout.
  */
-interface Props { pose: string; hue?: string; facing?: 1 | -1; class?: string; poster?: boolean; eager?: boolean }
-const { pose, hue, facing = -1, class: cls, poster = true, eager = false } = Astro.props;
+interface Props { pose: string; hue?: string; facing?: 1 | -1; class?: string; eager?: boolean }
+const { pose, hue, facing = -1, class: cls } = Astro.props;
 ---
-<div class:list={['mascot-anchor', cls]} data-mascot-anchor data-pose={pose} data-hue={hue} data-facing={String(facing)}>
-  {poster && (
-    <picture class="mascot-poster" aria-hidden="true">
-      <source srcset="/mascot/poster.webp" type="image/webp" />
-      <img draggable="false" src="/mascot/poster.png" alt="" width="708" height="794" loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : undefined} decoding="async" />
-    </picture>
-  )}
-</div>
+<div class:list={['mascot-anchor', cls]} data-mascot-anchor data-pose={pose} data-hue={hue} data-facing={String(facing)} aria-hidden="true"></div>
 <style>
   .mascot-anchor { position: relative; width: 100%; min-height: 280px; }
-  .mascot-poster { position: absolute; inset: 0; display: grid; place-items: center; opacity: 1; transition: opacity 600ms var(--ease-out); pointer-events: none; }
-  .mascot-poster img { max-height: 100%; width: auto; object-fit: contain; filter: drop-shadow(0 30px 40px rgb(0 0 0 / 0.45)); }
-  /* The poster hands over to the live render after it has faded in, so there is never a visible dip. */
-  :global(html.gl-ready) .mascot-poster { opacity: 0; transition: opacity 500ms var(--ease-out) 380ms; }
+  /* Graceful fallback without WebGL: no placeholder art, the layout simply closes up around the copy. */
+  :global(html.gl-fallback) .mascot-anchor { display: none; }
 </style>

@@ -1,4 +1,4 @@
-// Renders the favicon set from public/favicon.svg (white circle, black bubble outline, black eyes).
+// Renders the favicon set from public/favicon.svg (the original ADAI icon, inverted: white character, black face).
 // Outputs: favicon.ico (16+32), favicon-32.png, apple-touch-icon.png (180, white square), icon-192/512.png.
 import { chromium } from '@playwright/test';
 import fs from 'node:fs';
