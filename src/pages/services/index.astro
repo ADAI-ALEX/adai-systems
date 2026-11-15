@@ -29,7 +29,7 @@ import { breadcrumbLd, serviceLd } from '@/lib/seo';
     </div>
   </section>
 
-  <section class="section--tight"><div class="wrap grid cards">{services.map((s, i) => <ServiceCard service={s} index={i} />)}</div></section>
+  <section class="section--tight" aria-labelledby="svc-title"><h2 id="svc-title" class="sr-only">The four services</h2><div class="wrap grid cards">{services.map((s, i) => <ServiceCard service={s} index={i} />)}</div></section>
 
   <section class="section compare" aria-labelledby="compare-title">
     <div class="wrap">

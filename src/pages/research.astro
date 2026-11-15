@@ -30,7 +30,7 @@ const glimmer = getProject('glimmer');
         <MascotAnchor pose="research" class="page-mascot" eager facing={-1} />
       </div>
     </section>
-    <section class="section--tight"><div class="wrap grid cards">{research.map((p) => <ProjectCard project={p} />)}</div></section>
+    <section class="section--tight" aria-labelledby="rp-title"><h2 id="rp-title" class="sr-only">Research projects</h2><div class="wrap grid cards">{research.map((p) => <ProjectCard project={p} />)}</div></section>
     <section class="section" aria-labelledby="stevie-title">
       <div class="wrap">
         <SectionHead id="stevie-title" eyebrow={glimmer.title} title="A model built from nothing, asked a few questions" lead={glimmer.pitch} />

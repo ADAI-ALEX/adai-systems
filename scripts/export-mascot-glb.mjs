@@ -11,6 +11,6 @@ await page.evaluate(() => window.adai.mascot({ expression: 'neutral', hold: 60 }
 await page.waitForTimeout(1500);
 const b64 = await page.evaluate(() => window.adai.exportGlb());
 fs.mkdirSync('assets-src/mascot', { recursive: true });
-fs.writeFileSync('assets-src/mascot/adi-blockout.glb', Buffer.from(b64, 'base64'));
-console.log('wrote assets-src/mascot/adi-blockout.glb', fs.statSync('assets-src/mascot/adi-blockout.glb').size, 'bytes');
+fs.writeFileSync('assets-src/mascot/auri-blockout.glb', Buffer.from(b64, 'base64'));
+console.log('wrote assets-src/mascot/auri-blockout.glb', fs.statSync('assets-src/mascot/auri-blockout.glb').size, 'bytes');
 await browser.close();

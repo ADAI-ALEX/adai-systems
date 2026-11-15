@@ -1,45 +1,47 @@
-# Adi: the ADAI Systems character
+# Auri: the ADAI Systems character
 
-Adi is ADAI's real-time 3D companion. This document covers:
+Auri is ADAI's real-time 3D companion. This document covers:
 - the character design and where it comes from;
 - the animation and expression system;
 - the asset pipeline;
 - the contract a future hand-authored model must follow to replace the procedural one without touching the website.
 
-Working name: **Adi** (from ADAI). The name is a placeholder; see "Decisions for Alex" at the end.
+Name: **Auri**, set once in `src/lib/mascot.ts`.
 
 ## 1. Identity: from the mark to a character
 
-The existing ADAI mark (favicon `public/favicon.svg`, also inside `public/brand/adai-wordmark-source.svg`) is a circle containing a **speech bubble** with its tail at the lower left and **two round eyes**. Adi keeps that face and that idea, and nothing is extruded or traced:
+The ADAI mark (`public/brand/adai-mark.svg`) is a circle containing a **speech bubble** with two **round eyes**. Auri keeps that face and that idea, and nothing is extruded or traced:
 
-| Mark | Adi |
+| Mark | Auri |
 |---|---|
-| Speech bubble | The whole **head** is a soft speech bubble, a sculpted superellipsoid with the bubble's tail as a nub at the lower left. |
-| Bubble inside the circle | A glossy ink **visor** in the same bubble shape, tail included, sitting on the face. |
-| Two round eyes | Two glowing round eyes at the **mark's exact proportions**: centres at ±25.8 % of the visor width, radius 12.5 % of it. |
+| Two round eyes | Two glowing round eyes in the visor, at the **mark's proportions** (centres at ±25 % of the visor width, radius about 13 % of it). |
+| The bubble's rounded body | A calm, **centred** ink visor with the same soft rounded-rectangle shape. |
+| The speech bubble with its tail | A small **speech-bubble emblem on the chest**, lit from inside in the colour of the work. |
 
-Everything else is new:
-- a soft plush pebble **body**;
-- floating mitten **hands** with soft thumbs;
-- felted **ear cushions**, deliberately unequal;
-- a bendy **thought sprout** that grows off-centre and leans;
-- a **chest light**.
+### Revision 2 (November 2026)
+
+Feedback: the bubble-tail bump on the head made the face look uneven, and the surface read as leather.
+- **Head:** now a smooth, evenly rounded cushion. The tail bump is gone. A touch of crown fullness and soft fullness under the chin keep it organic.
+- **Face:** the visor and eyes are now centred and symmetrical.
+- **Speech bubble:** moved to the chest emblem, a separate design detail rather than a distortion of the face.
+- **Materials:** all grain and bump textures are removed. The head and hands are satin silicone, the body is a soft-touch matte oat, and depth comes from lighting and a gentle baked colour variation instead of micro-texture.
+- **Signature accent:** a deep indigo (`AURI_ACCENT`, `#5a63f0`) on the antenna tip and the felt ear cushions. Everything else stays warm cream. The section hue still lights the eyes, the chest bubble and (while thinking) the antenna.
 
 ### Design rules
-- **Soft, not mechanical.** No joints, panels, seams, screws, circuit patterns or segmented limbs. Satin silicone for the head and hands, plush for the body, felt for the cushions.
-- **Small asymmetries:** bubble tail on one side, sprout off-centre and leaning, right cushion 12 % bigger and tilted, top-right of the head slightly fuller.
-- **Readable at low resolution.** Big shapes, one dark visor against a light shell, eyes that glow. The face survives being reduced to a handful of glyph cells.
-- **Colour carries meaning.** Adi is cream. The eyes, sprout bulb, chest light and rim light take the colour of the kind of work on screen: amber for agents, aqua for automation, coral for apps, sky for research, warm cream for the studio. This follows the existing Atlas rule that a hue stands for one kind of work.
-- **Personality:** friendly, curious and quick, slightly playful without being childish. Adi listens (cushions), thinks (the sprout glows, and the visor shows the three typing dots of a chat bubble) and talks (a voice waveform on the visor).
+- **Soft, not mechanical.** No joints, panels, seams, screws, circuit patterns or segmented limbs.
+- **Small asymmetries:** the antenna grows off-centre and leans, the right ear cushion is 12 % bigger and tilted, and the crown is slightly fuller on one side.
+- **Readable at low resolution.** Big shapes, one dark visor against a light shell, glowing eyes.
+- **Colour carries meaning.** The section hue (amber agents, aqua automation, coral apps, sky research, cream studio) lights the eyes, the chest bubble, the rim light and the antenna glow. The indigo accent is constant: a signature, not a signal.
+- **Personality:** friendly, curious and quick, slightly playful without being childish.
 
-## 2. How Adi is built today (procedural)
+## 2. How Auri is built today (procedural)
 
 All code is in `src/gl/mascot/`.
 
 | File | What it does |
 |---|---|
-| `shapes.ts` | Sculpts every part from high-resolution spheres reshaped per direction (superellipsoids plus soft directional bulges). The visor is sampled from the same surface as the head, so it hugs it exactly. |
-| `materials.ts` | Satin silicone, plush, cushion, glow and core materials (`MeshPhysicalMaterial`: sheen, clearcoat). Micro-surface normal maps are generated at runtime, so no texture downloads. |
+| `shapes.ts` | Sculpts every part from high-resolution spheres reshaped per direction (superellipsoids plus soft directional bulges). The visor is sampled from the same surface as the head, so it hugs it exactly. The chest emblem is an extruded, bevelled speech bubble bent to the body's curve. |
+| `materials.ts` | Satin silicone, soft-touch body, indigo felt cushions, the glossy indigo antenna tip and the emblem glass (`MeshPhysicalMaterial`: sheen, light clearcoat). No textures; `bakeWarmth()` adds a soft vertex-colour variation. |
 | `faceMaterial.ts` | The face: a signed-distance-field shader for the bubble visor, both eyes, lids, smile crescents, gaze, catch-lights, blush, the talking waveform and the typing dots. |
 | `expressions.ts` | Eleven expressions as parameter sets: neutral, happy, curious, surprised, thinking, focused, talking, excited, confused, sleepy, proud. |
 | `poses.ts` | Story poses used by page sections: expression + arrival gesture + hue + glyph styling + body turn. |
@@ -48,20 +50,20 @@ All code is in `src/gl/mascot/`.
 | `GltfMascot.ts` | The same interface, for an authored GLB. |
 
 ### Animation system (all frame-rate independent)
-- **Gaze leads.** Eyes (fast), then head (medium), then body (slow) follow the cursor, with clamps (head yaw ±31°, pitch ±19°). Micro-saccades run when the pointer is idle. A call to action under the pointer draws Adi's gaze to it.
+- **Gaze leads.** Eyes (fast), then head (medium), then body (slow) follow the cursor, with clamps (head yaw ±31°, pitch ±19°). Micro-saccades run when the pointer is idle. A call to action under the pointer draws Auri's gaze to it.
 - **Blinking:** random intervals of 2.2 to 5.6 s, with an 18 % chance of a double blink.
 - **Idle life:**
   - breathing, plus a slow sway and head drift;
-  - after 28 s with no input, Adi gets **sleepy** and wakes with a startle on the next input.
+  - after 28 s with no input, Auri gets **sleepy** and wakes with a startle on the next input.
 - **Springs everywhere.** The hands and the sprout are damped springs, so every move has follow-through. A jump has gravity and squash-and-stretch on landing.
 - **Gestures:** keyframed hand targets layered over the springs: wave, point, think (hand to chin), cheer (both hands up and a hop), present (palm toward the content), shrug, nod.
 - **Reactions:**
-  - **Poke** (click on Adi): surprised, then happy, plus a hop and a boing of the sprout.
-  - **Startle:** a very fast pointer flick near Adi.
-  - **Notice:** the pointer arriving near Adi makes it curious.
+  - **Poke** (click on Auri): surprised, then happy, plus a hop and a boing of the sprout.
+  - **Startle:** a very fast pointer flick near Auri.
+  - **Notice:** the pointer arriving near Auri makes it curious.
 - **Story choreography** (`src/gl/World.ts`):
-  - Each page section can hold an empty box `data-mascot-anchor data-pose="…"`. Adi frames itself into the most central visible box.
-  - Adi glides over short distances, and pops out and back in over long ones, so it never sweeps across text.
+  - Each page section can hold an empty box `data-mascot-anchor data-pose="…"`. Auri frames itself into the most central visible box.
+  - Auri glides over short distances, and pops out and back in over long ones, so it never sweeps across text.
   - On arrival it changes pose, plays the gesture, shifts hue and runs a glyph sweep.
   - The boxes are ordinary CSS, so the choreography is responsive by construction. Scrolling is never hijacked.
 - **Page events.** Any script can send `window.dispatchEvent(new CustomEvent('adai:mascot', { detail: { expression, gesture, pose, hue } }))`. The demos and the brief builder use this.
@@ -69,20 +71,30 @@ All code is in `src/gl/mascot/`.
 ### Reduced motion
 With `prefers-reduced-motion`, or the header toggle:
 - no idle motion, gestures, springs, glide or glyph animation;
-- Adi holds a static pose and renders only when something changes.
+- Auri holds a static pose and renders only when something changes.
 
-## 3. The glyph renderer (Adi in letters)
+## 3. The glyph renderer (Auri in letters)
 
 Code: `src/gl/passes/`.
-1. Adi renders into an HDR target with a transparent background.
-2. A reduction pass averages each glyph cell (16 taps), so glyph choice is stable rather than flickering.
-3. The composite:
-   - draws the clean render;
-   - swaps in **typographic glyphs** from a ramp set in IBM Plex Mono (`· . : - ~ + = * o x % # @`), whose densest glyph is **the ADAI mark itself**;
-   - shows them inside a cursor lens and during story sweeps, with a dithered edge so they dissolve cell by cell;
-   - adds an ambient glyph aura in the section hue, a soft halo and a contact shadow.
+1. Auri renders into an HDR target with a transparent background.
+2. A reduction pass reads each glyph cell in **screen pixels**, on exactly the grid the composite draws, and stores the cell's average colour and its **maximum** coverage. Any cell the silhouette touches counts as part of it.
+3. The composite decides **per cell**: either glyph or 3D, never a blend. Glyphs come from a ramp set in IBM Plex Mono (`· . : - ~ + = * o x % # @`), and the densest glyph is the ADAI mark itself.
 
-This is deliberately different from the studied reference site, which uses rounded-square holes and no letters (see the research spec §12).
+**The reveal.** While the cursor is over Auri, or briefly after a tap on touch screens, a dissolve disc grows from the cursor over 0.7 s:
+- every frame, its target radius is the distance to the furthest corner of Auri's **projected bounding box** (hands, antenna and gestures included);
+- at full activation, coverage is forced complete;
+- glyphs are only drawn where the rendered silhouette is, so the effect never bleeds into the background.
+
+### Coverage fix (revision 2)
+
+The first version left pieces of the 3D model visible, most noticeably on the left. The causes were:
+- a fixed-size circular lens that could never cover the whole character;
+- a deliberate 12 % "ghost" of the 3D render under the glyphs;
+- a coverage gate that let thin edge slivers (hands, silhouette edges) pass through;
+- a grid mismatch between the two passes that drifted by a few pixels across the screen;
+- partial cells cross-fading between the two layers.
+
+All five are fixed. `?glyphdebug` paints any 3D pixel left uncovered at full activation magenta. The automated test and `scripts/glyph-probe.mjs --metric` count **0** at every probed position (face left, centre and right, head top, body, both hands). Before and after: `docs/screenshots/glyph-before-after.png`.
 
 ## 4. Asset pipeline (replaceable without touching the site)
 
@@ -96,14 +108,14 @@ World.loadMascot() ── gltf ok? ──► GltfMascot (authored)  ──┐
 ```
 
 **Scripts:**
-- `npm run mascot:glb`: exports the live procedural Adi as `assets-src/mascot/adi-blockout.glb` (2 MB), with named nodes per the contract below. It's the **starting blockout for Blender**: correct proportions and naming, ready to retopologise, UV, rig and animate.
-- `npm run poster`: renders `public/mascot/poster.{png,webp}` from the site's own renderer. It's the still shown before WebGL starts and whenever WebGL is unavailable. Re-run it after changing Adi.
+- `npm run mascot:glb`: exports the live procedural Auri as `assets-src/mascot/auri-blockout.glb` (2 MB), with named nodes per the contract below. It's the **starting blockout for Blender**: correct proportions and naming, ready to retopologise, UV, rig and animate.
+- `npm run poster`: renders `public/mascot/poster.{png,webp}` from the site's own renderer. It's the still shown before WebGL starts and whenever WebGL is unavailable. Re-run it after changing Auri.
 
 Both scripts need the dev server (`npm run dev`) running.
 
 ### GLB contract
 
-To replace the procedural Adi, deliver a GLB with:
+To replace the procedural Auri, deliver a GLB with:
 
 | Kind | Required names | Notes |
 |---|---|---|
@@ -126,12 +138,12 @@ To replace the procedural Adi, deliver a GLB with:
 
 Optimise with `gltf-transform optimize --compress meshopt --texture-compress ktx2`.
 
-## 5. Producing the final hand-authored Adi (recommended plan)
+## 5. Producing the final hand-authored Auri (recommended plan)
 
 1. **Concept round.** Three to five sheets exploring proportions and materials around this design: the bubble head and the mark's eyes are fixed; the rest is open.
    - Higgsfield: generation was **not** used. On 15 November 2026 its unlimited allowance reported `available: false` and the balance was 0.05 credits, so nothing was generated to avoid paid credits.
    - If the allowance is activated, use `generate_image` for turnaround and expression sheets from written prompts only. Never use reference images of other mascots or of the studied site.
-2. **Blockout.** Start from `assets-src/mascot/adi-blockout.glb` in Blender. Proportions and names are already correct.
+2. **Blockout.** Start from `assets-src/mascot/auri-blockout.glb` in Blender. Proportions and names are already correct.
 3. **Sculpt and retopologise** to budget. Add subtle surface detail: soft creases where the head meets the body, a stitched seam on the plush, a slight dent in the cushions.
 4. **UV and textures:** a subtle colour variation on the silicone, and a plush fibre normal. Bake to KTX2.
 5. **Rig:** root, spine, neck, head, hands, and a two-bone sprout chain. Do not bake look-at; the site does it.
@@ -141,6 +153,5 @@ Optimise with `gltf-transform optimize --compress meshopt --texture-compress ktx
 AI image-to-3D output (e.g. Higgsfield `generate_3d`) is a **blockout only**. It still needs steps 3 to 6.
 
 ## 6. Decisions for Alex
-- The name "Adi".
-- Whether Adi appears on case-study pages (currently it doesn't, to keep them fast and focused).
-- Whether to commission a hand-authored Adi or keep the procedural one: it already meets the budgets.
+- Whether Auri appears on case-study pages (currently it doesn't, to keep them fast and focused).
+- Whether to commission a hand-authored Auri or keep the procedural one: it already meets the budgets.

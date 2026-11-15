@@ -29,8 +29,9 @@ const matches = (slug: string) => filters.filter((f) => f.test(archive.find((p) 
     </div>
   </section>
 
-  <section class="section--tight" aria-label="Archive">
+  <section class="section--tight" aria-labelledby="archive-title">
     <div class="wrap">
+      <h2 id="archive-title" class="sr-only">All projects</h2>
       <div class="filters" role="group" aria-label="Filter projects" data-filters>
         {filters.map((f, i) => (
           <button type="button" class="filter" aria-pressed={i === 0 ? 'true' : 'false'} data-filter={f.id}>

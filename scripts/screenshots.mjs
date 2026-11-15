@@ -25,12 +25,21 @@ await shoot('chapter-apps', '/', { at: '#ch-products' });
 await shoot('chapter-research', '/', { at: '#ch-research', before: async (p) => { await p.waitForTimeout(1200); await p.locator('[data-prompt="6"]').click(); }, wait: 4500 });
 await shoot('selected-work', '/', { at: '#work-title' });
 await shoot('work-archive', '/work');
+await shoot('work-grid', '/work', { at: '[data-archive]', before: async (p) => p.evaluate(() => document.querySelectorAll('[data-reveal]').forEach((e) => e.classList.add('is-in'))) });
+await shoot('mobile-work-grid', '/work', { w: 390, h: 844, at: '[data-archive]', before: async (p) => p.evaluate(() => document.querySelectorAll('[data-reveal]').forEach((e) => e.classList.add('is-in'))) });
 await shoot('case-study-margin', '/work/margin');
 await shoot('case-study-lockout', '/work/lockout', { at: '.lead-media' });
 await shoot('service-automation', '/services/automation');
 await shoot('start-brief', '/start?type=agents', { before: async (p) => { await p.fill('#what', 'Answer our booking calls after hours and put the bookings in our calendar.'); await p.fill('#name', 'Sam Example'); }, wait: 3500 });
-await shoot('meet-adi', '/mascot', { before: async (p) => { await p.waitForTimeout(1500); await p.locator('[data-expression="curious"]').click(); await p.locator('[data-set-hue="research"]').click(); }, mouse: [400, 300], wait: 2500 });
+await shoot('meet-auri', '/mascot', { before: async (p) => { await p.waitForTimeout(1500); await p.locator('[data-expression="curious"]').click(); await p.locator('[data-set-hue="research"]').click(); }, mouse: [400, 300], wait: 2500 });
 await shoot('not-found', '/nope');
 await shoot('mobile-home', '/', { w: 390, h: 844 });
 await shoot('mobile-chapter', '/', { w: 390, h: 844, at: '#ch-agents', wait: 5000 });
+{
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });
+  await page.goto(base + '/', { waitUntil: 'networkidle' });
+  await page.screenshot({ path: `${out}/header.png`, clip: { x: 0, y: 0, width: 1440, height: 80 } });
+  await page.close();
+  console.log('header');
+}
 await browser.close();
