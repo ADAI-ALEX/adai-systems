@@ -20,6 +20,8 @@ const MASCOT_HEIGHT = 2.55; // rig units, floor to sprout tip
 const MASCOT_CENTER_Y = 1.25;
 const damp = (a: number, b: number, l: number, dt: number) => a + (b - a) * (1 - Math.exp(-l * dt));
 const clamp = (v: number, a: number, b: number) => Math.min(Math.max(v, a), b);
+const easeInBack = (x: number) => { const c = 1.70158; x = clamp(x, 0, 1); return (c + 1) * x * x * x - c * x * x; };
+const easeOutBack = (x: number) => { const c = 1.9; x = clamp(x, 0, 1); return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
 
 export type MascotCommand = { pose?: string; expression?: ExpressionName; hold?: number; gesture?: GestureName; hue?: HueName };
 
@@ -43,6 +45,7 @@ export class World {
   private poseGlyph = 0;
   private poseAura = 0.8;
   private sweep = { t: -1, start: 0 };
+  private transition = { at: -10, teleport: false, jumped: true };
   private turn = 0;
   private dpr = 1.5;
   private dprCap = 1.5;
@@ -245,30 +248,49 @@ export class World {
     const anchor = this.pickAnchor();
     if (anchor !== this.active) {
       const first = !this.active;
+      if (anchor && this.active && this.motion) {
+        // Long jumps pop out and back in at the new spot (never sweep across text); short hops glide.
+        const r = anchor.el.getBoundingClientRect();
+        const dist = Math.hypot((r.left + r.right) / 2 - this.frame.cx, (r.top + r.bottom) / 2 - this.frame.cy);
+        this.transition = { at: now, teleport: dist > H * 0.32, jumped: false };
+      }
       this.active = anchor;
       if (anchor) this.applyPose(anchor, first);
     }
     this.visible = damp(this.visible, anchor ? 1 : 0, this.motion ? 5 : 1000, dt);
     this.stage.style.opacity = this.visible.toFixed(3);
 
-    // Frame target from the anchor box: centre, clamped into the viewport, and height.
+    // Frame target: Adi stays glued to its anchor box (CSS sticky boxes give the 'parked' effect).
+    let pop = 1;
     if (anchor) {
       const r = anchor.el.getBoundingClientRect();
       const targetH = Math.min(r.height, r.width * 1.1, H * 0.74) * 0.86;
-      const cy = clamp((r.top + r.bottom) / 2, targetH * 0.5 + 40, H - targetH * 0.5 - 10);
+      const cy = (r.top + r.bottom) / 2;
       const cx = (r.left + r.right) / 2;
-      const lambda = this.motion ? 7 : 1000;
-      if (!this.frame.init || force) { this.frame = { cx, cy, h: targetH, init: true }; }
-      this.frame.cx = damp(this.frame.cx, cx, lambda, dt);
-      this.frame.cy = damp(this.frame.cy, cy, lambda, dt);
-      this.frame.h = damp(this.frame.h, targetH, lambda * 0.8, dt);
+      const since = now - this.transition.at;
+      const t = this.transition;
+      if (!this.frame.init || force || !this.motion) {
+        this.frame = { cx, cy, h: targetH, init: true };
+      } else if (t.teleport && since < 0.62) {
+        if (since < 0.2) pop = 1 - easeInBack(since / 0.2);
+        else {
+          if (!t.jumped) t.jumped = true;
+          pop = easeOutBack((since - 0.2) / 0.42);
+          this.frame.cx = cx; this.frame.cy = cy; this.frame.h = targetH;
+        }
+      } else {
+        const lambda = since < 0.9 ? 6 : 24; // glide on arrival, then track the box closely
+        this.frame.cx = damp(this.frame.cx, cx, lambda, dt);
+        this.frame.cy = damp(this.frame.cy, cy, lambda, dt);
+        this.frame.h = damp(this.frame.h, targetH, lambda * 0.8, dt);
+      }
       this.turn = damp(this.turn, (anchor.pose.turn ?? 0) * -anchor.facing, this.motion ? 3 : 1000, dt);
     }
 
     // Place the rig so its visual centre lands on the frame centre.
     const visibleH = 2 * this.camera.position.z * Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2));
     const wpp = visibleH / H;
-    const scale = (this.frame.h * wpp) / MASCOT_HEIGHT;
+    const scale = ((this.frame.h * wpp) / MASCOT_HEIGHT) * Math.max(pop, 0.001);
     const obj = this.mascot.object;
     obj.scale.setScalar(scale);
     obj.position.set((this.frame.cx - W / 2) * wpp, (H / 2 - this.frame.cy) * wpp - MASCOT_CENTER_Y * scale, 0);
