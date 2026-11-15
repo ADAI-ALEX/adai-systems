@@ -34,7 +34,7 @@ export const siteConfig = {
     entityName: "FitDawg Ltd",
     relationship:
       "ADAI Systems is a technology studio operated by FitDawg Ltd.",
-    lastUpdated: "23 August 2026",
+    lastUpdated: "15 November 2026",
   },
 } as const;
 

@@ -20,7 +20,7 @@ This repo is public, so this file holds publishable facts only. Recon notes that
 4. Real products get real screenshots. Generated imagery is for concepts only and is labelled as a concept.
 5. No em dashes in copy, alt text or metadata.
 6. No analytics. The privacy notice says the site collects nothing, and that stays true.
-7. Privacy and Terms carry over word for word at the same URLs, with one permitted change: em dashes are swapped for other punctuation.
+7. Privacy and Terms keep their URLs and their wording. Two changes have been made: em dashes were swapped for other punctuation (approved), and on 15 November 2026 the sentence "There are no forms" in the privacy notice was replaced, because the project brief page now has fields. The new wording says what is true: what you type stays in your browser and is only used to write an email that you send yourself. `TODO(alex)`: confirm this wording.
 8. Registered address, company number and governing law stay "to be confirmed", exactly as the legal pages say now.
 
 ---
@@ -49,7 +49,7 @@ This repo is public, so this file holds publishable facts only. Recon notes that
 
 ## 3. Projects
 
-Fourteen entries, oldest first. Slugs marked (existing) are live URLs today.
+Fifteen entries, oldest first. Slugs marked (existing) are live URLs today.
 
 ### 3.1 ADAI Systems · `adai-systems` (existing)
 
@@ -254,13 +254,51 @@ Fourteen entries, oldest first. Slugs marked (existing) are live URLs today.
 
 ---
 
-## 4. Groupings
+### 3.15 Margin · `margin` (headline project, full case study)
 
-- **Now building:** Lockout, Glimmer.
-- **Selected work (case studies with real media):** Glimmer, Lockout, JEB Depot. Apex Terminal, Voice Agent, Hospitality Platform and Spatial Memory Scanner get case studies as media becomes available.
+- **Pitch:** How close is the evidence? An atlas of NASA's combustion tests, mapped against the air crews will actually breathe.
+- **What it is:** an entry for NASA Space Apps 2026, challenge "Flame in Freefall". Pick a cabin atmosphere, a fire-safety question and a gravity regime. Margin finds the nearest comparable NASA test, reports how far away it is as a documented evidence distance D, and links every number to the table row or paper it came from.
+- **The problem it shows:** the highest oxygen level in any of the archive's 140 solid-material tests with a recorded value is 22.2%. Lunar surface habitats plan 26.5% and the Exploration Atmosphere 34%. None of those tests reaches either. Every run in the archive flew in microgravity.
+- **Scale:** 24 combustion investigations and 1,870 run rows from NASA's Physical Sciences Informatics archive.
+- **How it works:** a comparability gate, then a distance over oxygen, pressure and flow. Verdicts: direct (D of 1 or less), near (up to 2.5), distant, none. Each verdict is recomputed 27 times for robustness. Gravity is a category and nothing is interpolated across it. Static site: no backend, no database, no AI at runtime.
+- **What it is not:** a fire model, a hazard rating or a certification aid. "Evidence proximity, not a safety rating."
+- **Type / status:** Web app. Live at https://margin.adai.systems. Open source (Apache-2.0).
+- **Dates:** November 2026 (repository created 14 November 2026).
+- **Stack:** Next.js 16, React 19, TypeScript, d3 (scale, contour, shape, array), zod, Vitest, Playwright with axe-core, Vercel.
+- **Links:** https://margin.adai.systems and https://github.com/ADAI-ALEX/margin
+- **Media (real):** nine screenshots from the repository, and the 30-second narrated demo video (a screen recording of the live app).
+- **Must be stated:** built with AI assistance, disclosed in full in the repository. Data from NASA PSI and the NASA Technical Reports Server. Use of NASA data does not imply NASA endorsement. No NASA logos or insignia are used.
+- **Not claimed:** any result, ranking or award from the hackathon. None is recorded.
+- **Source:** the repository README, read 15 November 2026.
+
+---
+
+## 4. Services (added 15 November 2026)
+
+Alex asked for the site to work as a funnel as well as a portfolio, because it gets about 6,000 organic visits a month. The studio's work is grouped into four services, each backed only by projects that exist:
+
+| Service | Proof |
+|---|---|
+| AI agents and voice | Voice Agent, JEB Depot, Apex Terminal, Call Recording Analyser |
+| Automation and internal tools | Call Recording Analyser, Hospitality Platform, Voice Agent |
+| Apps and products | Lockout, Margin, Apex Terminal, FitDawg |
+| Research and prototypes | Glimmer, JEB Depot, Spatial Memory Scanner, Holographic Display Study, Reinforcement Learning |
+
+Every capability line in `content/services.ts` names the project that demonstrates it.
+
+**Drafted, not confirmed (`TODO(alex)`):**
+
+- The four "How a project runs" steps (send the brief, agree the scope, see it working early, hand over). They describe a way of working, so Alex should check they match what he offers.
+- No prices, timelines, guarantees, testimonials or client counts appear anywhere, because none are recorded.
+- The traffic figure (about 6,000 a month) is Alex's own reading of Cloudflare. It is not stated on the site.
+
+## 5. Groupings
+
+- **Now building:** Lockout, Margin, Glimmer.
+- **Selected work (shown large on the home page):** Margin, Lockout, Glimmer, JEB Depot. Apex Terminal, Voice Agent, Hospitality Platform and Spatial Memory Scanner get case studies as media becomes available.
 - **Research:** Reinforcement Learning, Acoustic Levitation RL, Holographic Display Study, Spatial Memory Scanner.
 - **Not on the site:** Rizzly (`DEFAULT`: left out until Alex says yes. If yes, it goes in a lighter "Experiments" group, not with featured work). The lead-generation pipeline, the browser automation test and the shop site are out by Alex's decision.
-- **To add later:** the NASA Space Apps Challenge 2026 entry, after the hackathon (from 14 November 2026).
+- **Added 15 November 2026:** Margin, the NASA Space Apps 2026 entry.
 
 **Domains and the projects behind them**
 
@@ -279,7 +317,7 @@ Fourteen entries, oldest first. Slugs marked (existing) are live URLs today.
 
 ---
 
-## 5. Decisions taken without a checkpoint
+## 6. Decisions taken without a checkpoint
 
 On 13 November 2026 Alex asked for the build to continue to a finished site without stopping. These calls were made on his behalf and can all be reversed.
 
@@ -287,7 +325,9 @@ On 13 November 2026 Alex asked for the build to continue to a finished site with
 2. **Tweaks config.** No tuned config was supplied, so the baked tokens are the direction's own defaults. The tweaks bar stays available on preview deployments at `?tweaks=1`.
 3. **Every project has a page.** All fourteen get a case study at `/work/[slug]`, so the eight existing URLs keep working and the archive has no dead rows. Depth follows what the inventory holds: Glimmer, Lockout and JEB Depot are full, Vantage AI and ADAI Systems are short on purpose.
 
-## 6. Still open (defaults in use)
+4. **15 November 2026: a new direction.** Alex turned down all three earlier designs (he liked the interaction and the web, not the look) and asked for a new one. The site is now the "Atlas" design: dark and precise, with the web of projects as the hero. The terminal design, the three direction prototypes and the tweaks bar were removed.
+
+## 7. Still open (defaults in use)
 
 1. Glimmer backstory (why Rust, why Australian). Default: none.
 2. Lockout pricing wording. Default: not stated.

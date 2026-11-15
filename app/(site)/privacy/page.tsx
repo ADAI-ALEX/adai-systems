@@ -48,8 +48,11 @@ export default function PrivacyPage() {
         cookies, and it stores nothing in your browser.
       </p>
       <p>
-        There are no forms. The only way to send anything to the studio from
-        this site is to use the email address, which opens your own mail client.
+        Nothing you type on this site is sent to the studio by the site. The
+        project brief page has fields you can fill in, and what you type there
+        stays in your own browser: it is used only to write an email for you,
+        which opens in your own mail client and is sent only if you send it.
+        The only way to send anything to the studio from this site is by email.
       </p>
 
       <h2>Hosting</h2>
