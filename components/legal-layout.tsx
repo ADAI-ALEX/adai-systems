@@ -12,17 +12,17 @@ export function LegalLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <div className="wrap">
       <header className="page-head">
-        <p className="crumb">
-          <Link href="/">home</Link> / legal · updated {siteConfig.legal.lastUpdated}
+        <p className="meta crumb">
+          <Link href="/">Home</Link> / Legal · Updated {siteConfig.legal.lastUpdated}
         </p>
         <h1>{title}</h1>
         <p className="lede">{intro}</p>
       </header>
-      <div className="block">
-        <div className="prose">{children}</div>
+      <div className="prose" style={{ marginTop: "3rem" }}>
+        {children}
       </div>
-    </>
+    </div>
   );
 }

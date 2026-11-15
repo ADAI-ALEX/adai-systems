@@ -2,38 +2,77 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { counts } from "@/content/projects";
-import { site } from "@/content/site";
+import { useEffect, useState } from "react";
+import { copy } from "@/content/site";
 
 export const PAGES = [
-  { href: "/", label: "home" },
-  { href: "/work", label: "work" },
-  { href: "/research", label: "research" },
-  { href: "/studio", label: "studio" },
-  { href: "/contact", label: "contact" },
+  { href: "/work", label: "Work" },
+  { href: "/services", label: "Services" },
+  { href: "/research", label: "Research" },
+  { href: "/studio", label: "Studio" },
 ] as const;
 
 export function Bar() {
   const pathname = usePathname();
-  const current = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
+  const [open, setOpen] = useState(false);
+  const [stuck, setStuck] = useState(false);
+  const [last, setLast] = useState(pathname);
+
+  // Close the menu whenever the page changes.
+  if (last !== pathname) {
+    setLast(pathname);
+    setOpen(false);
+  }
+
+  useEffect(() => {
+    const onScroll = () => setStuck(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => event.key === "Escape" && setOpen(false);
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
 
   return (
-    <header className="bar">
-      <Link className="bar-brand" href="/">
-        <span aria-hidden="true">✦</span> ADAI SYSTEMS
-      </Link>
-      <nav aria-label="Main">
-        {PAGES.map((page, index) => (
-          <Link key={page.href} href={page.href} aria-current={current(page.href) ? "page" : undefined}>
-            <kbd aria-hidden="true">{index + 1}</kbd>
-            {page.label}
+    <header className="bar" data-stuck={stuck || open}>
+      <div className="wrap bar-in">
+        <Link className="brand" href="/">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/assets/logo/adai-mark-white.svg" alt="" width={28} height={28} />
+          ADAI Systems
+        </Link>
+        <nav id="site-nav" aria-label="Main" data-open={open}>
+          {PAGES.map((page) => (
+            <Link key={page.href} href={page.href} aria-current={pathname.startsWith(page.href) ? "page" : undefined}>
+              {page.label}
+            </Link>
+          ))}
+          <Link className="btn btn-primary" href="/start">
+            {copy.hero.primary}
           </Link>
-        ))}
-      </nav>
-      <p className="bar-right">
-        <span className="dot dot-live" aria-hidden="true" />
-        {counts.running} running <span className="t-dim">&nbsp;· est. {site.foundedShort.toLowerCase()}</span>
-      </p>
+        </nav>
+        <Link className="btn btn-primary btn-small bar-cta" href="/start">
+          {copy.hero.primary}
+        </Link>
+        <button
+          type="button"
+          className="btn btn-small menu-toggle"
+          aria-expanded={open}
+          aria-controls="site-nav"
+          onClick={() => setOpen((value) => !value)}
+        >
+          {open ? "Close" : "Menu"}
+        </button>
+      </div>
     </header>
   );
 }

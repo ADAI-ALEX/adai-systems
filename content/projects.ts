@@ -18,6 +18,9 @@ export type Status =
 
 export type Kind = "studio" | "product" | "research" | "demo" | "tool";
 
+/** The four things the studio does. Each is a branch of the web and a service a client can hire. */
+export type Aspect = "agents" | "automation" | "products" | "research";
+
 export type Media = {
   src: string;
   alt: string;
@@ -26,6 +29,9 @@ export type Media = {
   /** "screen" is a real capture. "concept" is a generated illustration and must be labelled. */
   type: "screen" | "phone" | "pixel" | "concept";
 };
+
+/** A real recording of the product, self-hosted. */
+export type Video = { src: string; poster: string; width: number; height: number; label: string; seconds: number };
 
 export type Project = {
   slug: string;
@@ -36,6 +42,11 @@ export type Project = {
   dateLabel: string;
   kind: Kind;
   kindLabel: string;
+  /** The branch of the web this project hangs from. The studio itself is the centre and has none. */
+  aspect?: Aspect;
+  /** Other branches it also proves. */
+  alsoProves?: Aspect[];
+  video?: Video;
   status: Status;
   /** Shown wherever a status appears, so the wording never drifts. */
   statusLabel: string;
@@ -93,6 +104,8 @@ export const projects: Project[] = [
   },
   {
     slug: "vantage-ai",
+    aspect: "agents",
+    alsoProves: ["automation"],
     story: {
       problem:
         "Every client build repeated the same shape: a chatbot here, a voice agent there, a set of automations behind them, and no single place to deploy or manage any of it.",
@@ -114,6 +127,7 @@ export const projects: Project[] = [
   },
   {
     slug: "reinforcement-learning",
+    aspect: "research",
     story: {
       problem:
         "A set of experiments, not a product: environments built to study how an agent learns to act when it is given an objective and nothing else.",
@@ -162,6 +176,7 @@ export const projects: Project[] = [
   },
   {
     slug: "fitdawg",
+    aspect: "products",
     story: {
       problem:
         "Language apps hold attention with streaks, levels and leagues. FitDawg applied the same mechanics to exercise. The bet was social: friends, competition and visible standings, on the theory that accountability to other people outlasts accountability to yourself.",
@@ -190,6 +205,7 @@ export const projects: Project[] = [
   },
   {
     slug: "acoustic-levitation",
+    aspect: "research",
     story: {
       how: [
         "Pressure at any point is the sum of every transducer treated as a point source (the Rayleigh integral).",
@@ -222,6 +238,8 @@ export const projects: Project[] = [
   },
   {
     slug: "voice-agent",
+    aspect: "agents",
+    alsoProves: ["automation"],
     story: {
       problem:
         "Hosted voice AI is fast to adopt and hard to own. Every call goes through someone else's stack, at their latency, under their pricing, with their retention policy.",
@@ -258,6 +276,8 @@ export const projects: Project[] = [
   },
   {
     slug: "call-analyser",
+    aspect: "automation",
+    alsoProves: ["agents"],
     story: {
       built: [
         "It watches a folder for new call recordings.",
@@ -285,6 +305,8 @@ export const projects: Project[] = [
   },
   {
     slug: "apex-terminal",
+    aspect: "products",
+    alsoProves: ["agents"],
     story: {
       problem:
         "Systematic trading research is normally split across a terminal for looking at markets and a notebook for testing ideas about them.",
@@ -327,6 +349,7 @@ export const projects: Project[] = [
   },
   {
     slug: "holographic-display",
+    aspect: "research",
     story: {
       problem: "Could a true volumetric display be built from a flat array of lasers making points of plasma in the air?",
       how: [
@@ -360,6 +383,8 @@ export const projects: Project[] = [
   },
   {
     slug: "hospitality-platform",
+    aspect: "automation",
+    alsoProves: ["products"],
     story: {
       built: [
         "Table booking for guests.",
@@ -400,6 +425,7 @@ export const projects: Project[] = [
   },
   {
     slug: "spatial-memory-scanner",
+    aspect: "research",
     story: {
       problem:
         "Capturing a room is the easy part. The question is what it feels like to walk back into it later, at the scale you recorded it.",
@@ -438,6 +464,7 @@ export const projects: Project[] = [
   },
   {
     slug: "lockout",
+    aspect: "products",
     story: {
       problem: "Traditional app blockers tell you no, so you turn them off. Lockout asks you to earn it.",
       built: [
@@ -540,6 +567,8 @@ export const projects: Project[] = [
   },
   {
     slug: "jeb-depot",
+    aspect: "agents",
+    alsoProves: ["research"],
     story: {
       problem:
         "Some software needs a calibrated probability, not a sentence. A robot deciding whether to detour round a forklift is one example. JEB Depot is a playable demo of that idea.",
@@ -636,6 +665,8 @@ export const projects: Project[] = [
   },
   {
     slug: "glimmer",
+    aspect: "research",
+    alsoProves: ["agents"],
     story: {
       problem:
         "What does it take to train a language model from nothing, on a laptop, with every part of the stack written by hand in one language?",
@@ -738,12 +769,136 @@ export const projects: Project[] = [
     disclosure:
       "Screens are unedited captures of the real binary. STEVIE's conversation corpus is synthetic dialogue written for the project by Claude.",
   },
+  {
+    slug: "margin",
+    aspect: "products",
+    alsoProves: ["research"],
+    openSource: true,
+    title: "Margin",
+    start: "2026-11",
+    dateLabel: "Nov 2026",
+    kind: "product",
+    kindLabel: "Web app",
+    status: "live",
+    statusLabel: "Live, open source",
+    chapter: "Space fire safety",
+    pitch: "How close is the evidence? An atlas of NASA's combustion tests, mapped against the air crews will actually breathe.",
+    summary:
+      "An entry for NASA Space Apps 2026, challenge Flame in Freefall. Pick a cabin atmosphere, a fire-safety question and a gravity regime. Margin finds the nearest comparable NASA test, reports how far away it is as a documented evidence distance, and links every number to the table row or paper it came from.",
+    points: [
+      "Every test run in NASA's Physical Sciences Informatics combustion archive, on one full-screen field.",
+      "A verdict you can audit: direct, near, distant or none.",
+      "No backend, no database and no AI at runtime. Every number comes from a deterministic engine.",
+      "It measures how close the evidence is. It is not a safety rating.",
+    ],
+    facts: [
+      { label: "NASA test runs mapped", value: "1,870" },
+      { label: "Investigations", value: "24" },
+      { label: "Highest oxygen in a solid-material test", value: "22.2%" },
+      { label: "Planned for lunar habitats", value: "26.5%" },
+    ],
+    stack: ["Next.js", "React", "TypeScript", "d3", "zod", "Vitest", "Playwright"],
+    links: [
+      { label: "Open Margin", href: "https://margin.adai.systems" },
+      { label: "Source on GitHub", href: "https://github.com/ADAI-ALEX/margin" },
+    ],
+    video: {
+      src: "/work/margin/demo.mp4",
+      poster: "/work/margin/demo-poster.webp",
+      width: 1920,
+      height: 1080,
+      label: "Margin in 30 seconds: a narrated screen recording of the live app.",
+      seconds: 30,
+    },
+    media: [
+      {
+        src: "/work/margin/atlas-hero.webp",
+        alt: "Margin's Atlas: a full-screen field of oxygen against pressure, with coverage bands around NASA's tests and an amber probe sitting outside them. Verdict: distant.",
+        width: 1800,
+        height: 1125,
+        type: "screen",
+      },
+      {
+        src: "/work/margin/atlas-regimes-overview.webp",
+        alt: "Margin's regimes overview: four separate plates for microgravity, lunar, Martian and Earth gravity. Only microgravity holds archive tests.",
+        width: 1800,
+        height: 1125,
+        type: "screen",
+      },
+      {
+        src: "/work/margin/atlas-run-inspector.webp",
+        alt: "Margin's run inspector open on one test: its conditions, the gap to the chosen scenario on each axis, and its source.",
+        width: 1800,
+        height: 1125,
+        type: "screen",
+      },
+      {
+        src: "/work/margin/atlas-moon-partial-gravity.webp",
+        alt: "Margin in lunar gravity: no archive tests, and a handful of published points drawn as points only.",
+        width: 1800,
+        height: 1125,
+        type: "screen",
+      },
+      {
+        src: "/work/margin/investigations-compare.webp",
+        alt: "Margin's investigations page: a ranked catalogue with two investigations pinned side by side for comparison.",
+        width: 1800,
+        height: 1125,
+        type: "screen",
+      },
+      {
+        src: "/work/margin/investigations-provenance.webp",
+        alt: "Margin's claim ledger with a drawer open showing where one test's numbers came from.",
+        width: 1800,
+        height: 1125,
+        type: "screen",
+      },
+      {
+        src: "/work/margin/method.webp",
+        alt: "Margin's method page: the distance formula typeset with every symbol defined.",
+        width: 1800,
+        height: 1125,
+        type: "screen",
+      },
+    ],
+    disclosure:
+      "Built with AI assistance, disclosed in full in the repository. Data: NASA Physical Sciences Informatics and the NASA Technical Reports Server. Use of NASA data does not imply NASA endorsement.",
+    story: {
+      problem:
+        "Crewed vehicles and habitats are planned with richer, lower-pressure air than the space station has. The highest oxygen level in any of the archive's 140 solid-material tests with a recorded value is 22.2%. Lunar surface habitats plan 26.5% and the Exploration Atmosphere 34%. None of those tests reaches either. And every run in the archive flew in microgravity: there are no partial-gravity runs at all. Margin shows that emptiness instead of filling it.",
+      built: [
+        "The Atlas: a full-screen evidence field for one gravity regime, with coverage bands, archive runs, published results, planned experiments and reference cabin atmospheres.",
+        "Four separate gravity regimes. No distance is ever computed across them.",
+        "A run inspector: conditions, the distance broken down by axis, and the source row or paper with a verbatim quote.",
+        "All 24 investigations ranked for the current scenario by a transparent score you can reweight, with a compare tray and a claim ledger.",
+        "A plain-language guide, a guided tour and command search.",
+        "The whole scenario lives in the address, so any view can be shared exactly.",
+      ],
+      how: [
+        "A gate first: a test only counts if it matches the gravity regime and is relevant to the question asked.",
+        "Then a distance. Oxygen, pressure and flow are each scaled to a documented unit and combined into one number, D.",
+        "The verdict is read off the nearest comparable test: direct at D of 1 or less, near up to 2.5, distant beyond, none if nothing comparable exists.",
+        "Every verdict is recomputed 27 times with each scale halved and doubled, and reported as robust or sensitive.",
+        "Gravity is a category, never a slider. Nothing is interpolated between gravity levels.",
+        "The site is static. The deployed app makes no calls to NASA and runs no AI.",
+      ],
+      outcome:
+        "Live at margin.adai.systems and open source under Apache-2.0. Entered for NASA Space Apps 2026.",
+      honest: [
+        "It is not a fire model, a hazard rating or a certification aid.",
+        "Being near a test is not evidence that a scenario would behave like that test.",
+        "The distance scales are expert judgement, shown with their rationale.",
+        "It was built with Claude as a pair programmer. The repository says exactly how.",
+      ],
+    },
+  },
 ];
 
 /* -------------------------------------------------------------------------- */
 /* Derived views                                                              */
 /* -------------------------------------------------------------------------- */
 
+/** Oldest first. Projects that share a month keep the order they are written in above. */
 export const byDate = [...projects].sort((a, b) => a.start.localeCompare(b.start));
 export const byDateDesc = [...byDate].reverse();
 
@@ -753,8 +908,10 @@ export function getProject(slug: string): Project {
   return found;
 }
 
-export const nowBuilding = ["lockout", "glimmer"].map(getProject);
+export const nowBuilding = ["lockout", "margin", "glimmer"].map(getProject);
 export const featured = getProject("jeb-depot");
+/** The four shown large on the home page, in order. */
+export const showcase = ["margin", "lockout", "glimmer", "jeb-depot"].map(getProject);
 export const selected = [
   "apex-terminal",
   "voice-agent",
@@ -794,6 +951,7 @@ export const domains: { label: string; note: string; slugs: string[] }[] = [
   { label: "Machine Learning", note: "Systems that learn a policy instead of being given one.", slugs: ["glimmer", "reinforcement-learning", "acoustic-levitation"] },
   { label: "Computer Vision", note: "Reading the physical world through a camera.", slugs: ["lockout", "spatial-memory-scanner"] },
   { label: "Consumer Software", note: "Products for people, not for businesses.", slugs: ["lockout", "fitdawg"] },
+  { label: "Data and Science", note: "Public data turned into an instrument you can audit.", slugs: ["margin"] },
   { label: "Voice", note: "Speech pipelines that run close to the machine.", slugs: ["voice-agent", "call-analyser"] },
   { label: "Spatial Computing", note: "Capturing real space and asking how to show it.", slugs: ["spatial-memory-scanner", "holographic-display"] },
   { label: "Fintech", note: "Strategy tools with the risk rules built in.", slugs: ["apex-terminal"] },
@@ -818,6 +976,8 @@ export const relations: { from: string; to: string; why: string }[] = [
   { from: "lockout", to: "spatial-memory-scanner", why: "Both read the physical world through a phone camera." },
   { from: "spatial-memory-scanner", to: "holographic-display", why: "Capturing 3D space, then asking how to display it." },
   { from: "jeb-depot", to: "glimmer", why: "Local models on Apple silicon, in Rust." },
+  { from: "glimmer", to: "margin", why: "The same habit: measure it, cite it, say what it is not." },
+  { from: "acoustic-levitation", to: "margin", why: "Physics again, this time read from NASA's own data." },
   { from: "reinforcement-learning", to: "glimmer", why: "Training models from nothing, at a different scale." },
 ];
 

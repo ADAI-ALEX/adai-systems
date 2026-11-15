@@ -1,14 +1,12 @@
-import { tokenAttributes } from "@/design/tokens";
 import { Bar } from "./bar";
-import { dot, mono } from "./fonts";
+import { mono, sans } from "./fonts";
 import { Footer } from "./parts";
 import { Runtime } from "./runtime";
-import { TweaksGate } from "./tweaks-gate";
 
-/** The shell every real page sits in: fonts, tokens, bar, footer and behaviours. */
+/** The shell every page sits in: fonts, tokens, bar, footer and behaviours. */
 export function SiteFrame({ children }: { children: React.ReactNode }) {
   return (
-    <div id="site" className={`${mono.variable} ${dot.variable} site`} {...tokenAttributes()}>
+    <div id="site" className={`${sans.variable} ${mono.variable} site`}>
       <a className="skip" href="#main">
         Skip to content
       </a>
@@ -16,7 +14,6 @@ export function SiteFrame({ children }: { children: React.ReactNode }) {
       <main id="main">{children}</main>
       <Footer />
       <Runtime />
-      <TweaksGate />
     </div>
   );
 }

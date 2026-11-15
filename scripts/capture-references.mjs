@@ -29,6 +29,20 @@ const SITES = [
   ["charm", "https://charm.land"],
   ["klim", "https://klim.co.nz"],
   ["browser-company", "https://thebrowser.company"],
+  // Round two (15 Nov): premium, cinematic studio and product sites with a clear route to enquiry.
+  ["igloo", "https://www.igloo.inc"],
+  ["darkroom", "https://darkroom.engineering"],
+  ["linear", "https://linear.app"],
+  ["cursor", "https://cursor.com"],
+  ["resend", "https://resend.com"],
+  ["family", "https://family.co"],
+  ["cosmos", "https://www.cosmos.so"],
+  ["instrument", "https://www.instrument.com"],
+  ["koto", "https://koto.studio"],
+  ["unseen", "https://unseen.co"],
+  ["activetheory", "https://activetheory.net"],
+  ["daylight", "https://daylightcomputer.com"],
+  ["margin", "https://margin.adai.systems"],
 ];
 
 const only = process.argv.slice(2);
