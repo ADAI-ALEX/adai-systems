@@ -147,12 +147,13 @@ src/
 public/             brand, favicons, project media (work/), share cards (og/), mascot manifest
 tests/              Playwright + axe suite
 scripts/            screenshots, glyph probe, load profile, icons, banner, Auri still and GLB export
-docs/               MASCOT.md, ARCHITECTURE.md, screenshots and assets
+docs/               MASCOT.md, ARCHITECTURE.md, performance/ (benchmarks), screenshots and assets
 ```
 
 - **One canvas, layout-driven.** Each section marks an empty box with `data-mascot-anchor` and a pose. Auri frames itself into the most central visible box, so the story is responsive by construction.
 - **Glyphs that line up.** Auri renders into an HDR target. A reduction pass averages each glyph cell on exactly the pixel grid the composite draws. Inside the cursor lens each cell is either glyph or 3D, never a blend.
-- **Fast first paint.** Pages ship a few kilobytes of script. The WebGL world (147 KB gzipped) downloads after first paint and starts once the page is idle, on real GPUs only. Without WebGL, the layout closes up around the copy.
+- **Sharp glyphs at any load.** Glyphs are drawn at the screen's own pixel density from an atlas rasterised at the exact cell size. Under load, the frame-time watchdog lowers only the 3D resolution, never the glyphs.
+- **Fast first paint.** Pages ship a few kilobytes of script. The WebGL world (147 KB gzipped) starts downloading at low priority as soon as the HTML is parsed, and starts once the page is idle, on real GPUs only. Nothing renders while Auri is out of view. Without WebGL, the layout closes up around the copy.
 - **Pages never import WebGL.** They talk to Auri through a DOM event (`adai:mascot`).
 
 More in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/MASCOT.md](docs/MASCOT.md).
@@ -171,7 +172,10 @@ Node 22.12 or newer is required. Tests use the installed Google Chrome so WebGL 
 
 | Tool | What it does |
 |---|---|
-| `node scripts/glyph-probe.mjs <dir> [url] --metric` | Moves the cursor around Auri and counts any 3D pixel inside the glyph lens (expected: 0) |
+| `node scripts/glyph-probe.mjs <dir> [url] --metric [--dsf=2]` | Moves the cursor around Auri and counts any 3D pixel inside the glyph lens (expected: 0) |
+| `node scripts/render-bench.mjs <url> <out.json> [--throttle] [--reading]` | Start-up (FCP, LCP, first frame, blocking time) and rendering (frame times, draw calls, rAF loops, serialised GPU cost) benchmark, cold and warm |
+| `node scripts/glyph-quality.mjs <dir> <beforeUrl> <afterUrl>` | Glyph screenshots and sharpness proxies, homepage vs `/studio`, four viewports, normal and under load |
+| `node scripts/serve-static.mjs <dir> [port]` | Serves a build like Vercel (clean URLs, brotli, immutable assets), for side-by-side benchmarks |
 | `node scripts/touch-probe.mjs <out.png> [url]` | Drags a finger across Auri on a phone viewport and reports whether the page scrolled (expected: 0) |
 | `node scripts/load-profile.mjs [url] 3 --throttle` | Times start-up (first paint, WebGL import, build, first frame) on cold and cached visits |
 | `npm run mascot:glb` | Exports the procedural Auri as a GLB blockout for Blender |
@@ -180,13 +184,15 @@ Node 22.12 or newer is required. Tests use the installed Google Chrome so WebGL 
 ## Quality
 
 - `astro check`: 0 errors, 0 warnings.
-- `npm test`: 63 tests, covering:
+- `npm test`: 71 tests, covering:
   - every route: status, a single h1, title, description, canonical, JSON-LD and no console errors;
   - axe WCAG 2.2 AA (no serious or critical issues);
   - no horizontal scroll at 375 px;
   - the WebGL boot, and the no-WebGL fallback;
   - reduced motion;
   - the glyph lens: size, cursor following and coverage (0 uncovered pixels);
+  - glyph resolution: native pixel density and a pixel-exact atlas, identical on the homepage and other pages, unchanged under sustained load (only the 3D steps down, then recovers);
+  - progressive rendering: no GPU work while Auri is out of view, immediate resume, a fast scroll straight to a lower section, one WebGL context, no GPU-resource or listener leaks across scrolling and resizes, the WebGL preload hint, and reduced motion;
   - touch on a phone: a drag on Auri moves the lens without scrolling, lift and cancel release it, and swipes elsewhere scroll;
   - identical project cards at three widths;
   - no draggable images, and no highlightable display headings;

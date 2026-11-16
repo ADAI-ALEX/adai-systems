@@ -1,0 +1,620 @@
+{
+ "home/desktop": {
+  "before": {
+   "normal": {
+    "energy": 1.651,
+    "midtone": 0.614,
+    "lens": {
+     "radius": 0.165,
+     "frame": 0.7565999999999999,
+     "viewportH": 900,
+     "dragging": false,
+     "x": 1039.9326168912023,
+     "y": 402.2715760688009
+    },
+    "render": null,
+    "canvas": [
+     2160,
+     1350,
+     1.5
+    ]
+   },
+   "underLoad": {
+    "energy": 1.4186,
+    "midtone": 0.838,
+    "lens": {
+     "radius": 0.165,
+     "frame": 0.7565999999999999,
+     "viewportH": 900,
+     "dragging": false,
+     "x": 1039.9326171873379,
+     "y": 402.2715759278116
+    },
+    "render": null,
+    "canvas": [
+     1440,
+     900,
+     1
+    ]
+   }
+  },
+  "after": {
+   "normal": {
+    "energy": 1.1643,
+    "midtone": 0.579,
+    "lens": {
+     "radius": 0.0825,
+     "frame": 0.7565999999999999,
+     "viewportH": 900,
+     "dragging": false,
+     "x": 1039.9326168942566,
+     "y": 402.27157606734664
+    },
+    "render": {
+     "outDpr": 2,
+     "sceneDpr": 1.5,
+     "cellPx": 19,
+     "cellCss": 9.5,
+     "atlasCell": 19,
+     "canvas": [
+      2880,
+      1800
+     ],
+     "scene": [
+      2160,
+      1350
+     ],
+     "rendered": 256,
+     "skipped": 0,
+     "offscreen": false,
+     "anchor": "hero",
+     "geometries": 12,
+     "textures": 8,
+     "programs": 21
+    },
+    "canvas": [
+     2880,
+     1800,
+     2
+    ]
+   },
+   "underLoad": {
+    "energy": 1.9276,
+    "midtone": 0.487,
+    "lens": {
+     "radius": 0.0825,
+     "frame": 0.7565999999999999,
+     "viewportH": 900,
+     "dragging": false,
+     "x": 1039.9326171873274,
+     "y": 402.2715759278165
+    },
+    "render": {
+     "outDpr": 2,
+     "sceneDpr": 1.25,
+     "cellPx": 19,
+     "cellCss": 9.5,
+     "atlasCell": 19,
+     "canvas": [
+      2880,
+      1800
+     ],
+     "scene": [
+      1800,
+      1125
+     ],
+     "rendered": 586,
+     "skipped": 0,
+     "offscreen": false,
+     "anchor": "hero",
+     "geometries": 12,
+     "textures": 8,
+     "programs": 21
+    },
+    "canvas": [
+     2880,
+     1800,
+     2
+    ]
+   }
+  }
+ },
+ "home/desktop-1x": {
+  "before": {
+   "normal": {
+    "energy": 2.6333,
+    "midtone": 0.208,
+    "lens": {
+     "radius": 0.165,
+     "frame": 0.7565999999999999,
+     "viewportH": 900,
+     "dragging": false,
+     "x": 1039.9326164706722,
+     "y": 402.27157626901396
+    },
+    "render": null,
+    "canvas": [
+     1440,
+     900,
+     1
+    ]
+   }
+  },
+  "after": {
+   "normal": {
+    "energy": 3.997,
+    "midtone": 0.377,
+    "lens": {
+     "radius": 0.0825,
+     "frame": 0.7565999999999999,
+     "viewportH": 900,
+     "dragging": false,
+     "x": 1039.9326164722447,
+     "y": 402.27157626826545
+    },
+    "render": {
+     "outDpr": 1,
+     "sceneDpr": 1,
+     "cellPx": 10,
+     "cellCss": 10,
+     "atlasCell": 10,
+     "canvas": [
+      1440,
+      900
+     ],
+     "scene": [
+      1440,
+      900
+     ],
+     "rendered": 253,
+     "skipped": 0,
+     "offscreen": false,
+     "anchor": "hero",
+     "geometries": 12,
+     "textures": 8,
+     "programs": 21
+    },
+    "canvas": [
+     1440,
+     900,
+     1
+    ]
+   }
+  }
+ },
+ "home/tablet": {
+  "before": {
+   "normal": {
+    "energy": 0.2182,
+    "midtone": 0.851,
+    "lens": {
+     "radius": 0.09777416816546762,
+     "frame": 0.4073923673561151,
+     "viewportH": 1112,
+     "dragging": false,
+     "x": 389.81560647283385,
+     "y": 263.1601718048916
+    },
+    "render": null,
+    "canvas": [
+     1042,
+     1390,
+     1.249
+    ]
+   }
+  },
+  "after": {
+   "normal": {
+    "energy": 0.1822,
+    "midtone": 0.386,
+    "lens": {
+     "radius": 0.04888708408273381,
+     "frame": 0.4073923673561151,
+     "viewportH": 1112,
+     "dragging": false,
+     "x": 389.8144835549797,
+     "y": 263.16263418633673
+    },
+    "render": {
+     "outDpr": 2,
+     "sceneDpr": 1.25,
+     "cellPx": 19,
+     "cellCss": 9.5,
+     "atlasCell": 19,
+     "canvas": [
+      1668,
+      2224
+     ],
+     "scene": [
+      1043,
+      1390
+     ],
+     "rendered": 217,
+     "skipped": 0,
+     "offscreen": false,
+     "anchor": "hero",
+     "geometries": 12,
+     "textures": 8,
+     "programs": 21
+    },
+    "canvas": [
+     1668,
+     2224,
+     2
+    ]
+   }
+  }
+ },
+ "home/mobile": {
+  "before": {
+   "normal": {
+    "energy": 0.1739,
+    "midtone": 0.95,
+    "lens": {
+     "radius": 0.09777289691943127,
+     "frame": 0.4073870704976303,
+     "viewportH": 844,
+     "dragging": false,
+     "x": 174.36799398781713,
+     "y": 219.98124767828216
+    },
+    "render": null,
+    "canvas": [
+     487,
+     1055,
+     1.249
+    ]
+   }
+  },
+  "after": {
+   "normal": {
+    "energy": 0.1744,
+    "midtone": 0.869,
+    "lens": {
+     "radius": 0.04888644845971563,
+     "frame": 0.4073870704976303,
+     "viewportH": 844,
+     "dragging": false,
+     "x": 174.36851409976418,
+     "y": 219.97934673442055
+    },
+    "render": {
+     "outDpr": 3,
+     "sceneDpr": 1.25,
+     "cellPx": 24,
+     "cellCss": 8,
+     "atlasCell": 24,
+     "canvas": [
+      1170,
+      2532
+     ],
+     "scene": [
+      488,
+      1055
+     ],
+     "rendered": 215,
+     "skipped": 0,
+     "offscreen": false,
+     "anchor": "hero",
+     "geometries": 12,
+     "textures": 8,
+     "programs": 21
+    },
+    "canvas": [
+     1170,
+     2532,
+     3
+    ]
+   }
+  }
+ },
+ "studio/desktop": {
+  "before": {
+   "normal": {
+    "energy": 1.6251,
+    "midtone": 0.594,
+    "lens": {
+     "radius": 0.11898666666666666,
+     "frame": 0.49577777777777776,
+     "viewportH": 900,
+     "dragging": false,
+     "x": 1154.8217767541137,
+     "y": 425.29974389320927
+    },
+    "render": null,
+    "canvas": [
+     2160,
+     1350,
+     1.5
+    ]
+   },
+   "underLoad": {
+    "energy": 1.1582,
+    "midtone": 0.78,
+    "lens": {
+     "radius": 0.11898666666666666,
+     "frame": 0.49577777777777776,
+     "viewportH": 900,
+     "dragging": false,
+     "x": 1154.8217773435595,
+     "y": 425.2997436524216
+    },
+    "render": null,
+    "canvas": [
+     1224,
+     765,
+     0.85
+    ]
+   }
+  },
+  "after": {
+   "normal": {
+    "energy": 2.3198,
+    "midtone": 0.497,
+    "lens": {
+     "radius": 0.05949333333333333,
+     "frame": 0.49577777777777776,
+     "viewportH": 900,
+     "dragging": false,
+     "x": 1154.8217767481055,
+     "y": 425.2997438956635
+    },
+    "render": {
+     "outDpr": 2,
+     "sceneDpr": 1.5,
+     "cellPx": 19,
+     "cellCss": 9.5,
+     "atlasCell": 19,
+     "canvas": [
+      2880,
+      1800
+     ],
+     "scene": [
+      2160,
+      1350
+     ],
+     "rendered": 251,
+     "skipped": 0,
+     "offscreen": false,
+     "anchor": "intro",
+     "geometries": 12,
+     "textures": 8,
+     "programs": 21
+    },
+    "canvas": [
+     2880,
+     1800,
+     2
+    ]
+   },
+   "underLoad": {
+    "energy": 2.4595,
+    "midtone": 0.503,
+    "lens": {
+     "radius": 0.05949333333333333,
+     "frame": 0.49577777777777776,
+     "viewportH": 900,
+     "dragging": false,
+     "x": 1154.8217773435433,
+     "y": 425.2997436524282
+    },
+    "render": {
+     "outDpr": 2,
+     "sceneDpr": 1.25,
+     "cellPx": 19,
+     "cellCss": 9.5,
+     "atlasCell": 19,
+     "canvas": [
+      2880,
+      1800
+     ],
+     "scene": [
+      1800,
+      1125
+     ],
+     "rendered": 582,
+     "skipped": 0,
+     "offscreen": false,
+     "anchor": "intro",
+     "geometries": 12,
+     "textures": 8,
+     "programs": 21
+    },
+    "canvas": [
+     2880,
+     1800,
+     2
+    ]
+   }
+  }
+ },
+ "studio/desktop-1x": {
+  "before": {
+   "normal": {
+    "energy": 3.0564,
+    "midtone": 0.206,
+    "lens": {
+     "radius": 0.11898666666666666,
+     "frame": 0.49577777777777776,
+     "viewportH": 900,
+     "dragging": false,
+     "x": 1154.8217762686027,
+     "y": 425.29974409153965
+    },
+    "render": null,
+    "canvas": [
+     1440,
+     900,
+     1
+    ]
+   }
+  },
+  "after": {
+   "normal": {
+    "energy": 2.7867,
+    "midtone": 0.42,
+    "lens": {
+     "radius": 0.05949333333333333,
+     "frame": 0.49577777777777776,
+     "viewportH": 900,
+     "dragging": false,
+     "x": 1154.8217762707573,
+     "y": 425.2997440906595
+    },
+    "render": {
+     "outDpr": 1,
+     "sceneDpr": 1,
+     "cellPx": 10,
+     "cellCss": 10,
+     "atlasCell": 10,
+     "canvas": [
+      1440,
+      900
+     ],
+     "scene": [
+      1440,
+      900
+     ],
+     "rendered": 249,
+     "skipped": 0,
+     "offscreen": false,
+     "anchor": "intro",
+     "geometries": 12,
+     "textures": 8,
+     "programs": 21
+    },
+    "canvas": [
+     1440,
+     900,
+     1
+    ]
+   }
+  }
+ },
+ "studio/tablet": {
+  "before": {
+   "normal": {
+    "energy": 0.3248,
+    "midtone": 0.806,
+    "lens": {
+     "radius": 0.06,
+     "frame": 0.24424460431654674,
+     "viewportH": 1112,
+     "dragging": false,
+     "x": 400.698022822313,
+     "y": 224.78072835449046
+    },
+    "render": null,
+    "canvas": [
+     1042,
+     1390,
+     1.249
+    ]
+   }
+  },
+  "after": {
+   "normal": {
+    "energy": 0.6792,
+    "midtone": 0.635,
+    "lens": {
+     "radius": 0.03,
+     "frame": 0.24424460431654674,
+     "viewportH": 1112,
+     "dragging": false,
+     "x": 400.6980228223138,
+     "y": 224.78072835448867
+    },
+    "render": {
+     "outDpr": 2,
+     "sceneDpr": 1.25,
+     "cellPx": 19,
+     "cellCss": 9.5,
+     "atlasCell": 19,
+     "canvas": [
+      1668,
+      2224
+     ],
+     "scene": [
+      1043,
+      1390
+     ],
+     "rendered": 214,
+     "skipped": 0,
+     "offscreen": false,
+     "anchor": "intro",
+     "geometries": 12,
+     "textures": 8,
+     "programs": 21
+    },
+    "canvas": [
+     1668,
+     2224,
+     2
+    ]
+   }
+  }
+ },
+ "studio/mobile": {
+  "before": {
+   "normal": {
+    "energy": 0.1754,
+    "midtone": 0.948,
+    "lens": {
+     "radius": 0.07723222748815164,
+     "frame": 0.3218009478672985,
+     "viewportH": 844,
+     "dragging": false,
+     "x": 178.70201710358933,
+     "y": 207.41519553526047
+    },
+    "render": null,
+    "canvas": [
+     487,
+     1055,
+     1.249
+    ]
+   }
+  },
+  "after": {
+   "normal": {
+    "energy": 0.4603,
+    "midtone": 0.643,
+    "lens": {
+     "radius": 0.03861611374407582,
+     "frame": 0.3218009478672985,
+     "viewportH": 844,
+     "dragging": false,
+     "x": 178.7013665279831,
+     "y": 207.41756104415833
+    },
+    "render": {
+     "outDpr": 3,
+     "sceneDpr": 1.25,
+     "cellPx": 24,
+     "cellCss": 8,
+     "atlasCell": 24,
+     "canvas": [
+      1170,
+      2532
+     ],
+     "scene": [
+      488,
+      1055
+     ],
+     "rendered": 213,
+     "skipped": 0,
+     "offscreen": false,
+     "anchor": "intro",
+     "geometries": 12,
+     "textures": 8,
+     "programs": 21
+    },
+    "canvas": [
+     1170,
+     2532,
+     3
+    ]
+   }
+  }
+ }
+}

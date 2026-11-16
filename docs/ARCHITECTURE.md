@@ -9,17 +9,29 @@
   - `Save-Data` is off and `?nowebgl` isn't set.
 
   Otherwise `html.gl-fallback` is set and every `MascotAnchor` collapses, so the layout closes up around the text. No flat image stands in for Auri.
-- **Start-up** (`World.init`) yields to the main thread between steps (environment map, mascot, glyph atlas, async shader compile), so no single task blocks input for long.
+- **Start-up** (`World.init`) yields to the main thread between steps (environment map, mascot, glyph atlas, async shader compile), so no single task blocks input for long. See "Start-up" below for the order things load in.
 - **Frame:**
   1. key light with a 1024² soft shadow that follows Auri's scale;
-  2. scene into a half-float target;
-  3. 16-tap cell reduction, addressed in screen pixels, storing average colour and max coverage;
-  4. per-cell composite (glyph or 3D) with tone mapping (Neutral) straight to the canvas.
+  2. scene into a half-float target, at the 3D resolution;
+  3. 16-tap cell reduction, on the composite's cell grid, storing average colour and max coverage;
+  4. a per-cell noise pass (lens dither, aura field, glyph jitter);
+  5. per-cell composite (glyph or 3D) with tone mapping (Neutral) straight to the canvas, at the screen's pixel density.
 
-  A small glyph lens follows the cursor near Auri (radius scales with Auri, capped at 16.5 % of the viewport height); a finger dragging across Auri drives it on touch screens without scrolling the page, and `?glyphdebug` exposes any uncovered 3D pixel inside it.
-
-  The device pixel ratio is capped at 1.5 on desktop and 1.25 on coarse pointers. A frame-time watchdog steps it down (to 0.85) or back up.
-- **Pausing.** Rendering stops when the tab is hidden. Under reduced motion it renders only when something changes.
+  A small glyph lens follows the cursor near Auri (radius scales with Auri, capped at 8.25 % of the viewport height); a finger dragging across Auri drives it on touch screens without scrolling the page, and `?glyphdebug` exposes any uncovered 3D pixel inside it.
+- **Two resolutions.**
+  - The canvas, and so the glyph pass, runs at the screen's own pixel density (up to 3×; 2× when a 3× canvas would exceed 6 megapixels), with a glyph atlas drawn at the exact cell size. Glyph quality is identical on every page.
+  - The 3D scene renders into its own target at 1.5× (desktop) or 1.25× (touch), as before. The animated noise is computed once per glyph cell in a small pass, and the composite skips, exactly, every pixel where it would output nothing: beyond 2.4 mascot radii, and where neither Auri nor the aura reaches. As a result the sharper glyph pass costs no more GPU time on desktop than the old one (see `docs/performance/README.md`).
+- **Frame-time watchdog** (`trackPerformance` in `World.ts`):
+  - it only changes the 3D resolution (steps of 0.25, floor 1×), never the glyphs;
+  - it judges two-second windows by their median against the display's refresh rate, so isolated slow frames are ignored;
+  - a step that doesn't make frames faster is undone (the cost was elsewhere, e.g. another tab);
+  - it steps back up as soon as frames are smooth;
+  - last resort, on 3× phones only: glyphs may drop to 2×.
+- **Pausing.**
+  - Rendering stops when the tab is hidden.
+  - When no mascot area is in view and Auri has faded out, frames skip the character, shadow and glyph passes entirely. Anchors are still checked from live layout every frame, so a fast scroll to any section draws Auri there on the next frame.
+  - Under reduced motion it renders only when something changes.
+- **One context.** One renderer, one set of geometry, materials and render targets, reused by every section. Below-the-fold sections have no 3D of their own to initialise. Their demos start when scrolled into view, and their images are lazy.
 
 ## Choreography
 
@@ -61,7 +73,16 @@
 
 ## Start-up
 
-`scripts/load-profile.mjs --throttle` (fast 4G, 4× CPU) measured, as medians of 3 runs:
+Order of work on a page with Auri:
+1. HTML, styles and the headline paint first. The hero needs no script and no WebGL.
+2. At the end of `<body>`, a build-time hint (`preloadWebGL` in `astro.config.mjs`) starts a low-priority download of the WebGL chunk. It is skipped with Save-Data or `?nowebgl`.
+3. When the page scripts run, `gl-loader.ts` also fetches the mascot manifest and the glyph font, so initialisation never waits on the network.
+4. After `load` and an idle moment, `World.init` builds the environment, Auri and the glyph atlas. It compiles every shader (both glyph passes included) asynchronously before the first frame.
+5. Auri fades in. Sections further down cost nothing until a mascot area scrolls into view.
+
+Before/after measurements of this work are in `docs/performance/README.md`.
+
+Earlier measurement (before November 2026), with `scripts/load-profile.mjs --throttle` (fast 4G, 4× CPU), as medians of 3 runs:
 
 | Visit | First contentful paint | First interactive mascot frame |
 |---|---|---|

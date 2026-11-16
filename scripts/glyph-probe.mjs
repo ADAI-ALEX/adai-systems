@@ -1,14 +1,15 @@
 // Probes the cursor glyph lens around the whole character and saves clipped screenshots.
-// Usage: node scripts/glyph-probe.mjs <outDir> [baseUrl] [--metric]
+// Usage: node scripts/glyph-probe.mjs <outDir> [baseUrl] [--metric] [--dsf=2]
 // With --metric the page runs with ?glyphdebug, where any 3D pixel inside the lens core renders magenta;
 // those pixels are counted (expected: 0 everywhere).
 import { chromium } from '@playwright/test';
 import fs from 'node:fs';
 const [outDir, base = 'http://localhost:4322'] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const metric = process.argv.includes('--metric');
+const dsf = +(process.argv.find((a) => a.startsWith('--dsf='))?.split('=')[1] ?? 1);
 fs.mkdirSync(outDir, { recursive: true });
 const browser = await chromium.launch({ channel: 'chrome', headless: true, args: ['--enable-gpu', '--ignore-gpu-blocklist', '--use-angle=metal'] });
-const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: dsf });
 await page.goto(`${base}/${metric ? '?glyphdebug' : ''}`, { waitUntil: 'networkidle' });
 await page.waitForFunction(() => document.documentElement.classList.contains('gl-ready'));
 await page.mouse.move(150, 450);

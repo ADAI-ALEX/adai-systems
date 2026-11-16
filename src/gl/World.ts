@@ -13,15 +13,20 @@ import type { MascotRig } from './mascot/rig';
 import { getPose, type Pose } from './mascot/poses';
 import type { ExpressionName, GestureName, HueName } from './mascot/rig';
 import { GlyphPipeline } from './passes/GlyphPipeline';
-import { createGlyphAtlas } from './passes/glyphAtlas';
+import { loadGlyphFont } from './passes/glyphAtlas';
 import { motionAllowed } from '@/scripts/motion';
 
 const HUES: Record<HueName, string> = { agents: '#f2b560', automation: '#5cd6c4', products: '#ff7d61', research: '#8db3ff', studio: '#f3e6cf' };
 const MASCOT_HEIGHT = 3.0; // rig units, measured floor (y = -0.08) to the top of the sprout bulb (y = 2.92)
 const MASCOT_CENTER_Y = 1.42;
 /** Glyph lens radius = clamp(frame height / viewport height × SCALE, MIN, MAX), in viewport heights.
- *  0.75 × the original (0.32, 0.08, 0.22): the circle is 25 % smaller in diameter. */
-const LENS_SCALE = 0.24, LENS_MIN = 0.06, LENS_MAX = 0.165;
+ *  Half of the previous (0.24, 0.06, 0.165), i.e. 0.375 × the original (0.32, 0.08, 0.22): the circle is
+ *  half the diameter it was. */
+const LENS_SCALE = 0.12, LENS_MIN = 0.03, LENS_MAX = 0.0825;
+/** Glyph cell edge in CSS pixels (rounded to whole device pixels by the pipeline). */
+const cellCss = (w: number) => (w < 700 ? 8 : 9.5);
+/** 3D scene resolution: the starting cap (as before) and the watchdog's lowest step. */
+const SCENE_DPR_FINE = 1.5, SCENE_DPR_COARSE = 1.25, SCENE_DPR_FLOOR = 1;
 /** Let the browser breathe between heavy start-up steps, so no single task blocks input for long. */
 const yieldToMain = () => new Promise<void>((r) => setTimeout(r, 0));
 const damp = (a: number, b: number, l: number, dt: number) => a + (b - a) * (1 - Math.exp(-l * dt));
@@ -33,19 +38,24 @@ const easeOutBack = (x: number) => { const c = 1.9; x = clamp(x, 0, 1); return 1
  * Pick the mascot implementation from /mascot/manifest.json. An authored GLB is used when the manifest
  * says so and it loads; anything else falls back to the procedural Adi, so the site never breaks.
  */
-async function loadMascot(coarse: boolean): Promise<MascotRig> {
+async function loadMascot(coarse: boolean, manifestPromise?: Promise<MascotManifest | null>): Promise<MascotRig> {
   try {
-    const res = await fetch('/mascot/manifest.json', { cache: 'force-cache' });
-    const manifest = res.ok ? await res.json() : null;
+    const manifest = await (manifestPromise ?? fetchMascotManifest());
     if (manifest?.renderer === 'gltf' && manifest.src) {
       const { GltfMascot } = await import('./mascot/GltfMascot');
-      return await GltfMascot.load(manifest);
+      return await GltfMascot.load(manifest as Parameters<typeof GltfMascot.load>[0]);
     }
   } catch (err) {
     console.warn('[adai] authored mascot unavailable, using the procedural one', err);
   }
   return new ProceduralMascot({ detail: coarse ? 0.6 : 0.85 });
 }
+
+type MascotManifest = { renderer?: string; src?: string } & Record<string, unknown>;
+export const fetchMascotManifest = (): Promise<MascotManifest | null> =>
+  fetch('/mascot/manifest.json', { cache: 'force-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+/** Work started by the loader while the WebGL chunk downloads, so init never waits on the network. */
+export interface Prefetch { manifest?: Promise<MascotManifest | null>; font?: Promise<unknown> }
 
 export type MascotCommand = { pose?: string; expression?: ExpressionName; hold?: number; gesture?: GestureName; hue?: HueName };
 
@@ -84,9 +94,18 @@ export class World {
   private asleep = false;
   private wasNear = false;
   private turn = 0;
-  private dpr = 1.5;
-  private dprCap = 1.5;
-  private frameTimes: number[] = [];
+  /** Canvas (glyph) pixel density: the screen's own, never lowered by the watchdog. */
+  private outDpr = 1;
+  /** Lowered from 3 to 2 only as a last resort (3D already at its floor and frames still slow). */
+  private outDprCap = 3;
+  /** 3D scene pixel density: starts at the cap, the watchdog may step it down to SCENE_DPR_FLOOR and back. */
+  private sceneDpr = SCENE_DPR_FINE;
+  private sceneDprCap = SCENE_DPR_FINE;
+  private perf = { samples: [] as number[], holdUntil: 0, refresh: 1000 / 60, lastStep: null as null | { from: number; median: number } };
+  private viewport = { w: 0, h: 0, dpr: 0 };
+  /** True while no mascot area is in view and Auri has faded out: frames skip all GPU work. */
+  private offscreen = false;
+  private stats = { rendered: 0, skipped: 0 };
   private running = false;
   private dirty = true;
   private visible = 0;
@@ -110,7 +129,8 @@ export class World {
     this.ro = new ResizeObserver(() => this.resize());
   }
 
-  async init() {
+  async init(prefetch: Prefetch = {}) {
+    const fontReady = prefetch.font ?? loadGlyphFont(); // the glyph atlas needs it; overlaps with the character build
     const pmrem = new THREE.PMREMGenerator(this.renderer);
     this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     pmrem.dispose();
@@ -134,28 +154,28 @@ export class World {
     this.scene.add(key, key.target, fill, this.rimLight);
 
     const coarse = matchMedia('(pointer: coarse)').matches;
-    const atlasPromise = createGlyphAtlas(64); // waits on the mono font; overlaps with the character build
-    this.mascot = await loadMascot(coarse);
+    this.mascot = await loadMascot(coarse, prefetch.manifest);
     performance.mark('adai:gl-mascot');
     await yieldToMain();
     this.scene.add(this.mascot.object);
     this.camera.position.set(0, 0, 11);
     this.camera.lookAt(0, 0, 0);
 
-    const atlas = await atlasPromise;
+    await fontReady;
     performance.mark('adai:gl-atlas');
     await yieldToMain();
-    this.pipeline = new GlyphPipeline(this.renderer, atlas);
-    this.dprCap = coarse ? 1.25 : 1.5;
-    this.dpr = Math.min(window.devicePixelRatio || 1, this.dprCap);
+    this.pipeline = new GlyphPipeline(this.renderer);
+    this.sceneDprCap = coarse ? SCENE_DPR_COARSE : SCENE_DPR_FINE;
+    this.sceneDpr = Math.min(window.devicePixelRatio || 1, this.sceneDprCap);
 
     this.collectAnchors();
     this.bindEvents();
-    this.resize();
+    this.resize(); // also draws the glyph atlas at the screen's cell size
     this.ro.observe(document.documentElement);
-    // compile shaders before the first visible frame (async where the driver supports it)
+    // Compile every shader (the character and both glyph passes) before the first visible frame, off the
+    // main thread where the driver supports it, so the first frame is not one long blocking task.
     await yieldToMain();
-    await this.renderer.compileAsync(this.scene, this.camera);
+    await Promise.all([this.renderer.compileAsync(this.scene, this.camera), this.pipeline.compile()]);
     performance.mark('adai:gl-compiled');
     this.update(0.016, true);
     performance.mark('adai:gl-first-frame');
@@ -281,6 +301,15 @@ export class World {
     on('adai:motion', (e) => { this.motion = e.detail.allowed; this.dirty = true; if (this.motion) this.start(); });
     on('adai:mascot', (e) => this.command(e.detail));
     const vis = () => { if (document.hidden) this.stop(); else this.start(); };
+    // Moved to a screen with another pixel ratio (or zoomed): redraw the canvas and glyph atlas to match,
+    // then watch for the next change from the new ratio.
+    const watchDpr = () => {
+      const media = matchMedia(`(resolution: ${window.devicePixelRatio || 1}dppx)`);
+      const change = () => { this.resize(); watchDpr(); };
+      media.addEventListener('change', change, { once: true });
+      this.disposers.push(() => media.removeEventListener('change', change));
+    };
+    watchDpr();
     document.addEventListener('visibilitychange', vis);
     this.disposers.push(() => document.removeEventListener('visibilitychange', vis));
     // Calls to action make Adi look and light up.
@@ -344,23 +373,42 @@ export class World {
   }
 
   /* ---------------------------------------------------------------- frame */
+  /**
+   * Glyphs are drawn at the screen's pixel density (up to 3×, or 2× on very large canvases), so the
+   * canvas maps 1:1 to device pixels and nothing is stretched. The 3D scene keeps its own, lower density.
+   */
   resize() {
-    const w = innerWidth, h = innerHeight;
-    this.renderer.setPixelRatio(this.dpr);
+    const w = innerWidth, h = innerHeight, native = window.devicePixelRatio || 1;
+    if (w === this.viewport.w && h === this.viewport.h && native === this.viewport.dpr) return; // nothing changed
+    this.viewport = { w, h, dpr: native };
+    this.outDpr = Math.min(native <= 2 ? native : w * h * native * native <= 6e6 ? Math.min(native, 3) : 2, Math.max(2, this.outDprCap));
+    this.sceneDpr = Math.min(this.sceneDpr, native, this.sceneDprCap);
+    this.renderer.setPixelRatio(this.outDpr);
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
-    const cell = w < 700 ? 8 : 9.5;
-    this.pipeline.setSize(w, h, this.dpr, cell);
+    this.pipeline.setSize(w, h, this.outDpr, this.sceneDpr, cellCss(w));
+    this.holdPerformance();
     this.dirty = true;
   }
 
-  private update(dt: number, force = false) {
+  private setSceneDpr(dpr: number) {
+    this.sceneDpr = dpr;
+    this.pipeline.setSceneDpr(dpr);
+    this.holdPerformance();
+    this.dirty = true;
+  }
+
+  /** Returns false when the frame skipped all rendering (Auri is out of view). */
+  private update(dt: number, force = false): boolean {
     const W = innerWidth, H = innerHeight;
     const now = this.clock.elapsedTime;
     const anchor = this.pickAnchor();
     if (anchor !== this.active) {
       const first = !this.active;
+      // Coming back after being out of view (e.g. a fast scroll to a lower section): appear in place at
+      // the new spot straight away instead of gliding in from wherever Auri was last seen.
+      if (anchor && !this.active && this.visible < 0.05) this.frame.init = false;
       if (anchor && this.active && this.motion) {
         // Long jumps pop out and back in at the new spot (never sweep across text); short hops glide.
         const r = anchor.el.getBoundingClientRect();
@@ -371,7 +419,13 @@ export class World {
       if (anchor) this.applyPose(anchor, first);
     }
     this.visible = damp(this.visible, anchor ? 1 : 0, this.motion ? 5 : 1000, dt);
-    this.stage.style.opacity = this.visible.toFixed(3);
+    const opacity = this.visible < 0.02 ? '0' : this.visible.toFixed(3); // below 2 % Auri is invisible anyway
+    if (this.stage.style.opacity !== opacity) this.stage.style.opacity = opacity;
+    // No mascot area in view and Auri has faded out: skip the character, shadow and glyph passes entirely.
+    // Anchors are still checked every frame from live layout, so Auri reappears on the very next frame.
+    this.offscreen = !anchor && opacity === '0' && !force;
+    if (this.offscreen) { this.stats.skipped++; this.debugInfo(); return false; }
+    this.stats.rendered++;
 
     // Frame target: Adi stays glued to its anchor box (CSS sticky boxes give the 'parked' effect).
     let pop = 1;
@@ -447,11 +501,8 @@ export class World {
 
     const reveal = this.updateReveal(dt, W, H);
     this.pipeline.render(this.scene, this.camera, {
-      cellCss: 9,
       pointer: new THREE.Vector2(this.revealOrigin.x / W, 1 - this.revealOrigin.y / H),
       revealRadius: reveal.radius,
-      revealEdge: reveal.edge,
-      revealFull: reveal.full,
       debug: this.glyphDebug ? 1 : 0,
       glyphAmount: this.poseGlyph,
       aura: this.posterMode ? 0 : this.poseAura,
@@ -464,6 +515,20 @@ export class World {
       time: now,
       motion: this.motion,
     });
+    this.debugInfo();
+    return true;
+  }
+
+  /** Test hook (only with ?glyphdebug): rendering state, for the progressive-rendering and quality tests. */
+  private debugInfo() {
+    if (!this.glyphDebug) return;
+    const p = this.pipeline, m = this.renderer.info.memory;
+    (window as unknown as { __adaiRender: object }).__adaiRender = {
+      outDpr: this.outDpr, sceneDpr: this.sceneDpr, cellPx: p.cellPx, cellCss: p.cellPx / this.outDpr, atlasCell: p.atlas?.cell ?? 0,
+      canvas: [this.renderer.domElement.width, this.renderer.domElement.height], scene: [p.sceneRT.width, p.sceneRT.height],
+      rendered: this.stats.rendered, skipped: this.stats.skipped, offscreen: this.offscreen, anchor: this.active?.poseName ?? null,
+      geometries: m.geometries, textures: m.textures, programs: this.renderer.info.programs?.length ?? 0,
+    };
   }
 
   /**
@@ -496,40 +561,79 @@ export class World {
       this.revealOrigin.x = damp(this.revealOrigin.x, px, 18, dt);
       this.revealOrigin.y = damp(this.revealOrigin.y, py, 18, dt);
     }
-    // Lens radius as a fraction of viewport height: 25 % smaller than the original 0.32 × frame (0.08–0.22).
+    // Lens radius as a fraction of viewport height: half the previous 0.24 × frame (0.06–0.165).
     const base = clamp((this.frame.h / H) * LENS_SCALE, LENS_MIN, LENS_MAX);
     const e = 1 - Math.pow(1 - this.reveal, 3);
     const radius = this.reveal > 0 ? base * e : 0;
     // Test hook (only with ?glyphdebug): the live lens state, so tests can check size and touch behaviour.
     if (this.glyphDebug) (window as unknown as { __adaiLens: object }).__adaiLens = { radius, frame: this.frame.h / H, viewportH: H, dragging: this.drag !== null, x: this.revealOrigin.x, y: this.revealOrigin.y };
-    return { radius, edge: 0, full: 0 };
+    return { radius };
   }
 
   private loop = () => {
     if (!this.running) return;
     this.raf = requestAnimationFrame(this.loop);
-    const dt = Math.min(this.clock.getDelta(), 1 / 30);
+    const raw = this.clock.getDelta();
+    const dt = Math.min(raw, 1 / 30);
     if (!this.motion && !this.dirty) return; // reduced motion: render on demand only
-    const t0 = performance.now();
-    this.update(dt);
+    const wasOffscreen = this.offscreen;
+    const rendered = this.update(dt);
     this.dirty = false;
-    this.trackPerformance(performance.now() - t0, dt);
+    if (rendered && wasOffscreen) this.holdPerformance(); // back in view: measure afresh
+    else if (rendered) this.trackPerformance(raw);
   };
 
-  private trackPerformance(_cpuMs: number, dt: number) {
-    if (!this.motion) return;
-    this.frameTimes.push(dt * 1000);
-    if (this.frameTimes.length < 90) return;
-    const avg = this.frameTimes.reduce((a, b) => a + b, 0) / this.frameTimes.length;
-    this.frameTimes.length = 0;
-    if (avg > 26 && this.dpr > 0.85) { this.dpr = Math.max(0.85, this.dpr - 0.25); this.resize(); }
-    else if (avg < 17.5 && this.dpr < Math.min(window.devicePixelRatio, this.dprCap)) { this.dpr = Math.min(this.dprCap, this.dpr + 0.25); this.resize(); }
+  /** Ignore frame times for a moment (start, resize, a resolution step), so one-off hitches don't count. */
+  private holdPerformance(ms = 2500) {
+    this.perf.samples.length = 0;
+    this.perf.holdUntil = Math.max(this.perf.holdUntil, performance.now() + ms);
+  }
+
+  /**
+   * Frame-time watchdog. It only ever changes the 3D scene's resolution, never the glyphs, and it uses
+   * medians over two-second windows, so a few slow frames (a scroll hitch, an image decode) don't count:
+   *  - step down (0.25, not below 1×) only when most frames miss the display's refresh;
+   *  - if a step down didn't make frames faster, the cost is elsewhere (another tab, the page): undo it
+   *    and leave the resolution alone for 20 s;
+   *  - step back up as soon as frames are smooth again;
+   *  - last resort, for 3× phone screens only: if the 3D is already at its floor and frames are still slow,
+   *    glyphs drop from 3× to 2× (still sharper than the 1.25× they used to get) for the rest of the visit.
+   */
+  private trackPerformance(rawDt: number) {
+    const now = performance.now();
+    if (!this.motion || now < this.perf.holdUntil) return;
+    const s = this.perf.samples;
+    s.push(rawDt * 1000);
+    if (s.length < 120) return;
+    const sorted = [...s].sort((a, b) => a - b);
+    s.length = 0;
+    const median = sorted[60];
+    // the display's refresh interval: the fastest frames seen so far (never assumed slower than 60 Hz)
+    this.perf.refresh = Math.min(this.perf.refresh, Math.max(sorted[6], 1000 / 240));
+    const slow = median > Math.max(this.perf.refresh * 1.6, 20);
+    const smooth = median < this.perf.refresh * 1.25;
+    const step = this.perf.lastStep;
+    this.perf.lastStep = null;
+    if (step && !smooth && median > step.median * 0.85) {
+      this.setSceneDpr(step.from);
+      this.holdPerformance(20000);
+    } else if (slow && this.sceneDpr > SCENE_DPR_FLOOR) {
+      this.perf.lastStep = { from: this.sceneDpr, median };
+      this.setSceneDpr(Math.max(SCENE_DPR_FLOOR, this.sceneDpr - 0.25));
+    } else if (slow && this.outDpr > 2) {
+      this.outDprCap = 2;
+      this.viewport.dpr = 0; // force the resize
+      this.resize();
+    } else if (smooth && this.sceneDpr < Math.min(window.devicePixelRatio || 1, this.sceneDprCap)) {
+      this.setSceneDpr(Math.min(this.sceneDprCap, this.sceneDpr + 0.25));
+    }
   }
 
   start() {
     if (this.running || document.hidden) return;
     this.running = true;
     this.clock.getDelta();
+    this.holdPerformance();
     this.raf = requestAnimationFrame(this.loop);
   }
 

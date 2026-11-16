@@ -76,12 +76,14 @@ With `prefers-reduced-motion` set in the operating system:
 ## 3. The glyph renderer (Auri in letters)
 
 Code: `src/gl/passes/`.
-1. Auri renders into an HDR target with a transparent background.
-2. A reduction pass reads each glyph cell in **screen pixels**, on exactly the grid the composite draws, and stores the cell's average colour and its **maximum** coverage. Any cell the silhouette touches counts as part of it.
+1. Auri renders into an HDR target with a transparent background, at the 3D resolution (1.5× on desktop, 1.25× on touch screens, lowered by the frame-time watchdog when needed).
+2. A reduction pass reads each glyph cell on exactly the grid the composite draws (in normalised screen coordinates, so the two passes line up at any pair of resolutions) and stores the cell's average colour and its **maximum** coverage. Any cell the silhouette touches counts as part of it.
 3. The composite decides **per cell**: either glyph or 3D, never a blend. Glyphs come from a ramp set in IBM Plex Mono (`· . : - ~ + = * o x % # @`), and the densest glyph is the ADAI mark itself.
 
+**Glyph sharpness.** The composite, and so every glyph, is drawn at the screen's own pixel density (up to 3×; 2× on very large canvases), which the watchdog never lowers. The glyph cell is a whole number of device pixels (9.5 CSS px, or 8 under 700 px wide, rounded: 19 px on a 2× screen, 10 px on a 1× screen, 24 px on a 3× phone), and the glyph atlas is drawn by the browser's own text renderer at exactly that size and read texel for texel. Each glyph is rasterised once at its final size, with no resampling. Before November 2026 the atlas was a 64 px bitmap shrunk into each cell without mipmaps, and the whole canvas (glyphs included) was rendered at 1.5× and stretched to the screen. The watchdog could also lower the resolution to 0.85×, which smeared the dots and turned the mark into a blob. That happened most on the homepage, which is where visitors arrive cold and scroll the most (see `docs/performance/README.md`). On 1× screens, cells under 14 px get a hairline stroke and a steeper edge on the mark, so it stays legible at 10 px.
+
 **The lens.** While the cursor is over or near Auri, or while a finger drags across Auri on a touch screen (and briefly after a tap), a small circular glyph lens follows the pointer:
-- its radius is `clamp(frameHeight / viewportHeight × 0.24, 0.06, 0.165)` of the viewport height (`LENS_*` in `World.ts`), so it scales with Auri but never covers the whole character. That is 25 % smaller in diameter than the first version (`0.32, 0.08, 0.22`);
+- its radius is `clamp(frameHeight / viewportHeight × 0.12, 0.03, 0.0825)` of the viewport height (`LENS_*` in `World.ts`), so it scales with Auri but never covers the whole character. That is half the diameter of the previous lens (`0.24, 0.06, 0.165`), and 0.375 × the first version (`0.32, 0.08, 0.22`). The trigger distance and the interaction are unchanged;
 - it opens over about 0.22 s and closes over about 0.3 s, and its centre is damped so it trails the cursor softly;
 - only the area inside the lens turns into glyphs; the rest of Auri stays 3D;
 - glyphs are only drawn where the rendered silhouette is, so the effect never bleeds into the background.
@@ -96,7 +98,7 @@ An earlier version left slivers of the 3D model visible inside the glyph area. T
 - a grid mismatch between the two passes that drifted by a few pixels across the screen;
 - partial cells cross-fading between the two layers.
 
-All four are fixed, and the lens keeps those fixes: inside the lens every cell is either fully glyph or empty, so no 3D surface shows through. `?glyphdebug` paints any 3D pixel left uncovered in the lens core magenta. The automated test and `scripts/glyph-probe.mjs --metric` count **0** at every probed position (face left edge, centre and right edge, antenna, ear, body, both hands).
+All four are fixed, and the lens keeps those fixes: inside the lens every cell is either fully glyph or empty, so no 3D surface shows through. `?glyphdebug` paints any 3D pixel left uncovered in the lens core magenta. The automated test and `scripts/glyph-probe.mjs --metric [--dsf=2]` count **0** at every probed position (face left edge, centre and right edge, antenna, ear, body, both hands), at 1×, 2× and 3×, with the glyphs and the 3D at different resolutions.
 
 ## 4. Asset pipeline (replaceable without touching the site)
 

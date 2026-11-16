@@ -1,6 +1,12 @@
 /**
  * The ADAI glyph ramp, rendered at runtime into a one-row atlas from the self-hosted IBM Plex Mono
  * (SIL OFL). The densest glyph is the ADAI face mark itself, so a fully lit cell is the brand.
+ *
+ * The atlas is drawn at the exact device-pixel size of a glyph cell on screen, and the composite reads it
+ * texel for texel (texelFetch). Each glyph is therefore rasterised once by the browser's own text
+ * renderer at its final size, with no resampling, instead of being shrunk from a large bitmap (which
+ * aliased) and then stretched by the canvas scaling (which blurred). It is redrawn when the cell size
+ * changes (window resize across the mobile breakpoint, or a different screen pixel ratio).
  */
 import * as THREE from 'three';
 
@@ -11,38 +17,64 @@ const MARK_PATHS = [
   'M101.28,123.22A20.7,20.7,0,1,1,80.6,102.54,20.7,20.7,0,0,1,101.28,123.22Z',
   'M186.54,123.22a20.69,20.69,0,1,1-20.68-20.68A20.69,20.69,0,0,1,186.54,123.22Z',
 ];
+const FONT = '"IBM Plex Mono", ui-monospace, monospace';
 
-export async function createGlyphAtlas(cell = 64) {
+export interface GlyphAtlas { texture: THREE.CanvasTexture; count: number; cell: number }
+
+/** Waits for the glyph font (the request is usually already in flight, see gl-loader.ts). */
+export async function loadGlyphFont() {
+  try { await document.fonts.load(`500 32px "IBM Plex Mono"`); } catch { /* falls back to monospace */ }
+}
+
+/** Draws the ramp with `cell` × `cell` device pixels per glyph (an integer). */
+export function drawGlyphAtlas(cell: number): GlyphAtlas {
   const n = GLYPH_RAMP.length;
   const canvas = document.createElement('canvas');
   canvas.width = cell * n;
   canvas.height = cell;
   const ctx = canvas.getContext('2d')!;
-  try { await document.fonts.load(`500 ${cell}px "IBM Plex Mono"`); } catch { /* falls back to monospace */ }
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = '#fff';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.font = `500 ${Math.round(cell * 0.86)}px "IBM Plex Mono", ui-monospace, monospace`;
+  // Same proportions as before (glyph height ≈ 0.86 of the cell, mark ≈ 0.78 of it).
+  ctx.font = `500 ${Math.max(6, Math.round(cell * 0.86))}px ${FONT}`;
+  // On 1× screens a cell is only ~10 px: a hairline stroke keeps strokes and the mark's ring from greying out.
+  const embolden = cell < 14 ? Math.min(0.6, cell * 0.045) : 0;
+  ctx.strokeStyle = '#fff';
+  ctx.lineJoin = 'round';
   GLYPH_RAMP.forEach((g, i) => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(i * cell, 0, cell, cell); // every glyph stays inside its own cell: no bleeding into neighbours
+    ctx.clip();
     const cx = i * cell + cell / 2;
     if (g === 'MARK') {
-      ctx.save();
       const s = (cell * 0.78) / 246.46;
       ctx.translate(cx - (246.46 * s) / 2, cell / 2 - (246.46 * s) / 2);
       ctx.scale(s, s);
       MARK_PATHS.forEach((d) => ctx.fill(new Path2D(d)));
-      ctx.restore();
     } else if (g !== ' ') {
       ctx.fillText(g, cx, cell / 2 + cell * 0.04);
+      if (embolden) { ctx.lineWidth = embolden; ctx.strokeText(g, cx, cell / 2 + cell * 0.04); }
+    }
+    ctx.restore();
+    // Small cells: steepen the mark's anti-aliased edges, so its ring, bubble and eyes stay distinct.
+    if (g === 'MARK' && embolden) {
+      const img = ctx.getImageData(i * cell, 0, cell, cell), d = img.data;
+      for (let k = 0; k < d.length; k += 4) {
+        const t = Math.min(1, Math.max(0, (d[k] / 255 - 0.22) / 0.46));
+        d[k] = d[k + 1] = d[k + 2] = Math.round(255 * t * t * (3 - 2 * t));
+      }
+      ctx.putImageData(img, i * cell, 0);
     }
   });
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = THREE.NoColorSpace;
-  tex.minFilter = THREE.LinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  tex.generateMipmaps = false;
-  tex.needsUpdate = true;
-  return { texture: tex, count: n };
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.NoColorSpace;
+  texture.minFilter = THREE.NearestFilter;
+  texture.magFilter = THREE.NearestFilter;
+  texture.generateMipmaps = false;
+  texture.needsUpdate = true;
+  return { texture, count: n, cell };
 }

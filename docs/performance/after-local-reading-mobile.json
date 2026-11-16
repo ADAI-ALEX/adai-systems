@@ -1,0 +1,21 @@
+{
+ "base": "http://localhost:4331",
+ "date": "2026-11-16T01:40:26.954Z",
+ "dsf": 3,
+ "viewport": "390x844",
+ "scenario": "scroll 700 px, pause 1.5 s, to the bottom; serialised GL cost per second of wall time",
+ "pages": {
+  "/": {
+   "frames": 2648,
+   "framesWithGl": 0.591,
+   "glMsPerSecond": 31,
+   "seconds": 44.3
+  },
+  "/studio": {
+   "frames": 1001,
+   "framesWithGl": 0.051,
+   "glMsPerSecond": 2.1,
+   "seconds": 16.7
+  }
+ }
+}

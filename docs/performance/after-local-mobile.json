@@ -1,0 +1,590 @@
+{
+ "base": "http://localhost:4331",
+ "date": "2026-11-16T01:38:13.333Z",
+ "runs": 3,
+ "dsf": 3,
+ "throttle": false,
+ "viewport": "1440x900",
+ "load": {
+  "/": {
+   "cold": {
+    "fcp": 64,
+    "lcp": 64,
+    "load": 61,
+    "glStart": 58,
+    "firstFrame": 264,
+    "tbt": 13,
+    "longest": 63
+   },
+   "warm": {
+    "fcp": 52,
+    "lcp": 52,
+    "load": 35,
+    "glStart": 34,
+    "firstFrame": 218,
+    "tbt": 11,
+    "longest": 61
+   },
+   "trials": {
+    "cold": [
+     {
+      "fcp": 68,
+      "lcp": 68,
+      "load": 74.60000000149012,
+      "glStart": 66.60000000149012,
+      "firstFrame": 279.90000000596046,
+      "tbt": 21,
+      "longest": 71
+     },
+     {
+      "fcp": 64,
+      "lcp": 64,
+      "load": 57.70000000298023,
+      "glStart": 51.29999999701977,
+      "firstFrame": 258.1000000014901,
+      "tbt": 13,
+      "longest": 63
+     },
+     {
+      "fcp": 60,
+      "lcp": 60,
+      "load": 61.100000001490116,
+      "glStart": 57.900000005960464,
+      "firstFrame": 263.5,
+      "tbt": 13,
+      "longest": 63
+     }
+    ],
+    "warm": [
+     {
+      "fcp": 52,
+      "lcp": 52,
+      "load": 34.70000000298023,
+      "glStart": 34.29999999701977,
+      "firstFrame": 218.29999999701977,
+      "tbt": 12,
+      "longest": 62
+     },
+     {
+      "fcp": 44,
+      "lcp": 44,
+      "load": 32.899999998509884,
+      "glStart": 32.600000001490116,
+      "firstFrame": 215.20000000298023,
+      "tbt": 11,
+      "longest": 61
+     },
+     {
+      "fcp": 56,
+      "lcp": 56,
+      "load": 37.70000000298023,
+      "glStart": 37.30000000447035,
+      "firstFrame": 219.10000000149012,
+      "tbt": 10,
+      "longest": 60
+     }
+    ]
+   }
+  },
+  "/studio": {
+   "cold": {
+    "fcp": 52,
+    "lcp": 52,
+    "load": 41,
+    "glStart": 35,
+    "firstFrame": 240,
+    "tbt": 12,
+    "longest": 62
+   },
+   "warm": {
+    "fcp": 52,
+    "lcp": 52,
+    "load": 27,
+    "glStart": 27,
+    "firstFrame": 211,
+    "tbt": 10,
+    "longest": 60
+   },
+   "trials": {
+    "cold": [
+     {
+      "fcp": 52,
+      "lcp": 52,
+      "load": 43.30000000447035,
+      "glStart": 39.100000001490116,
+      "firstFrame": 243.40000000596046,
+      "tbt": 14,
+      "longest": 64
+     },
+     {
+      "fcp": 60,
+      "lcp": 60,
+      "load": 41,
+      "glStart": 34.80000000447035,
+      "firstFrame": 239.70000000298023,
+      "tbt": 12,
+      "longest": 62
+     },
+     {
+      "fcp": 48,
+      "lcp": 48,
+      "load": 40.20000000298023,
+      "glStart": 34.20000000298023,
+      "firstFrame": 237.60000000149012,
+      "tbt": 12,
+      "longest": 62
+     }
+    ],
+    "warm": [
+     {
+      "fcp": 52,
+      "lcp": 52,
+      "load": 27.299999997019768,
+      "glStart": 26.69999999552965,
+      "firstFrame": 212.19999999552965,
+      "tbt": 10,
+      "longest": 60
+     },
+     {
+      "fcp": 56,
+      "lcp": 56,
+      "load": 31.399999998509884,
+      "glStart": 31,
+      "firstFrame": 210.89999999850988,
+      "tbt": 9,
+      "longest": 59
+     },
+     {
+      "fcp": 40,
+      "lcp": 40,
+      "load": 26.30000000447035,
+      "glStart": 25.700000002980232,
+      "firstFrame": 207.20000000298023,
+      "tbt": 10,
+      "longest": 60
+     }
+    ]
+   }
+  }
+ },
+ "render": {
+  "/": {
+   "resolution": {
+    "canvas": [
+     1170,
+     2532
+    ],
+    "css": [
+     390,
+     844
+    ],
+    "dpr": 3,
+    "render": {
+     "outDpr": 3,
+     "sceneDpr": 1.5,
+     "cellPx": 24,
+     "cellCss": 8,
+     "atlasCell": 24,
+     "canvas": [
+      1170,
+      2532
+     ],
+     "scene": [
+      585,
+      1266
+     ],
+     "rendered": 155,
+     "skipped": 0,
+     "offscreen": false,
+     "anchor": "hero",
+     "geometries": 12,
+     "textures": 8,
+     "programs": 21
+    }
+   },
+   "idle": {
+    "frameMs": {
+     "n": 240,
+     "mean": 16.67,
+     "median": 16.7,
+     "p95": 16.7,
+     "max": 16.8,
+     "sd": 0.06
+    },
+    "over20ms": 0,
+    "loopsPerFrame": {
+     "n": 240,
+     "mean": 2,
+     "median": 2,
+     "p95": 2,
+     "max": 2,
+     "sd": 0
+    },
+    "drawCallsPerFrame": {
+     "n": 240,
+     "mean": 23,
+     "median": 23,
+     "p95": 23,
+     "max": 23,
+     "sd": 0
+    },
+    "framesWithGl": 1
+   },
+   "lens": {
+    "frameMs": {
+     "n": 240,
+     "mean": 16.67,
+     "median": 16.7,
+     "p95": 16.7,
+     "max": 16.8,
+     "sd": 0.06
+    },
+    "over20ms": 0,
+    "loopsPerFrame": {
+     "n": 240,
+     "mean": 2,
+     "median": 2,
+     "p95": 2,
+     "max": 2,
+     "sd": 0
+    },
+    "drawCallsPerFrame": {
+     "n": 240,
+     "mean": 22.98,
+     "median": 23,
+     "p95": 23,
+     "max": 23,
+     "sd": 0.14
+    },
+    "framesWithGl": 1
+   },
+   "scroll": {
+    "frameMs": {
+     "n": 360,
+     "mean": 16.67,
+     "median": 16.7,
+     "p95": 16.8,
+     "max": 16.8,
+     "sd": 0.06
+    },
+    "over20ms": 0,
+    "loopsPerFrame": {
+     "n": 360,
+     "mean": 2,
+     "median": 2,
+     "p95": 2,
+     "max": 2,
+     "sd": 0
+    },
+    "drawCallsPerFrame": {
+     "n": 360,
+     "mean": 21.74,
+     "median": 23,
+     "p95": 23,
+     "max": 23,
+     "sd": 1.85
+    },
+    "framesWithGl": 1
+   },
+   "fullScroll": {
+    "frameMs": {
+     "n": 541,
+     "mean": 16.67,
+     "median": 16.7,
+     "p95": 16.7,
+     "max": 16.8,
+     "sd": 0.06
+    },
+    "over20ms": 0,
+    "loopsPerFrame": {
+     "n": 541,
+     "mean": 2,
+     "median": 2,
+     "p95": 2,
+     "max": 2,
+     "sd": 0
+    },
+    "drawCallsPerFrame": {
+     "n": 369,
+     "mean": 20.79,
+     "median": 21,
+     "p95": 23,
+     "max": 23,
+     "sd": 2.36
+    },
+    "framesWithGl": 0.682,
+    "serialisedCostMs": {
+     "n": 403,
+     "mean": 1.07,
+     "median": 0.8,
+     "p95": 2.1,
+     "max": 7.2,
+     "sd": 0.74
+    },
+    "glMsPerSecond": 47.9
+   },
+   "serialisedCostMs": {
+    "n": 61,
+    "mean": 1.27,
+    "median": 1.1,
+    "p95": 2.4,
+    "max": 3.3,
+    "sd": 0.76
+   },
+   "resolutionAfter": {
+    "canvas": [
+     1170,
+     2532
+    ],
+    "css": [
+     390,
+     844
+    ],
+    "dpr": 3,
+    "render": {
+     "outDpr": 3,
+     "sceneDpr": 1.5,
+     "cellPx": 24,
+     "cellCss": 8,
+     "atlasCell": 24,
+     "canvas": [
+      1170,
+      2532
+     ],
+     "scene": [
+      585,
+      1266
+     ],
+     "rendered": 1921,
+     "skipped": 238,
+     "offscreen": false,
+     "anchor": "automation",
+     "geometries": 12,
+     "textures": 8,
+     "programs": 21
+    }
+   },
+   "dprTimelineAfterScroll": [
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3
+   ],
+   "gpuTimerQuery": true,
+   "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)"
+  },
+  "/studio": {
+   "resolution": {
+    "canvas": [
+     1170,
+     2532
+    ],
+    "css": [
+     390,
+     844
+    ],
+    "dpr": 3,
+    "render": {
+     "outDpr": 3,
+     "sceneDpr": 1.5,
+     "cellPx": 24,
+     "cellCss": 8,
+     "atlasCell": 24,
+     "canvas": [
+      1170,
+      2532
+     ],
+     "scene": [
+      585,
+      1266
+     ],
+     "rendered": 152,
+     "skipped": 0,
+     "offscreen": false,
+     "anchor": "intro",
+     "geometries": 12,
+     "textures": 8,
+     "programs": 21
+    }
+   },
+   "idle": {
+    "frameMs": {
+     "n": 240,
+     "mean": 16.67,
+     "median": 16.7,
+     "p95": 16.7,
+     "max": 16.8,
+     "sd": 0.06
+    },
+    "over20ms": 0,
+    "loopsPerFrame": {
+     "n": 240,
+     "mean": 2,
+     "median": 2,
+     "p95": 2,
+     "max": 2,
+     "sd": 0
+    },
+    "drawCallsPerFrame": {
+     "n": 240,
+     "mean": 23,
+     "median": 23,
+     "p95": 23,
+     "max": 23,
+     "sd": 0
+    },
+    "framesWithGl": 1
+   },
+   "lens": {
+    "frameMs": {
+     "n": 240,
+     "mean": 16.67,
+     "median": 16.7,
+     "p95": 16.7,
+     "max": 16.8,
+     "sd": 0.06
+    },
+    "over20ms": 0,
+    "loopsPerFrame": {
+     "n": 240,
+     "mean": 2,
+     "median": 2,
+     "p95": 2,
+     "max": 2,
+     "sd": 0
+    },
+    "drawCallsPerFrame": {
+     "n": 240,
+     "mean": 23,
+     "median": 23,
+     "p95": 23,
+     "max": 23,
+     "sd": 0
+    },
+    "framesWithGl": 1
+   },
+   "scroll": {
+    "frameMs": {
+     "n": 360,
+     "mean": 16.67,
+     "median": 16.7,
+     "p95": 16.8,
+     "max": 16.8,
+     "sd": 0.06
+    },
+    "over20ms": 0,
+    "loopsPerFrame": {
+     "n": 360,
+     "mean": 2,
+     "median": 2,
+     "p95": 2,
+     "max": 2,
+     "sd": 0
+    },
+    "drawCallsPerFrame": {
+     "n": 97,
+     "mean": 20.4,
+     "median": 19,
+     "p95": 23,
+     "max": 23,
+     "sd": 1.68
+    },
+    "framesWithGl": 0.269
+   },
+   "fullScroll": {
+    "frameMs": {
+     "n": 540,
+     "mean": 16.67,
+     "median": 16.7,
+     "p95": 16.8,
+     "max": 16.8,
+     "sd": 0.06
+    },
+    "over20ms": 0,
+    "loopsPerFrame": {
+     "n": 540,
+     "mean": 2,
+     "median": 2,
+     "p95": 2,
+     "max": 2,
+     "sd": 0
+    },
+    "drawCallsPerFrame": {
+     "n": 87,
+     "mean": 19.16,
+     "median": 17,
+     "p95": 23,
+     "max": 23,
+     "sd": 2.55
+    },
+    "framesWithGl": 0.161,
+    "serialisedCostMs": {
+     "n": 86,
+     "mean": 1.24,
+     "median": 1.2,
+     "p95": 2.2,
+     "max": 4.9,
+     "sd": 0.73
+    },
+    "glMsPerSecond": 11.9
+   },
+   "serialisedCostMs": {
+    "n": 61,
+    "mean": 1.22,
+    "median": 1,
+    "p95": 2.3,
+    "max": 2.5,
+    "sd": 0.68
+   },
+   "resolutionAfter": {
+    "canvas": [
+     1170,
+     2532
+    ],
+    "css": [
+     390,
+     844
+    ],
+    "dpr": 3,
+    "render": {
+     "outDpr": 3,
+     "sceneDpr": 1.5,
+     "cellPx": 24,
+     "cellCss": 8,
+     "atlasCell": 24,
+     "canvas": [
+      1170,
+      2532
+     ],
+     "scene": [
+      585,
+      1266
+     ],
+     "rendered": 987,
+     "skipped": 1166,
+     "offscreen": true,
+     "anchor": null,
+     "geometries": 12,
+     "textures": 8,
+     "programs": 21
+    }
+   },
+   "dprTimelineAfterScroll": [
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3
+   ],
+   "gpuTimerQuery": true,
+   "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)"
+  }
+ }
+}

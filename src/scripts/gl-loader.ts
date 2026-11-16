@@ -24,14 +24,21 @@ export function bootWhenReady() {
     document.documentElement.classList.add('gl-fallback');
     return;
   }
-  // Download (and parse) the WebGL chunk straight after first paint, in parallel with the page's images…
+  // The WebGL chunk is already downloading: a build step adds a low-priority modulepreload for it at the
+  // end of <body> on every page with a mascot (see astro.config.mjs). Import it straight after first paint, and
+  // meanwhile fetch the two small things initialisation would otherwise wait on: the mascot manifest and
+  // the glyph font (the atlas is drawn with it).
   performance.mark('adai:gl-start');
   let modulePromise: Promise<typeof import('@/gl/boot')> | null = null;
   const fetchModule = () => (modulePromise ??= import('@/gl/boot'));
   requestAnimationFrame(() => setTimeout(fetchModule, 0));
-  // …but only initialise once the page has loaded and the main thread is idle: the headline and the
-  // poster of the character are on screen from the first paint, so nothing ever waits on WebGL.
-  const start = () => fetchModule().then((m) => m.boot(stage)).catch((err) => {
+  const prefetch = {
+    manifest: fetch('/mascot/manifest.json', { cache: 'force-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+    font: document.fonts.load('500 32px "IBM Plex Mono"').catch(() => null),
+  };
+  // Initialise once the page has loaded and the main thread is idle: the headline and the rest of the
+  // page are on screen from the first paint, so nothing ever waits on WebGL.
+  const start = () => fetchModule().then((m) => m.boot(stage, prefetch)).catch((err) => {
     console.warn('[adai] WebGL failed, using the poster', err);
     document.documentElement.classList.add('gl-fallback');
   });

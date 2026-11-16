@@ -235,10 +235,10 @@ test('cursor glyph lens: no 3D pixels inside the lens core anywhere around the c
 
 type Lens = { radius: number; frame: number; viewportH: number; dragging: boolean; x: number; y: number };
 const lens = (page: import('@playwright/test').Page) => page.evaluate(() => (window as unknown as { __adaiLens: Lens }).__adaiLens);
-/** Lens radius (in viewport heights): 0.75 × the original clamp(frame × 0.32, 0.08, 0.22), i.e. 25 % smaller. */
-const expectedRadius = (frame: number) => 0.75 * Math.min(Math.max(frame * 0.32, 0.08), 0.22);
+/** Lens radius (in viewport heights): clamp(frame × 0.12, 0.03, 0.0825), half the previous clamp(frame × 0.24, 0.06, 0.165). */
+const expectedRadius = (frame: number) => Math.min(Math.max(frame * 0.12, 0.03), 0.0825);
 
-test('cursor glyph lens is 25 % smaller than the original and follows the cursor', async ({ page }) => {
+test('cursor glyph lens is half its previous diameter and follows the cursor', async ({ page }) => {
   await page.goto('/?glyphdebug', { waitUntil: 'networkidle' });
   await page.waitForFunction(() => document.documentElement.classList.contains('gl-ready'), null, { timeout: 15_000 });
   await page.waitForTimeout(1200);
@@ -248,6 +248,7 @@ test('cursor glyph lens is 25 % smaller than the original and follows the cursor
   const l = await lens(page);
   expect(l.radius).toBeGreaterThan(0);
   expect(l.radius).toBeCloseTo(expectedRadius(l.frame), 3);
+  expect(l.radius).toBeCloseTo(0.5 * Math.min(Math.max(l.frame * 0.24, 0.06), 0.165), 4); // half the previous lens
   expect(Math.hypot(l.x - (box.x + box.width / 2), l.y - (box.y + box.height * 0.4))).toBeLessThan(3);
   await page.mouse.move(40, 860, { steps: 4 });
   await page.waitForTimeout(900);
@@ -307,4 +308,152 @@ test.describe('phone: touching Auri', () => {
     expect(await page.evaluate(() => scrollY)).toBeGreaterThan(100);
     expect((await lens(page)).dragging).toBe(false);
   });
+});
+
+/* ---------------------------------------------------------------- rendering quality and progressive rendering */
+type Render = { outDpr: number; sceneDpr: number; cellPx: number; cellCss: number; atlasCell: number; canvas: [number, number]; scene: [number, number]; rendered: number; skipped: number; offscreen: boolean; anchor: string | null; geometries: number; textures: number; programs: number };
+const render = (page: import('@playwright/test').Page) => page.evaluate(() => (window as unknown as { __adaiRender: Render }).__adaiRender);
+const glReady = (page: import('@playwright/test').Page) => page.waitForFunction(() => document.documentElement.classList.contains('gl-ready'), null, { timeout: 15_000 });
+const frames = (page: import('@playwright/test').Page, n: number) => page.evaluate((n) => new Promise<void>((r) => { let k = 0; const f = () => (++k >= n ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
+
+test.describe('glyph resolution on a 2× screen', () => {
+  test.use({ deviceScaleFactor: 2, viewport: { width: 1440, height: 900 } });
+
+  test('glyphs are drawn at the screen pixel density, identically on the homepage and another page', async ({ page }) => {
+    const seen: Render[] = [];
+    for (const path of ['/', '/studio']) {
+      await page.goto(`${path}?glyphdebug`, { waitUntil: 'networkidle' });
+      await glReady(page);
+      await page.waitForTimeout(800);
+      const r = await render(page);
+      expect(r.outDpr).toBe(2);
+      expect(r.canvas).toEqual([2880, 1800]);
+      expect(r.cellPx).toBe(19); // 9.5 CSS px on whole device pixels
+      expect(r.atlasCell).toBe(r.cellPx); // pixel-exact glyph atlas
+      expect(r.sceneDpr).toBe(1.5); // the 3D keeps its previous resolution
+      seen.push(r);
+    }
+    expect(seen[0].outDpr).toBe(seen[1].outDpr);
+    expect(seen[0].cellPx).toBe(seen[1].cellPx);
+  });
+
+  test('under sustained load only the 3D resolution reacts; glyphs keep full resolution; 3D recovers afterwards', async ({ page }) => {
+    test.setTimeout(90_000);
+    await page.goto('/?glyphdebug', { waitUntil: 'networkidle' });
+    await glReady(page);
+    await page.waitForTimeout(3000);
+    // 30 ms of main-thread work per frame, like a busy machine
+    await page.evaluate(() => { (window as unknown as { __jank: boolean }).__jank = true; const f = () => { if (!(window as unknown as { __jank: boolean }).__jank) return; const t = performance.now(); while (performance.now() - t < 30); requestAnimationFrame(f); }; requestAnimationFrame(f); });
+    let minScene = 1.5;
+    for (let i = 0; i < 24; i++) {
+      await page.waitForTimeout(500);
+      const r = await render(page);
+      minScene = Math.min(minScene, r.sceneDpr);
+      expect(r.outDpr).toBe(2);
+      expect(r.cellPx).toBe(19);
+      expect(r.sceneDpr).toBeGreaterThanOrEqual(1); // never below the floor
+    }
+    expect(minScene).toBeLessThan(1.5); // the watchdog did react
+    await page.evaluate(() => ((window as unknown as { __jank: boolean }).__jank = false));
+    await expect.poll(async () => (await render(page)).sceneDpr, { timeout: 15_000, intervals: [500] }).toBe(1.5);
+    expect((await render(page)).outDpr).toBe(2);
+  });
+});
+
+test('Auri is initialised once and reused: one WebGL canvas, one context on every page', async ({ page }) => {
+  await page.goto('/?glyphdebug', { waitUntil: 'networkidle' });
+  await glReady(page);
+  expect(await page.locator('canvas').count()).toBe(1);
+});
+
+test('offscreen: no GPU work while no mascot area is in view; rendering resumes on return', async ({ page }) => {
+  await page.goto('/?glyphdebug', { waitUntil: 'networkidle' });
+  await glReady(page);
+  await page.waitForTimeout(500);
+  expect((await render(page)).offscreen).toBe(false);
+  // The archive grid has no mascot area: Auri fades out and frames stop rendering.
+  await page.evaluate(() => document.querySelector('.more-title')!.scrollIntoView({ block: 'center' }));
+  await expect.poll(async () => (await render(page)).offscreen, { timeout: 5000 }).toBe(true);
+  const a = await render(page);
+  await page.waitForTimeout(1000);
+  const b = await render(page);
+  expect(b.rendered).toBe(a.rendered); // nothing drawn
+  expect(b.skipped).toBeGreaterThan(a.skipped + 20); // while the loop keeps watching the layout
+  expect(await page.locator('.gl-stage').evaluate((el) => getComputedStyle(el).opacity)).toBe('0');
+  // Back to the top: rendering resumes on the next frames, at the hero.
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await frames(page, 3);
+  const c = await render(page);
+  expect(c.offscreen).toBe(false);
+  expect(c.anchor).toBe('hero');
+  expect(c.rendered).toBeGreaterThan(b.rendered);
+});
+
+test('fast scroll: jumping straight to a lower section draws Auri there within a few frames', async ({ page }) => {
+  await page.goto('/?glyphdebug', { waitUntil: 'networkidle' });
+  await glReady(page);
+  await page.waitForTimeout(500);
+  // From the hero straight to the fourth chapter, in one jump (no intermediate sections rendered).
+  await page.evaluate(() => document.querySelector('#ch-research')!.scrollIntoView({ block: 'start' }));
+  await frames(page, 3);
+  const r = await render(page);
+  expect(r.anchor).toBe('research');
+  expect(r.offscreen).toBe(false);
+  await expect.poll(() => page.locator('.gl-stage').evaluate((el) => +getComputedStyle(el).opacity), { timeout: 2000 }).toBeGreaterThan(0.9);
+  // And from far below the last mascot area straight back to one.
+  await page.evaluate(() => document.querySelector('.more-title')!.scrollIntoView({ block: 'center' }));
+  await expect.poll(async () => (await render(page)).offscreen, { timeout: 5000 }).toBe(true);
+  await page.evaluate(() => document.querySelector('.hire-mascot')!.scrollIntoView({ block: 'center' }));
+  await frames(page, 3);
+  expect((await render(page)).anchor).toBe('cta');
+});
+
+test('no leaks: GPU resources and window listeners stay constant across a full scroll and resizes', async ({ page }) => {
+  test.setTimeout(90_000);
+  await page.goto('/?glyphdebug', { waitUntil: 'networkidle' });
+  await glReady(page);
+  await page.waitForTimeout(800);
+  const cdp = await page.context().newCDPSession(page);
+  const listeners = async () => {
+    const { result } = await cdp.send('Runtime.evaluate', { expression: 'window' });
+    const { listeners } = await cdp.send('DOMDebugger.getEventListeners', { objectId: result.objectId! });
+    return listeners.length;
+  };
+  const before = { ...(await render(page)), listeners: await listeners() };
+  const height = await page.evaluate(() => document.documentElement.scrollHeight);
+  for (let y = 0; y < height; y += 700) { await page.evaluate((y) => window.scrollTo(0, y), y); await page.waitForTimeout(120); }
+  await page.evaluate(() => window.scrollTo(0, 0));
+  // resizes, crossing the phone breakpoint (the glyph atlas is redrawn at a new cell size) and back
+  for (const vp of [{ width: 600, height: 800 }, { width: 1000, height: 700 }, { width: 1280, height: 720 }]) { await page.setViewportSize(vp); await page.waitForTimeout(400); }
+  await page.waitForTimeout(800);
+  const after = { ...(await render(page)), listeners: await listeners() };
+  expect(after.geometries).toBe(before.geometries);
+  expect(after.textures).toBe(before.textures);
+  expect(after.programs).toBe(before.programs);
+  expect(after.listeners).toBe(before.listeners);
+});
+
+test('WebGL chunk is preloaded early on mascot pages only, and not with ?nowebgl', async ({ page }) => {
+  await page.goto('/');
+  expect(await page.locator('link[rel="modulepreload"][href*="/_astro/boot."]').count()).toBe(1);
+  await glReady(page);
+  await page.goto('/privacy');
+  expect(await page.locator('link[rel="modulepreload"]').count()).toBe(0);
+  await page.goto('/?nowebgl');
+  expect(await page.locator('link[rel="modulepreload"]').count()).toBe(0);
+});
+
+test('reduced motion: Auri still renders (on demand) and the offscreen pause still applies', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/?glyphdebug', { waitUntil: 'networkidle' });
+  await glReady(page);
+  await page.waitForTimeout(500);
+  const a = await render(page);
+  expect(a.rendered).toBeGreaterThan(0);
+  await page.waitForTimeout(800);
+  expect((await render(page)).rendered).toBe(a.rendered); // nothing changes, nothing is drawn
+  await page.evaluate(() => document.querySelector('.more-title')!.scrollIntoView({ block: 'center' }));
+  await expect.poll(async () => (await render(page)).offscreen, { timeout: 3000 }).toBe(true);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect.poll(async () => (await render(page)).anchor, { timeout: 3000 }).toBe('hero');
 });
