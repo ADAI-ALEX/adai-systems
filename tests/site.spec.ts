@@ -235,10 +235,10 @@ test('cursor glyph lens: no 3D pixels inside the lens core anywhere around the c
 
 type Lens = { radius: number; frame: number; viewportH: number; dragging: boolean; x: number; y: number };
 const lens = (page: import('@playwright/test').Page) => page.evaluate(() => (window as unknown as { __adaiLens: Lens }).__adaiLens);
-/** Lens radius (in viewport heights): clamp(frame × 0.12, 0.03, 0.0825), half the previous clamp(frame × 0.24, 0.06, 0.165). */
-const expectedRadius = (frame: number) => Math.min(Math.max(frame * 0.12, 0.03), 0.0825);
+/** Lens radius (in viewport heights): clamp(frame × 0.18, 0.045, 0.12375), midway between clamp(frame × 0.24, 0.06, 0.165) and clamp(frame × 0.12, 0.03, 0.0825). */
+const expectedRadius = (frame: number) => Math.min(Math.max(frame * 0.18, 0.045), 0.12375);
 
-test('cursor glyph lens is half its previous diameter and follows the cursor', async ({ page }) => {
+test('cursor glyph lens is midway between its two previous sizes and follows the cursor', async ({ page }) => {
   await page.goto('/?glyphdebug', { waitUntil: 'networkidle' });
   await page.waitForFunction(() => document.documentElement.classList.contains('gl-ready'), null, { timeout: 15_000 });
   await page.waitForTimeout(1200);
@@ -248,7 +248,8 @@ test('cursor glyph lens is half its previous diameter and follows the cursor', a
   const l = await lens(page);
   expect(l.radius).toBeGreaterThan(0);
   expect(l.radius).toBeCloseTo(expectedRadius(l.frame), 3);
-  expect(l.radius).toBeCloseTo(0.5 * Math.min(Math.max(l.frame * 0.24, 0.06), 0.165), 4); // half the previous lens
+  const larger = Math.min(Math.max(l.frame * 0.24, 0.06), 0.165), smaller = Math.min(Math.max(l.frame * 0.12, 0.03), 0.0825);
+  expect(l.radius).toBeCloseTo((larger + smaller) / 2, 4); // the midpoint of the two previous lenses
   expect(Math.hypot(l.x - (box.x + box.width / 2), l.y - (box.y + box.height * 0.4))).toBeLessThan(3);
   await page.mouse.move(40, 860, { steps: 4 });
   await page.waitForTimeout(900);

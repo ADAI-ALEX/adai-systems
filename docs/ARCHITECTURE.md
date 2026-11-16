@@ -17,7 +17,7 @@
   4. a per-cell noise pass (lens dither, aura field, glyph jitter);
   5. per-cell composite (glyph or 3D) with tone mapping (Neutral) straight to the canvas, at the screen's pixel density.
 
-  A small glyph lens follows the cursor near Auri (radius scales with Auri, capped at 8.25 % of the viewport height); a finger dragging across Auri drives it on touch screens without scrolling the page, and `?glyphdebug` exposes any uncovered 3D pixel inside it.
+  A small glyph lens follows the cursor near Auri (radius scales with Auri, capped at 12.375 % of the viewport height); a finger dragging across Auri drives it on touch screens without scrolling the page, and `?glyphdebug` exposes any uncovered 3D pixel inside it.
 - **Two resolutions.**
   - The canvas, and so the glyph pass, runs at the screen's own pixel density (up to 3×; 2× when a 3× canvas would exceed 6 megapixels), with a glyph atlas drawn at the exact cell size. Glyph quality is identical on every page.
   - The 3D scene renders into its own target at 1.5× (desktop) or 1.25× (touch), as before. The animated noise is computed once per glyph cell in a small pass, and the composite skips, exactly, every pixel where it would output nothing: beyond 2.4 mascot radii, and where neither Auri nor the aura reaches. As a result the sharper glyph pass costs no more GPU time on desktop than the old one (see `docs/performance/README.md`).

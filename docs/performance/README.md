@@ -78,7 +78,7 @@ The homepage is where visitors land cold, so its first seconds overlap with load
 - **Parallel small fetches.** `gl-loader.ts` fetches the mascot manifest and the glyph font in parallel with the chunk. Before, the manifest was fetched serially before Auri was built: one idle round trip.
 - **Shaders compiled ahead.** The glyph passes' shaders are compiled with `compileAsync` before the first frame. Before, they compiled synchronously inside it.
 
-**Lens:** `LENS_SCALE, LENS_MIN, LENS_MAX` went from `0.24, 0.06, 0.165` to `0.12, 0.03, 0.0825`. The diameter is exactly half at every viewport, as measured below.
+**Lens:** `LENS_SCALE, LENS_MIN, LENS_MAX` went from `0.24, 0.06, 0.165` to `0.12, 0.03, 0.0825`. The diameter is exactly half at every viewport, as measured below. A later adjustment set the lens midway between the two: `0.18, 0.045, 0.12375` (see `docs/MASCOT.md`). The measurements in this folder were taken with the half-size lens, which doesn't affect them.
 
 ## 3. Results
 

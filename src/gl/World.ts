@@ -20,9 +20,9 @@ const HUES: Record<HueName, string> = { agents: '#f2b560', automation: '#5cd6c4'
 const MASCOT_HEIGHT = 3.0; // rig units, measured floor (y = -0.08) to the top of the sprout bulb (y = 2.92)
 const MASCOT_CENTER_Y = 1.42;
 /** Glyph lens radius = clamp(frame height / viewport height × SCALE, MIN, MAX), in viewport heights.
- *  Half of the previous (0.24, 0.06, 0.165), i.e. 0.375 × the original (0.32, 0.08, 0.22): the circle is
- *  half the diameter it was. */
-const LENS_SCALE = 0.12, LENS_MIN = 0.03, LENS_MAX = 0.0825;
+ *  Midway between the 0.24/0.06/0.165 lens and the 0.12/0.03/0.0825 one: 0.75 × the former, 1.5 × the
+ *  latter, i.e. 0.5625 × the original (0.32, 0.08, 0.22). */
+const LENS_SCALE = 0.18, LENS_MIN = 0.045, LENS_MAX = 0.12375;
 /** Glyph cell edge in CSS pixels (rounded to whole device pixels by the pipeline). */
 const cellCss = (w: number) => (w < 700 ? 8 : 9.5);
 /** 3D scene resolution: the starting cap (as before) and the watchdog's lowest step. */
@@ -561,7 +561,7 @@ export class World {
       this.revealOrigin.x = damp(this.revealOrigin.x, px, 18, dt);
       this.revealOrigin.y = damp(this.revealOrigin.y, py, 18, dt);
     }
-    // Lens radius as a fraction of viewport height: half the previous 0.24 × frame (0.06–0.165).
+    // Lens radius as a fraction of viewport height: 0.18 × frame, clamped to 0.045–0.12375.
     const base = clamp((this.frame.h / H) * LENS_SCALE, LENS_MIN, LENS_MAX);
     const e = 1 - Math.pow(1 - this.reveal, 3);
     const radius = this.reveal > 0 ? base * e : 0;
