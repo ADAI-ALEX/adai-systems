@@ -1,0 +1,243 @@
+{
+ "base": "https://adai.systems",
+ "date": "2026-11-16T01:50:48.117Z",
+ "runs": 5,
+ "dsf": 2,
+ "throttle": true,
+ "viewport": "1440x900",
+ "load": {
+  "/": {
+   "cold": {
+    "fcp": 596,
+    "lcp": 596,
+    "load": 793,
+    "glStart": 603,
+    "firstFrame": 1277,
+    "tbt": 196,
+    "longest": 123
+   },
+   "warm": {
+    "fcp": 280,
+    "lcp": 280,
+    "load": 266,
+    "glStart": 264,
+    "firstFrame": 642,
+    "tbt": 107,
+    "longest": 100
+   },
+   "trials": {
+    "cold": [
+     {
+      "fcp": 604,
+      "lcp": 604,
+      "load": 785.7000000029802,
+      "glStart": 607.8999999985099,
+      "firstFrame": 1250.1000000014901,
+      "tbt": 187,
+      "longest": 115
+     },
+     {
+      "fcp": 592,
+      "lcp": 592,
+      "load": 797,
+      "glStart": 601.0999999940395,
+      "firstFrame": 1254.5,
+      "tbt": 173,
+      "longest": 110
+     },
+     {
+      "fcp": 592,
+      "lcp": 592,
+      "load": 793,
+      "glStart": 600.4000000059605,
+      "firstFrame": 1277.1000000014901,
+      "tbt": 196,
+      "longest": 123
+     },
+     {
+      "fcp": 596,
+      "lcp": 596,
+      "load": 779.2000000029802,
+      "glStart": 603.1000000014901,
+      "firstFrame": 1304,
+      "tbt": 218,
+      "longest": 134
+     },
+     {
+      "fcp": 624,
+      "lcp": 624,
+      "load": 824.2999999970198,
+      "glStart": 632,
+      "firstFrame": 1365.3999999985099,
+      "tbt": 231,
+      "longest": 139
+     }
+    ],
+    "warm": [
+     {
+      "fcp": 280,
+      "lcp": 280,
+      "load": 251.29999999701977,
+      "glStart": 249.79999999701977,
+      "firstFrame": 638.5,
+      "tbt": 107,
+      "longest": 98
+     },
+     {
+      "fcp": 268,
+      "lcp": 268,
+      "load": 265.29999999701977,
+      "glStart": 263.8999999985099,
+      "firstFrame": 642.1999999955297,
+      "tbt": 107,
+      "longest": 98
+     },
+     {
+      "fcp": 300,
+      "lcp": 300,
+      "load": 298.3999999985099,
+      "glStart": 296.29999999701977,
+      "firstFrame": 701.6999999955297,
+      "tbt": 113,
+      "longest": 100
+     },
+     {
+      "fcp": 312,
+      "lcp": 312,
+      "load": 312.5,
+      "glStart": 310.20000000298023,
+      "firstFrame": 732.8999999985099,
+      "tbt": 160,
+      "longest": 100
+     },
+     {
+      "fcp": 260,
+      "lcp": 260,
+      "load": 266.1000000014901,
+      "glStart": 264.20000000298023,
+      "firstFrame": 639.2000000029802,
+      "tbt": 105,
+      "longest": 100
+     }
+    ]
+   }
+  },
+  "/studio": {
+   "cold": {
+    "fcp": 560,
+    "lcp": 560,
+    "load": 742,
+    "glStart": 558,
+    "firstFrame": 1242,
+    "tbt": 215,
+    "longest": 129
+   },
+   "warm": {
+    "fcp": 252,
+    "lcp": 252,
+    "load": 242,
+    "glStart": 240,
+    "firstFrame": 662,
+    "tbt": 131,
+    "longest": 111
+   },
+   "trials": {
+    "cold": [
+     {
+      "fcp": 548,
+      "lcp": 548,
+      "load": 728.1000000014901,
+      "glStart": 554.3999999985099,
+      "firstFrame": 1183.8000000044703,
+      "tbt": 182,
+      "longest": 118
+     },
+     {
+      "fcp": 560,
+      "lcp": 560,
+      "load": 742.1999999955297,
+      "glStart": 558.1999999955297,
+      "firstFrame": 1242,
+      "tbt": 215,
+      "longest": 129
+     },
+     {
+      "fcp": 528,
+      "lcp": 528,
+      "load": 715.5,
+      "glStart": 540.1999999955297,
+      "firstFrame": 1226.2999999970198,
+      "tbt": 213,
+      "longest": 128
+     },
+     {
+      "fcp": 560,
+      "lcp": 560,
+      "load": 750.1000000014901,
+      "glStart": 569,
+      "firstFrame": 1253,
+      "tbt": 215,
+      "longest": 132
+     },
+     {
+      "fcp": 576,
+      "lcp": 576,
+      "load": 761.5,
+      "glStart": 586.8000000044703,
+      "firstFrame": 1288.8000000044703,
+      "tbt": 239,
+      "longest": 143
+     }
+    ],
+    "warm": [
+     {
+      "fcp": 264,
+      "lcp": 264,
+      "load": 234.70000000298023,
+      "glStart": 232.5,
+      "firstFrame": 649.7000000029802,
+      "tbt": 123,
+      "longest": 99
+     },
+     {
+      "fcp": 236,
+      "lcp": 236,
+      "load": 238.79999999701977,
+      "glStart": 236.60000000149012,
+      "firstFrame": 660.6999999955297,
+      "tbt": 141,
+      "longest": 111
+     },
+     {
+      "fcp": 252,
+      "lcp": 252,
+      "load": 248.10000000149012,
+      "glStart": 246.20000000298023,
+      "firstFrame": 664.8999999985099,
+      "tbt": 122,
+      "longest": 106
+     },
+     {
+      "fcp": 276,
+      "lcp": 276,
+      "load": 268.80000000447035,
+      "glStart": 266.20000000298023,
+      "firstFrame": 728.9000000059605,
+      "tbt": 157,
+      "longest": 122
+     },
+     {
+      "fcp": 240,
+      "lcp": 240,
+      "load": 241.79999999701977,
+      "glStart": 239.59999999403954,
+      "firstFrame": 662,
+      "tbt": 131,
+      "longest": 112
+     }
+    ]
+   }
+  }
+ },
+ "render": {}
+}

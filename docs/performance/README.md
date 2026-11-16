@@ -97,6 +97,23 @@ The homepage is where visitors land cold, so its first seconds overlap with load
 - **Warm visits.** Warm visits are about 20 ms slower: consistent, small, and not recovered. The likely cause is that three more shader programs are awaited through `compileAsync` before the first frame. Also under throttling, one small shared page module (`mascot-bus.js`) arrives about 100 ms later because it shares bandwidth with the early chunk download. The headline is visible without JavaScript, so this doesn't delay the first view.
 - **Production baseline.** For reference, production before this work (`before-production-throttled.json`) showed the homepage's first frame at 1507 ms cold and 645 ms warm. Unthrottled production: 429 ms cold, 240 ms warm.
 
+### Start-up on production (https://adai.systems), medians of 5
+
+The "before" runs were made against commit `86e3397`, about an hour before deployment. The "after" runs were made against `c257923` (deployment `dpl_8mKKXPUjvVdzan9UCjEA1wmQQ9Us`), twice. Real network timing varies by ±50–80 ms between runs, so both after runs are shown.
+
+| | Before | After, run 1 | After, run 2 |
+|---|---|---|---|
+| Homepage, throttled cold: FCP / first frame / blocking time | 596 / **1507** / 186 ms | 632 / **1354** / 232 ms | 596 / **1277** / 196 ms |
+| Homepage, throttled warm: first frame | 645 ms | 722 ms | 642 ms |
+| `/studio`, throttled cold: first frame | **1450** ms | **1200** ms | **1242** ms |
+| `/studio`, throttled warm: first frame | 605 ms | 653 ms | 662 ms |
+| Homepage, unthrottled cold / warm: first frame | 429 / 240 ms | 375 / 263 ms | |
+| `/studio`, unthrottled cold / warm: first frame | 419 / 242 ms | 356 / 232 ms | |
+
+- **Cold visits.** Auri's first frame is consistently 150–250 ms earlier.
+- **Warm visits.** Results are mixed, between equal and about 50–75 ms later, in line with the small warm regression measured locally.
+- **FCP and blocking time.** These moved by amounts within the run-to-run spread.
+
 Unthrottled on the local server, start-up is CPU-bound and unchanged: first frame 263 → 264 ms cold and 205 → 217 ms warm on the homepage. Blocking time is 16 → 13 ms.
 
 ### Rendering
@@ -159,5 +176,5 @@ Visual observations, not measurements:
 |---|---|
 | `before-local*.json`, `after-local*.json` | Same server, same browser. Suffixes: `-throttled` (fast 4G + 4× CPU), `-mobile` (390×844 @3×), `-reading` (reading pass), `-gpu` (timer queries) |
 | `before-production*.json` | https://adai.systems at commit `86e3397` |
-| `after-production*.json` | https://adai.systems after deployment |
+| `after-production*.json` | https://adai.systems after deployment of `c257923` (`-throttled-run2` is the repeat run) |
 | `screenshots/` | Comparison sheets and `glyph-quality.json` (resolutions, lens radius and sharpness proxies per case) |
