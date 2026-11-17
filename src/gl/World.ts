@@ -74,6 +74,7 @@ export class World {
   private active: Anchor | null = null;
   private frame = { cx: 0, cy: 0, h: 0, init: false };
   private pointer = { x: -1, y: -1, nx: 0, ny: 0, last: -100, speed: 0, inside: false, touched: false };
+  private startleUntil = 0;
   private reactTarget: { x: number; y: number; until: number } | null = null;
   private hue = new THREE.Color(HUES.studio);
   private poseGlyph = 0;
@@ -259,7 +260,11 @@ export class World {
       const near = this.isNearMascot(e.clientX, e.clientY, 1.4);
       if (near && !this.wasNear && this.pointer.speed < 4.5) this.mascot.react('notice');
       this.wasNear = near;
-      if (this.pointer.speed > 4.5 && this.isNearMascot(e.clientX, e.clientY, 1.6)) this.mascot.react('startle');
+      // A fast swipe near Auri startles it once, not on every pointer event of the swipe.
+      if (this.pointer.speed > 4.5 && now > this.startleUntil && this.isNearMascot(e.clientX, e.clientY, 1.6)) {
+        this.mascot.react('startle');
+        this.startleUntil = now + 1.2;
+      }
       this.dirty = true;
     }, { passive: true });
     on('pointerdown', (e) => {
@@ -519,6 +524,12 @@ export class World {
     return true;
   }
 
+  private mascotTopPx() {
+    this.bounds.setFromObject(this.mascot.object);
+    const v = this.projected.set((this.bounds.min.x + this.bounds.max.x) / 2, this.bounds.max.y, (this.bounds.min.z + this.bounds.max.z) / 2).project(this.camera);
+    return (-v.y * 0.5 + 0.5) * innerHeight;
+  }
+
   /** Test hook (only with ?glyphdebug): rendering state, for the progressive-rendering and quality tests. */
   private debugInfo() {
     if (!this.glyphDebug) return;
@@ -528,6 +539,8 @@ export class World {
       canvas: [this.renderer.domElement.width, this.renderer.domElement.height], scene: [p.sceneRT.width, p.sceneRT.height],
       rendered: this.stats.rendered, skipped: this.stats.skipped, offscreen: this.offscreen, anchor: this.active?.poseName ?? null,
       geometries: m.geometries, textures: m.textures, programs: this.renderer.info.programs?.length ?? 0,
+      // Auri's highest point on screen (CSS px) and how far above its resting frame that is, for the jump tests
+      mascotTop: this.mascotTopPx(), frameTop: this.frame.cy - this.frame.h / 2,
     };
   }
 

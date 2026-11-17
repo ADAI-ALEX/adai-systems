@@ -38,6 +38,8 @@ class Spring3 {
   }
 }
 
+/** Strongest hop (the poke) and the highest Auri may ever rise, in rig units (Auri is 3 units tall). */
+const MAX_KICK = 3.2, MAX_JUMP = 0.45;
 const HAND_REST_L = new THREE.Vector3(-0.86, 0.6, 0.28);
 const HAND_REST_R = new THREE.Vector3(0.86, 0.62, 0.28);
 const GESTURE_DURATION: Record<GestureName, number> = { none: 0, wave: 2.0, point: 1.8, think: 3.2, cheer: 1.6, present: 2.2, shrug: 1.6, nod: 1.1, hold: 0 };
@@ -184,7 +186,14 @@ export class ProceduralMascot implements MascotRig {
     }
   }
 
-  private kick(v: number) { this.jump.v += v; }
+  /**
+   * A hop. Only from the ground and never additive: a burst of reactions (a fast cursor fires dozens of
+   * pointer events) used to stack up velocity and launch Auri thousands of pixels off screen.
+   */
+  private kick(v: number) {
+    if (this.jump.y > 0.02 || this.jump.v > 0) return;
+    this.jump.v = Math.min(v, MAX_KICK);
+  }
 
   /** Hand targets for the active gesture (rig-local), or null when it has ended. */
   private gestureTargets(t: number, outL: THREE.Vector3, outR: THREE.Vector3): boolean {
@@ -269,6 +278,7 @@ export class ProceduralMascot implements MascotRig {
     if (motion) {
       this.jump.v -= 22 * dt; // gravity
       this.jump.y += this.jump.v * dt;
+      if (this.jump.y > MAX_JUMP) { this.jump.y = MAX_JUMP; this.jump.v = Math.min(this.jump.v, 0); } // backstop
       if (this.jump.y < 0) { if (this.jump.v < -1.5) this.squash.v -= this.jump.v * 1.6; this.jump.y = 0; this.jump.v = 0; }
       this.squash.v += (-this.squash.s * 140 - this.squash.v * 11) * dt;
       this.squash.s += this.squash.v * dt;

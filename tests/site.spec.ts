@@ -458,3 +458,25 @@ test('reduced motion: Auri still renders (on demand) and the offscreen pause sti
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect.poll(async () => (await render(page)).anchor, { timeout: 3000 }).toBe('hero');
 });
+
+test('fast swipes and repeated pokes never launch Auri: at most one small hop, then it lands', async ({ page }) => {
+  await page.goto('/?glyphdebug', { waitUntil: 'networkidle' });
+  await glReady(page);
+  await page.waitForTimeout(2500);
+  const top = () => page.evaluate(() => (window as unknown as { __adaiRender: { mascotTop: number; frameTop: number } }).__adaiRender);
+  const b = (await page.locator('.hero-mascot').boundingBox())!;
+  const rest = (await top()).mascotTop;
+  const frameH = Math.min(b.height, b.width * 1.25, 900 * 0.86) * 0.97;
+  let highest = rest;
+  // Quick swipes just under Auri's feet and across its body (dozens of fast pointer events near it).
+  for (let i = 0; i < 12; i++) {
+    const y = i % 2 ? b.y + b.height * 0.92 : b.y + b.height * 0.5;
+    await page.mouse.move(b.x - 40, y, { steps: 2 });
+    await page.mouse.move(b.x + b.width + 40, y, { steps: 3 });
+    highest = Math.min(highest, (await top()).mascotTop);
+  }
+  // Rapid clicks on Auri.
+  for (let i = 0; i < 12; i++) { await page.mouse.click(b.x + b.width / 2, b.y + b.height * 0.6); highest = Math.min(highest, (await top()).mascotTop); }
+  expect(rest - highest).toBeLessThan(frameH * 0.2); // a hop, never a launch (it used to rise ~20 000 px)
+  await expect.poll(async () => Math.abs((await top()).mascotTop - rest), { timeout: 4000 }).toBeLessThan(frameH * 0.06); // back down
+});
