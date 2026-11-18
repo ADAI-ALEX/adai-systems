@@ -50,7 +50,7 @@ export const LAYOUT = {
   neckY: 1.12,
   headUp: 0.66,
   bodyY: 0.55,
-  shoulder: new THREE.Vector3(0.36, 0.86, 0.02),
+  shoulder: new THREE.Vector3(0.4, 0.86, 0.0),
   antenna: { x: 0.2, y: 0.82, z: -0.06, lean: -0.3 },
   ear: { x: 1.01, y: -0.06, z: -0.04 },
 } as const;
@@ -310,6 +310,17 @@ export class ArmTube {
     }
     this.geometry.setAttribute('color', new THREE.BufferAttribute(col, 3));
     this.geometry.setIndex(idx);
+  }
+
+  /** Length of a cubic Bézier, from `n` straight segments (plenty for an arm). */
+  static length(p0: THREE.Vector3, p1: THREE.Vector3, p2: THREE.Vector3, p3: THREE.Vector3, n = 14) {
+    let len = 0, px = p0.x, py = p0.y, pz = p0.z;
+    for (let i = 1; i <= n; i++) {
+      const t = i / n, u = 1 - t, a = u * u * u, b = 3 * u * u * t, c = 3 * u * t * t, d = t * t * t;
+      const x = p0.x * a + p1.x * b + p2.x * c + p3.x * d, y = p0.y * a + p1.y * b + p2.y * c + p3.y * d, z = p0.z * a + p1.z * b + p2.z * c + p3.z * d;
+      len += Math.hypot(x - px, y - py, z - pz); px = x; py = y; pz = z;
+    }
+    return len;
   }
 
   private bez(t: number, out: THREE.Vector3) {

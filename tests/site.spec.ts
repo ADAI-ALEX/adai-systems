@@ -482,7 +482,7 @@ test('fast swipes and repeated pokes never launch Auri: at most one small hop, t
 });
 
 /* ---------------------------------------------------------------- the new Auri: expressions, gestures, colours */
-type MascotState = { expression: string; base: string; gesture: string; hue: string; arms: string };
+type MascotState = { expression: string; base: string; gesture: string; hue: string; arms: string; armLength: number; armLengths: number[]; headClearance: number };
 const mascotState = (page: import('@playwright/test').Page) => page.evaluate(() => (window as unknown as { __adaiRender: { mascot: MascotState } }).__adaiRender.mascot);
 
 test('Meet Auri: every expression, gesture and colour control drives the character', async ({ page }) => {
@@ -577,4 +577,34 @@ test('SEO: llms.txt and robots.txt are served with canonical links only', async 
   const robots = await (await request.get('/robots.txt')).text();
   expect(robots).toContain('Sitemap: https://adai.systems/sitemap-index.xml');
   expect(robots).not.toMatch(/User-agent: \*\s*\nDisallow: \/\s*$/m); // the site itself is never blocked for everyone
+});
+
+test('Auri: arms keep their length (no stretching) and stay out of the head in every expression and gesture', async ({ page }) => {
+  test.setTimeout(120_000);
+  await page.goto('/mascot?glyphdebug', { waitUntil: 'networkidle' });
+  await glReady(page);
+  await page.waitForTimeout(1200);
+  const sweep = async (selector: string, ms: number) => {
+    await page.locator(selector).click();
+    const t0 = Date.now();
+    const out = { minLen: Infinity, maxLen: 0, clearance: Infinity, armLength: 0 };
+    while (Date.now() - t0 < ms) {
+      const s = await mascotState(page);
+      out.armLength = s.armLength;
+      for (const l of s.armLengths) { out.minLen = Math.min(out.minLen, l); out.maxLen = Math.max(out.maxLen, l); }
+      out.clearance = Math.min(out.clearance, s.headClearance);
+      await page.waitForTimeout(60);
+    }
+    return out;
+  };
+  const bad: string[] = [];
+  const check = (name: string, r: { minLen: number; maxLen: number; clearance: number; armLength: number }) => {
+    if (r.minLen < r.armLength * 0.98 || r.maxLen > r.armLength * 1.03) bad.push(`${name}: arm length ${r.minLen}..${r.maxLen} (should stay ${r.armLength})`);
+    // 1 = touching the head's surface; the arm roots emerge from under the head by design and are not sampled
+    if (r.clearance < 0.95) bad.push(`${name}: a hand or arm went ${(100 * (1 - r.clearance)).toFixed(1)} % into the head`);
+  };
+  for (const e of ['neutral', 'happy', 'curious', 'surprised', 'thinking', 'focused', 'talking', 'excited', 'confused', 'proud', 'sleepy']) check(e, await sweep(`[data-expression="${e}"]`, 1300));
+  await page.locator('[data-expression="neutral"]').click();
+  for (const g of ['wave', 'point', 'think', 'cheer', 'present', 'shrug', 'nod']) check(g, await sweep(`[data-gesture="${g}"]`, 2400));
+  expect(bad).toEqual([]);
 });

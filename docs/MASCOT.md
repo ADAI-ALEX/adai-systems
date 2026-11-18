@@ -19,19 +19,19 @@ The design follows Alex's reference sheet, "New Mascot Screenshot" (kept outside
 | Part | Design |
 |---|---|
 | **Silhouette** | A floating companion: an oversized, soft capsule head (about half of Auri's height, 1.2 times as wide as it is tall), a compact rounded body, short soft arms, big mitten hands. No legs. |
-| **Head** | Ivory plush, rounder at the crown and fuller at the jaw. |
-| **Face display** | A large, glossy black display set into the head: a very rounded rectangle about 78 % of the head's width, sunk into a real recess with a rolled plush lip around it. |
+| **Head** | A smooth satin ivory shell, rounder at the crown and fuller at the jaw. |
+| **Face display** | A large, glossy black display set into the head: a very rounded rectangle about 78 % of the head's width, sunk into a real recess with a rolled lip around it. |
 | **Eyes** | Luminous white strokes and shapes with a soft glow in the accent colour. They are designed shapes, not dots (see §3). The face has no mouth, except an animated one while talking. |
-| **Antenna** | A short metal stalk on a plush collar, slightly off-centre and leaning, with a glossy, glowing ball. It bends on a spring and reacts to mood. |
+| **Antenna** | A short metal stalk on a soft collar, slightly off-centre and leaning, with a glossy, glowing ball. It bends on a spring and reacts to mood. |
 | **Ear modules** | Deep indigo housings with a glowing light ring and a glossy dark cap, integrated into the sides of the head. |
-| **Body** | Ivory plush, fullest at the chest. A thick navy velvet collar where the head rests, and a glossy chest tile with the ADAI speech bubble (with its three dots) lit from inside. |
-| **Arms and hands** | Soft tapered arms without elbows (they bend along a curve), navy velvet cuffs, and chunky four-finger mittens with a thumb, able to make a fist, point, or spread. |
-| **Light** | A cool violet back light and an accent-coloured rim glow on the plush silhouette, as in the reference. |
+| **Body** | Smooth ivory, fullest at the chest. A thick navy collar where the head rests, and a glossy chest tile with the ADAI speech bubble (with its three dots) lit from inside. |
+| **Arms and hands** | Soft tapered arms of a fixed length (1.0 rig units along the curve) that bend at a soft elbow, navy cuffs, and chunky four-finger mittens with a thumb, able to make a fist, point, or spread. |
+| **Light** | A cool violet back light and an accent-coloured rim glow on the silhouette, as in the reference. |
 
 Differences from the reference that were deliberate:
 - **The body is ivory with a navy collar**, as in the reference's expression sheet, not the navy top of its large hero illustration. The brief asks for an ivory body with a navy accent at the neck.
 - **Colour variants keep the shell ivory**: only the lights change. The reference's small variant thumbnails tint the whole head, but the brief asks for the ivory body and black face to stay constant.
-- **The fur is a shading effect**, not geometry (see §2), so it costs one shader rather than millions of hairs.
+- **The surface is smooth satin, not fur.** The reference is rendered as soft plush, but a fibre texture read as leather at website sizes (Alex's feedback, 18 November 2026), so the shell is smooth soft-touch plastic like the face's glass is smooth.
 
 ## 2. How Auri is built (procedural, in `src/gl/mascot/`)
 
@@ -40,7 +40,7 @@ Auri is generated in code at start-up: no model, texture or image is downloaded 
 | File | What it does |
 |---|---|
 | `shapes.ts` | All geometry. Soft parts are high-resolution spheres reshaped per direction (superellipsoids plus soft directional bulges). The head shell is carved by the face SDF: the display is pushed into a recess with a rolled lip. The glass is sampled from the same surface, sunk into the recess and slightly domed. The hand is one mesh with three morph targets (`fist`, `point`, `spread`); its fingers are capsules bent along their length. The arms are `ArmTube`s: a tapered tube along a cubic Bézier from shoulder to wrist, rebuilt each frame (about 270 vertices per arm). |
-| `materials.ts` | Plush (ivory), velvet (navy collar and cuffs), the ear housing and cap, the light materials, and the chest tile with its emblem drawn by shader. The plush fibre is a per-pixel normal from two octaves of value noise with analytic derivatives. It fades out as one noise cell approaches a pixel, so it never shimmers, and small renders get a clean sheen. The display's lip and groove are shaded per pixel from the same SDF that carved the geometry, so they stay crisp at any vertex count. An accent-tinted fresnel rim gives the reference's glowing plush edge. |
+| `materials.ts` | The smooth satin ivory shell (soft-touch plastic with a light clearcoat), the navy collar and cuffs, the ear housing and cap, the light materials, and the chest tile with its emblem drawn by shader. There is deliberately no grain, fibre or bump texture: at website sizes any micro-texture reads as leather. The display's lip and groove are shaded per pixel from the same SDF that carved the geometry, so they stay crisp at any vertex count. An accent-tinted fresnel rim gives the reference's glowing edge. The chest tile is ink-dark and only faintly reflective, so the emblem never fogs over when Auri leans back. |
 | `faceMaterial.ts` | The face shader (see §3). |
 | `expressions.ts` | The eleven expressions, the emote and resting arm pose that go with each, and blending. |
 | `emotes.ts` | The small symbols beside the head (`?`, `!!`, thinking dots, a speech bubble, sparkles, `z z`). They are drawn once into a canvas atlas with vector paths and shown on four pooled sprites, outside the bounds used for framing. |
@@ -81,7 +81,7 @@ On top of the shapes:
 - a small **mouth** appears and moves in syllables only while talking;
 - a faint **blush** for happy, excited and proud.
 
-The glass has an inner rim shadow (it sits below the plush lip), a broad soft window reflection, a key glint and a fresnel sheen.
+The glass has an inner rim shadow (it sits below the shell's lip), a broad soft window reflection, a key glint and a fresnel sheen.
 
 ## 4. Animation
 
@@ -91,7 +91,7 @@ Animation is layered, so the layers never fight over a transform. This is what l
 |---|---|---|
 | Face | eyes, mouth, lights | the expression; blinks and gaze on top |
 | Head | yaw, pitch, roll | gaze + expression tilt/pitch + gesture additive (nod, think, shrug) + idle drift, summed and clamped |
-| Arms and hands | hand position, orientation, finger pose | the gesture (by envelope: rise, hold, settle), over the expression's resting arm pose, over rest; then springs |
+| Arms and hands | hand position, orientation, finger pose | the gesture (by envelope: rise, hold, settle), over the expression's resting arm pose, over rest; then springs. A hand can never be placed farther than the arm reaches, and each frame the arm's bend is solved so its length along the curve stays constant (no stretching). Every pose keeps hands and forearms out of the head; a test sweeps all of them |
 | Body | hover, lean, sway, hop, squash | float + breathing, the expression's lean, gesture and reaction hops |
 | Antenna | bend, perk | a damped spring driven by head motion and hops, plus the expression's perk |
 
@@ -116,7 +116,7 @@ Animation is layered, so the layers never fight over a transform. This is what l
 
 ## 5. Colour variants
 
-Only the lights change (antenna ball and halo, ear rings and halos, chest emblem, the glow in the eyes, the plush rim, the collar sheen and the scene's rim light), so it is always recognisably the same Auri.
+Only the lights change (antenna ball and halo, ear rings and halos, chest emblem, the glow in the eyes, the shell's rim glow, the collar sheen and the scene's rim light), so it is always recognisably the same Auri.
 
 | Variant | Hex | Where |
 |---|---|---|

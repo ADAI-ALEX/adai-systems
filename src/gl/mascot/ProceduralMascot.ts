@@ -17,7 +17,7 @@
 import * as THREE from 'three';
 import {
   ANTENNA, ArmTube, antennaBallGeometry, antennaBaseGeometry, antennaStalkGeometry, bakeWarmth, bodyGeometry, collarGeometry,
-  cuffGeometry, earCapGeometry, earHousingGeometry, earRingGeometry, glassGeometry, glowTexture, HAND_MORPHS, handGeometry, headGeometry, LAYOUT, plateGeometry,
+  cuffGeometry, earCapGeometry, earHousingGeometry, earRingGeometry, glassGeometry, glowTexture, HAND_MORPHS, handGeometry, headGeometry, headRadius, LAYOUT, plateGeometry,
 } from './shapes';
 import { createMaterials, rimUniforms } from './materials';
 import { applyFace, createFaceMaterial } from './faceMaterial';
@@ -52,6 +52,12 @@ const MAX_KICK = 2.8, MAX_JUMP = 0.36;
 const BODY_Y = LAYOUT.bodyY;
 /** The mittens are drawn big, like the reference: chunky, soft, expressive. */
 const HAND_SCALE = 1.45;
+/**
+ * The arm's length along its curve, shoulder to wrist (rig units). It never changes: a near hand bends the arm,
+ * a far one straightens it, and no target may be farther than the arm can reach (so arms never stretch).
+ */
+const ARM_LENGTH = 1.0;
+const MAX_REACH = ARM_LENGTH * 0.96;
 const GESTURE_DURATION: Record<GestureName, number> = { none: 0, wave: 2.2, point: 2.0, think: 3.2, cheer: 1.7, present: 2.3, shrug: 1.8, nod: 1.3, hold: 0 };
 /** The expression a gesture suggests, used only when nobody has asked for a particular expression. */
 const GESTURE_MOOD: Partial<Record<GestureName, ExpressionName>> = { wave: 'happy', cheer: 'excited', shrug: 'confused', think: 'thinking', nod: 'happy', present: 'happy' };
@@ -62,34 +68,34 @@ interface HandPose { pos: [number, number, number]; fingers: [number, number, nu
 
 /** Resting arm poses: R is the +x hand, L (if given) the -x hand, both authored as if on the +x side. */
 const ARM_POSES: Record<ArmPose, { R: HandPose; L?: HandPose }> = {
-  rest: { R: { pos: [0.8, 0.5, 0.18], fingers: [0.22, -1, 0.25], palm: [-1, 0, 0.25] } },
+  rest: { R: { pos: [0.86, 0.28, 0.22], fingers: [0.3, -1, 0.2], palm: [-1, 0, 0.25], elbow: [-0.14, -0.32, -0.04] } },
   open: { R: { pos: [0.84, 0.66, 0.34], fingers: [0.5, -0.45, 0.6], palm: [-0.35, 0.35, 1], spread: 0.35 } },
   chin: {
-    R: { pos: [0.3, 1.04, 0.86], fingers: [-0.28, 1, 0.2], palm: [-0.15, 0.1, -1], point: 0.55, fist: 0.35, elbow: [0.1, -0.15, 0.25] },
+    R: { pos: [0.3, 0.97, 0.94], fingers: [-0.3, 0.62, 0.62], palm: [-0.15, 0.6, -0.8], point: 0.55, fist: 0.35, elbow: [0.1, -0.15, 0.2] },
     L: { pos: [0.62, 0.66, 0.5], fingers: [-0.6, 0.15, 0.6], palm: [0, 1, 0], fist: 0.25 },
   },
-  chest: { R: { pos: [0.52, 1.0, 0.66], fingers: [-0.05, 1, 0.25], palm: [-0.25, 0, 1], spread: 1 } },
-  fists: { R: { pos: [0.66, 0.74, 0.46], fingers: [-0.45, 0.35, 0.85], palm: [-0.8, -0.3, 0], fist: 1, elbow: [0.12, 0, 0] } },
+  chest: { R: { pos: [0.6, 0.84, 0.8], fingers: [-0.05, 0.7, 0.7], palm: [-0.25, -0.5, 1], spread: 1 } },
+  fists: { R: { pos: [0.72, 0.7, 0.5], fingers: [-0.45, 0.35, 0.85], palm: [-0.8, -0.3, 0], fist: 1, elbow: [0.2, -0.05, 0] } },
   talk: {
     R: { pos: [0.66, 0.86, 0.6], fingers: [-0.1, 0.35, 1], palm: [-0.25, 1, 0], spread: 0.3 },
-    L: { pos: [0.8, 0.5, 0.18], fingers: [0.22, -1, 0.25], palm: [-1, 0, 0.25] },
+    L: { pos: [0.86, 0.28, 0.22], fingers: [0.3, -1, 0.2], palm: [-1, 0, 0.25], elbow: [-0.14, -0.32, -0.04] },
   },
-  cheeks: { R: { pos: [0.82, 1.3, 0.55], fingers: [0.05, 1, 0.2], palm: [-0.7, 0, 1], fist: 0.9, elbow: [0.15, -0.1, 0] } },
+  cheeks: { R: { pos: [1.02, 1.16, 0.68], fingers: [0.08, 1, 0.25], palm: [-0.7, 0, 1], fist: 0.9, elbow: [0.15, -0.1, 0] } },
   scratch: {
-    R: { pos: [0.66, 1.12, 0.74], fingers: [-0.35, 1, 0.15], palm: [-0.35, 0, -1], point: 0.65, fist: 0.2 },
+    R: { pos: [1.06, 1.08, 0.64], fingers: [-0.15, 1, 0.15], palm: [-1, 0, 0.3], point: 0.65, fist: 0.2 },
     L: { pos: [0.9, 0.78, 0.38], fingers: [0.9, 0.25, 0.35], palm: [0, 1, 0.15], spread: 0.3 },
   },
   hips: { R: { pos: [0.68, 0.5, 0.2], fingers: [-1, -0.2, 0.1], palm: [0, 0.1, -1], fist: 0.9, elbow: [0.22, 0.05, -0.08] } },
-  droop: { R: { pos: [0.7, 0.4, 0.24], fingers: [0.12, -1, 0.15], palm: [-1, 0, 0] } },
+  droop: { R: { pos: [0.8, 0.22, 0.24], fingers: [0.18, -1, 0.15], palm: [-1, 0, 0], elbow: [-0.14, -0.32, -0.04] } },
 };
 
 /** Gesture key poses for the lead hand (on the content side) and the other one. */
 const GESTURE_POSES: Partial<Record<GestureName, { lead: HandPose; other?: HandPose; both?: boolean }>> = {
-  wave: { lead: { pos: [1.08, 1.48, 0.7], fingers: [0.25, 1, 0.1], palm: [0.1, 0, 1], spread: 0.8, elbow: [0.18, -0.25, 0.1] }, other: ARM_POSES.open.R },
-  point: { lead: { pos: [1.02, 1.16, 0.74], fingers: [0.85, 0.3, 0.6], palm: [0, -1, 0.3], point: 1, elbow: [0.08, -0.12, 0] }, other: ARM_POSES.rest.R },
+  wave: { lead: { pos: [1.14, 1.2, 0.5], fingers: [0.3, 1, 0.12], palm: [0.1, 0, 1], spread: 0.8, elbow: [0.12, -0.2, 0] }, other: ARM_POSES.open.R },
+  point: { lead: { pos: [0.98, 1.1, 0.66], fingers: [0.85, 0.3, 0.6], palm: [0, -1, 0.3], point: 1, elbow: [0.08, -0.12, 0] }, other: ARM_POSES.rest.R },
   think: { lead: ARM_POSES.chin.R, other: ARM_POSES.chin.L },
-  cheer: { lead: { pos: [0.96, 1.92, 0.3], fingers: [0.3, 1, 0.1], palm: [0, 0.1, 1], spread: 1, elbow: [0.25, -0.15, 0] }, both: true },
-  present: { lead: { pos: [1.02, 0.9, 0.8], fingers: [0.85, 0.2, 0.65], palm: [-0.1, 1, 0.2], spread: 0.35, elbow: [0.05, -0.12, 0] }, other: ARM_POSES.open.R },
+  cheer: { lead: { pos: [1.14, 1.26, 0.46], fingers: [0.35, 1, 0.1], palm: [0, 0.1, 1], spread: 1, elbow: [0.15, -0.15, 0] }, both: true },
+  present: { lead: { pos: [0.95, 0.88, 0.72], fingers: [0.85, 0.2, 0.65], palm: [-0.1, 1, 0.2], spread: 0.35, elbow: [0.05, -0.12, 0] }, other: ARM_POSES.open.R },
   shrug: { lead: { pos: [1.08, 1.02, 0.44], fingers: [1, 0.35, 0.3], palm: [0, 1, 0.25], spread: 0.55, elbow: [0, -0.2, 0] }, both: true },
 };
 
@@ -105,6 +111,8 @@ interface HandRig {
   quat: THREE.Quaternion;
   morph: { fist: number; point: number; spread: number };
   elbow: THREE.Vector3;
+  /** The arm's current length along its curve (for tests: it should stay ARM_LENGTH). */
+  armLength: number;
 }
 
 const PLATE_Y = 0.1;
@@ -146,7 +154,7 @@ function buildGeometrySync(detail: number): Geometry {
   };
 }
 
-const tmpV = new THREE.Vector3(), tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), tmpC = new THREE.Vector3(), tmpD = new THREE.Vector3();
+const tmpV = new THREE.Vector3(), tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), tmpC = new THREE.Vector3(), tmpD = new THREE.Vector3(), tmpE = new THREE.Vector3();
 const qx = new THREE.Vector3(), qy = new THREE.Vector3(), qz = new THREE.Vector3();
 const tmpM = new THREE.Matrix4(), tmpQ = new THREE.Quaternion();
 const handOut = { pos: new THREE.Vector3(), quat: new THREE.Quaternion(), morph: { fist: 0, point: 0, spread: 0 }, elbow: new THREE.Vector3() };
@@ -208,6 +216,8 @@ export class ProceduralMascot implements MascotRig {
   private lastHeadPitch = 0;
   private lastBounceY = 0;
   private time = 0;
+  /** Where the hands or arms last came closest to the head (debug only). */
+  private clearanceWhere = '';
   /** Deterministic mode for renders (character sheets, tests): no random blinks, saccades or idle behaviours. */
   lab = false;
 
@@ -312,7 +322,7 @@ export class ProceduralMascot implements MascotRig {
       group.position.copy(spring.pos); group.quaternion.copy(quat);
       group.name = side > 0 ? 'hand_R' : 'hand_L'; mesh.name = `${group.name}_mesh`; cuff.name = `${group.name}_cuff`; armMesh.name = side > 0 ? 'arm_R' : 'arm_L';
       this.bodyPivot.add(group, armMesh);
-      this.hands.push({ side, group, mesh, arm, armMesh, spring, quat, morph: { fist: 0, point: 0, spread: 0 }, elbow: new THREE.Vector3() });
+      this.hands.push({ side, group, mesh, arm, armMesh, spring, quat, morph: { fist: 0, point: 0, spread: 0 }, elbow: new THREE.Vector3(), armLength: 0 });
       this.pickables.push(mesh, armMesh);
     }
     this.updateArms();
@@ -508,16 +518,40 @@ export class ProceduralMascot implements MascotRig {
     return p;
   }
 
+  /** The shoulder for a hand at height `wristY` (raised arms lift it a little), in body space. */
+  private shoulderOf(side: number, wristY: number, out: THREE.Vector3) {
+    return out.set(LAYOUT.shoulder.x * side, LAYOUT.shoulder.y - BODY_Y + 0.06 * smoothstep(0.3, 1.0, wristY), LAYOUT.shoulder.z);
+  }
+
+  /** Pulls a wrist position back within the arm's reach of its shoulder. */
+  private clampReach(side: number, wrist: THREE.Vector3) {
+    const sh = this.shoulderOf(side, wrist.y, tmpE);
+    const d = wrist.distanceTo(sh);
+    if (d > MAX_REACH) wrist.sub(sh).multiplyScalar(MAX_REACH / d).add(sh);
+    return wrist;
+  }
+
+  /**
+   * Shapes each arm as a Bézier from shoulder to wrist whose length is always ARM_LENGTH: the control handles are
+   * solved (a short bisection) so a near hand bends the arm outwards like an elbow and a far hand straightens it.
+   */
   private updateArms() {
     for (const h of this.hands) {
       const wrist = h.group.position;
-      const shoulder = tmpA.set(LAYOUT.shoulder.x * h.side, LAYOUT.shoulder.y - BODY_Y, LAYOUT.shoulder.z);
-      shoulder.y += 0.07 * smoothstep(0.3, 1.2, wrist.y); // raised arms lift the shoulder a little
-      const d = Math.max(shoulder.distanceTo(wrist), 0.2);
-      const out = tmpB.set(h.side * 0.85, -0.4, 0.3).normalize();
-      const p1 = tmpC.copy(shoulder).addScaledVector(out, d * 0.36).add(h.elbow);
+      const shoulder = this.shoulderOf(h.side, wrist.y, tmpA);
+      const out = tmpB.set(h.side * 0.95, -0.32, -0.02).normalize(); // elbows go out to the side, never forward across the face
       const fingers = tmpV.set(0, 1, 0).applyQuaternion(h.group.quaternion);
-      const p2 = tmpD.copy(wrist).addScaledVector(fingers, -d * 0.33);
+      const p1 = tmpC, p2 = tmpD;
+      const shape = (k: number) => {
+        // the bend lives at the elbow, out to the side; the forearm only leans into the wrist a little
+        p1.copy(shoulder).addScaledVector(out, k).addScaledVector(h.elbow, Math.min(k / 0.35, 1.5));
+        p2.copy(wrist).addScaledVector(fingers, -Math.min(k * 0.9, 0.28)).addScaledVector(out, k * 0.45);
+        return ArmTube.length(shoulder, p1, p2, wrist);
+      };
+      let lo = 0.04, hi = 1.4;
+      if (shape(lo) >= ARM_LENGTH) hi = lo;
+      else for (let i = 0; i < 9; i++) { const mid = (lo + hi) / 2; if (shape(mid) < ARM_LENGTH) lo = mid; else hi = mid; }
+      h.armLength = shape(hi);
       h.arm.update(shoulder, p1, p2, wrist);
     }
   }
@@ -590,9 +624,12 @@ export class ProceduralMascot implements MascotRig {
     if (this.gestureName === 'wave') gRoll = -0.06 * gk * this.gestureSide;
     const wig = this.wiggle > 0 ? Math.sin((1 - this.wiggle) * 30) * this.wiggle : 0;
     this.wiggle = Math.max(0, this.wiggle - step * 1.4);
-    this.head.rotation.y = this.lookHead.x * 0.5 + wig * 0.12;
+    // With both arms up (cheer) or a hand beside the head (wave, shrug), Auri looks ahead rather than turning its
+    // face into its own raised hand.
+    const armsUp = this.gestureName === 'cheer' || this.gestureName === 'wave' || this.gestureName === 'shrug' ? gk : 0;
+    this.head.rotation.y = this.lookHead.x * 0.5 * (1 - 0.8 * armsUp) + wig * 0.12;
     this.head.rotation.x = -this.lookHead.y * 0.3 - e.pitch - gPitch + nod + Math.sin(idleT * 0.9) * 0.012;
-    this.head.rotation.z = e.tilt * (1 - gk * 0.5) + gRoll + Math.sin(idleT * 0.6 + 1.3) * 0.02 - this.lookHead.x * 0.07 + wig * 0.1;
+    this.head.rotation.z = e.tilt * (1 - gk * 0.5) + gRoll + Math.sin(idleT * 0.6 + 1.3) * 0.02 - this.lookHead.x * 0.07 * (1 - armsUp) + wig * 0.1;
     this.neck.rotation.y = this.lookHead.x * 0.1;
     this.bodyPivot.rotation.y = this.lookBody * 0.16 + (this.gestureName === 'present' ? this.gestureSide * 0.12 * gk : 0) + wig * 0.15;
     this.bodyPivot.rotation.x = -e.lean + (this.gestureName === 'nod' ? nod * 0.25 : 0);
@@ -643,8 +680,10 @@ export class ProceduralMascot implements MascotRig {
       // the shrug and present gestures also breathe a little; the idle hands drift
       tp.y += motion ? Math.sin(time * 1.6 + (h.side > 0 ? 0.4 : 1.9)) * 0.025 : 0;
       tp.x -= this.lookBody * 0.04;
+      this.clampReach(h.side, tp); // targets and shoulders are both in body space
       const pos = motion ? h.spring.step(tp, dt) : h.spring.pos.copy(tp);
       h.group.position.copy(pos);
+      this.clampReach(h.side, h.group.position); // the spring's overshoot is clamped too
       h.quat.slerp(tq, motion ? 1 - Math.exp(-dt * 11) : 1);
       h.group.quaternion.copy(h.quat);
       h.morph.fist = damp(h.morph.fist, tm.fist, 12, step);
@@ -706,7 +745,38 @@ export class ProceduralMascot implements MascotRig {
       meshes++; if (m.castShadow) casters++;
       triangles += (m.geometry.index ? m.geometry.index.count : m.geometry.attributes.position.count) / 3;
     });
-    return { expression: this.shownExpr, base: this.baseExpr, gesture: this.gestureName, hue: `#${this.hueTarget.getHexString()}`, arms: this.armPose, meshes, triangles: Math.round(triangles), casters, sprites };
+    return {
+      expression: this.shownExpr, base: this.baseExpr, gesture: this.gestureName, hue: `#${this.hueTarget.getHexString()}`, arms: this.armPose,
+      meshes, triangles: Math.round(triangles), casters, sprites,
+      armLength: ARM_LENGTH, armLengths: this.hands.map((h) => +h.armLength.toFixed(4)), headClearance: +this.headClearance().toFixed(3), clearanceWhere: this.clearanceWhere,
+    };
+  }
+
+  /**
+   * How close the hands and arms come to the inside of the head: the smallest |p| / headRadius(direction) over
+   * sampled hand points and every arm vertex, in head space (below 1 means inside the head shell).
+   */
+  private headClearance() {
+    this.object.updateMatrixWorld(true);
+    const p = new THREE.Vector3();
+    let min = Infinity;
+    let where = '';
+    const test = (v: THREE.Vector3, label = '') => {
+      this.head.worldToLocal(v);
+      const l = v.length();
+      if (l < 1e-6) return;
+      const r = l / headRadius({ x: v.x / l, y: v.y / l, z: v.z / l });
+      if (r < min) { min = r; where = `${label} ${v.x.toFixed(2)},${v.y.toFixed(2)},${v.z.toFixed(2)}`; }
+    };
+    const handPoints: [number, number, number][] = [[0, 0.11, 0], [-0.07, 0.29, 0.02], [0, 0.32, 0.02], [0.07, 0.27, 0.02], [-0.17, 0.15, 0.05], [0.12, 0.1, 0]];
+    for (const h of this.hands) {
+      handPoints.forEach(([x, y, z], i) => test(h.mesh.localToWorld(p.set(x, y, z)), `hand${h.side}:${i}`));
+      // the outer 55 % of the arm (its root emerges from under the head and collar by design)
+      const pos = h.arm.geometry.attributes.position as THREE.BufferAttribute;
+      for (let i = Math.floor(pos.count * 0.45); i < pos.count; i++) test(h.armMesh.localToWorld(p.fromBufferAttribute(pos, i)), `arm${h.side}:${Math.floor(i / 17)}`);
+    }
+    this.clearanceWhere = where;
+    return min;
   }
 
   dispose() {

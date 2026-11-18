@@ -90,3 +90,14 @@ Unchanged by design:
 - glyphs at the screen's pixel density (19 px cells at 2×) with a pixel-exact atlas;
 - the frame-time watchdog lowers only the 3D resolution;
 - the lens is glyph-only. The coverage probe counts 0 uncovered 3D pixels at every position at 1×, 2× and 3× (`scripts/glyph-probe.mjs --metric`), and the test suite checks this on every run.
+
+## Follow-up: smooth shell and fixed-length arms (18 November 2026)
+
+The plush fibre shader was replaced by a smooth satin shell (no noise), arms got a fixed length, and the chest tile was darkened. Measured against production (the redesign as first shipped), same machine, homepage at 1440×900 at 2×:
+
+| | Redesign as first shipped | With the follow-up |
+|---|---|---|
+| GPU time per frame, idle, median / p95 | 3.94 / 6.72 ms | 3.87 / 6.55 ms |
+| GPU time per frame, lens on Auri, median / p95 | 4.11 / 6.55 ms | 3.75 / 6.36 ms |
+
+The difference is within run-to-run noise, so the honest reading is "no slower". The per-frame arm solve (a nine-step bisection on two 14-segment curves) costs nothing measurable.

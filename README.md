@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/assets/banner.png" alt="ADAI Systems: Building intelligent software. The ADAI wordmark beside Auri, the studio's ivory plush 3D character with a black face display and glowing smiling eyes, with the four kinds of work: agents, automation, apps and research." width="100%"></p>
+<p align="center"><img src="docs/assets/banner.png" alt="ADAI Systems: Building intelligent software. The ADAI wordmark beside Auri, the studio's smooth ivory 3D character with a black face display and glowing smiling eyes, with the four kinds of work: agents, automation, apps and research." width="100%"></p>
 
 <p align="center">
   <a href="https://adai.systems"><img src="https://img.shields.io/badge/live-adai.systems-eceae4?labelColor=06080b" alt="Live: adai.systems"></a>
@@ -14,9 +14,9 @@
 
 **ADAI Systems** is an independent technology studio, run by Alex, that designs and builds AI agents, automation, apps and research prototypes. This repository is its website: every project the studio has made, four services backed by that proof, and a short path to starting a project.
 
-The site is built around **Auri**, an original real-time 3D character: a floating plush companion with a big black face display, expressive luminous eyes, a glowing antenna and the ADAI speech bubble on its chest. Auri follows your cursor, reacts to what you do and changes colour with the kind of work on screen. Under your cursor it turns into typographic glyphs.
+The site is built around **Auri**, an original real-time 3D character: a floating companion with a smooth ivory shell, a big black face display, expressive luminous eyes, a glowing antenna and the ADAI speech bubble on its chest. Auri follows your cursor, reacts to what you do and changes colour with the kind of work on screen. Under your cursor it turns into typographic glyphs.
 
-<p align="center"><img src="docs/screenshots/home-desktop.png" alt="The ADAI Systems home page: the headline 'Building intelligent software.' on the left and Auri on the right: an ivory plush 3D character with a large black face display, two glowing smiling eyes, lavender ear lights and antenna, and open mitten hands." width="100%"></p>
+<p align="center"><img src="docs/screenshots/home-desktop.png" alt="The ADAI Systems home page: the headline 'Building intelligent software.' on the left and Auri on the right: a smooth ivory 3D character with a large black face display, two glowing smiling eyes, lavender ear lights and antenna, and open mitten hands." width="100%"></p>
 <p align="center"><sub>The home page at 1440 × 900. Auri is drawn live in the browser with WebGL; the headline and every link are ordinary HTML.</sub></p>
 
 - **Live site:** https://adai.systems
@@ -39,12 +39,12 @@ The site is built around **Auri**, an original real-time 3D character: a floatin
 
 ## Auri
 
-<p align="center"><img src="docs/assets/auri.webp" alt="Auri, front view: an ivory plush head with a large glossy black face display and two glowing smiling eyes, lavender-lit ear modules and antenna ball, a navy collar, open mitten hands and the ADAI speech bubble glowing on its chest." width="340"></p>
+<p align="center"><img src="docs/assets/auri.webp" alt="Auri, front view: a smooth ivory head with a large glossy black face display and two glowing smiling eyes, lavender-lit ear modules and antenna ball, a navy collar, open mitten hands and the ADAI speech bubble glowing on its chest." width="340"></p>
 
-Auri is a floating plush companion. Its design follows a reference sheet supplied by Alex; everything on the site is the real-time model, built in code.
+Auri is a floating companion. Its design follows a reference sheet supplied by Alex; everything on the site is the real-time model, built in code.
 - **A face that is a display.** A large, glossy black display is set into an oversized soft head. The eyes are designed shapes (smiling arcs, crescents, rings, closed curves, chevrons), drawn as signed distance fields so they stay sharp and morph smoothly.
 - **The ADAI mark, worn.** The mark is a speech bubble with eyes: Auri's face carries the eyes, and the bubble, with its three dots, glows on its chest.
-- **Plush, not plastic.** Ivory plush with a fine fibre shading, a navy velvet collar and cuffs, chunky mitten hands, indigo ear modules with light rings, and a glowing antenna. One lavender accent, which changes with the work.
+- **Smooth and soft.** A smooth satin ivory shell (no grain or texture), a navy collar and cuffs, chunky mitten hands, indigo ear modules with light rings, and a glowing antenna. One lavender accent, which changes with the work.
 
 | | |
 |---|---|
@@ -128,7 +128,7 @@ Auri is a floating plush companion. Its design follows a reference sheet supplie
 |---|---|
 | Framework | [Astro 7](https://astro.build): static output, every page prerendered HTML |
 | 3D | [three.js](https://threejs.org) r187 (WebGL2) with custom GLSL: the face shader, the glyph reduction pass and the composite |
-| Character | Procedural sculpting, a per-pixel plush fibre shader, a signed-distance-field face with designed eye shapes, posable mitten hands (morph targets), Bézier arms and layered spring animation (`src/gl/mascot/`) |
+| Character | Procedural sculpting, smooth satin materials with an accent rim glow, a signed-distance-field face with designed eye shapes, posable mitten hands (morph targets), Bézier arms and layered spring animation (`src/gl/mascot/`) |
 | Scrolling | [Lenis](https://lenis.darkroom.engineering) with a fine pointer only; native scrolling otherwise |
 | Language | TypeScript (strict), checked by `astro check` |
 | Fonts | Mona Sans and IBM Plex Mono via Fontsource, self-hosted |
