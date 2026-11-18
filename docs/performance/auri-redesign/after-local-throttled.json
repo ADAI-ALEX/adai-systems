@@ -1,0 +1,91 @@
+{
+ "base": "http://localhost:4331",
+ "date": "2026-11-18T01:54:33.962Z",
+ "runs": 3,
+ "dsf": 2,
+ "throttle": true,
+ "viewport": "1440x900",
+ "load": {
+  "/": {
+   "cold": {
+    "fcp": 580,
+    "lcp": 580,
+    "load": 979,
+    "glStart": 809,
+    "firstFrame": 1544,
+    "tbt": 184,
+    "longest": 138
+   },
+   "warm": {
+    "fcp": 284,
+    "lcp": 284,
+    "load": 327,
+    "glStart": 281,
+    "firstFrame": 768,
+    "tbt": 117,
+    "longest": 125
+   },
+   "trials": {
+    "cold": [
+     {
+      "fcp": 592,
+      "lcp": 592,
+      "load": 982.5999999977648,
+      "glStart": 812.1999999992549,
+      "firstFrame": 1564.0999999977648,
+      "tbt": 200,
+      "longest": 146
+     },
+     {
+      "fcp": 580,
+      "lcp": 580,
+      "load": 977.6999999992549,
+      "glStart": 809,
+      "firstFrame": 1543.9000000022352,
+      "tbt": 184,
+      "longest": 136
+     },
+     {
+      "fcp": 580,
+      "lcp": 580,
+      "load": 978.8999999985099,
+      "glStart": 808.8000000007451,
+      "firstFrame": 1540.6000000014901,
+      "tbt": 178,
+      "longest": 138
+     }
+    ],
+    "warm": [
+     {
+      "fcp": 280,
+      "lcp": 280,
+      "load": 326.5,
+      "glStart": 280.69999999925494,
+      "firstFrame": 768.1999999992549,
+      "tbt": 117,
+      "longest": 128
+     },
+     {
+      "fcp": 284,
+      "lcp": 284,
+      "load": 328.5,
+      "glStart": 283.5999999977648,
+      "firstFrame": 778.8999999985099,
+      "tbt": 117,
+      "longest": 125
+     },
+     {
+      "fcp": 284,
+      "lcp": 284,
+      "load": 323,
+      "glStart": 276,
+      "firstFrame": 765.0999999977648,
+      "tbt": 126,
+      "longest": 124
+     }
+    ]
+   }
+  }
+ },
+ "render": {}
+}

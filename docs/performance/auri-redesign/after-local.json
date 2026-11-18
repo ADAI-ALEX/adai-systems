@@ -1,0 +1,698 @@
+{
+ "base": "http://localhost:4331",
+ "date": "2026-11-18T01:51:40.425Z",
+ "runs": 5,
+ "dsf": 2,
+ "throttle": false,
+ "viewport": "1440x900",
+ "load": {
+  "/": {
+   "cold": {
+    "fcp": 68,
+    "lcp": 68,
+    "load": 70,
+    "glStart": 62,
+    "firstFrame": 307,
+    "tbt": 25,
+    "longest": 75
+   },
+   "warm": {
+    "fcp": 56,
+    "lcp": 56,
+    "load": 39,
+    "glStart": 38,
+    "firstFrame": 249,
+    "tbt": 21,
+    "longest": 71
+   },
+   "trials": {
+    "cold": [
+     {
+      "fcp": 76,
+      "lcp": 76,
+      "load": 83.69999999925494,
+      "glStart": 75.39999999850988,
+      "firstFrame": 327.69999999925494,
+      "tbt": 41,
+      "longest": 85
+     },
+     {
+      "fcp": 68,
+      "lcp": 68,
+      "load": 63.20000000298023,
+      "glStart": 60.900000002235174,
+      "firstFrame": 305.20000000298023,
+      "tbt": 25,
+      "longest": 75
+     },
+     {
+      "fcp": 68,
+      "lcp": 68,
+      "load": 69.80000000074506,
+      "glStart": 66.5,
+      "firstFrame": 307.1000000014901,
+      "tbt": 25,
+      "longest": 75
+     },
+     {
+      "fcp": 88,
+      "lcp": 88,
+      "load": 63.30000000074506,
+      "glStart": 53.399999998509884,
+      "firstFrame": 300.1000000014901,
+      "tbt": 24,
+      "longest": 74
+     },
+     {
+      "fcp": 68,
+      "lcp": 68,
+      "load": 69.5,
+      "glStart": 62.30000000074506,
+      "firstFrame": 314,
+      "tbt": 25,
+      "longest": 75
+     }
+    ],
+    "warm": [
+     {
+      "fcp": 60,
+      "lcp": 60,
+      "load": 35.30000000074506,
+      "glStart": 34.80000000074506,
+      "firstFrame": 249.10000000149012,
+      "tbt": 22,
+      "longest": 72
+     },
+     {
+      "fcp": 64,
+      "lcp": 64,
+      "load": 38.900000002235174,
+      "glStart": 38.400000002235174,
+      "firstFrame": 251.30000000074506,
+      "tbt": 21,
+      "longest": 71
+     },
+     {
+      "fcp": 56,
+      "lcp": 56,
+      "load": 38.5,
+      "glStart": 38,
+      "firstFrame": 259.30000000074506,
+      "tbt": 22,
+      "longest": 72
+     },
+     {
+      "fcp": 56,
+      "lcp": 56,
+      "load": 39.30000000074506,
+      "glStart": 38.80000000074506,
+      "firstFrame": 246.09999999776483,
+      "tbt": 20,
+      "longest": 70
+     },
+     {
+      "fcp": 52,
+      "lcp": 52,
+      "load": 36.30000000074506,
+      "glStart": 35.899999998509884,
+      "firstFrame": 245.39999999850988,
+      "tbt": 21,
+      "longest": 71
+     }
+    ]
+   }
+  },
+  "/mascot": {
+   "cold": {
+    "fcp": 52,
+    "lcp": 52,
+    "load": 44,
+    "glStart": 40,
+    "firstFrame": 270,
+    "tbt": 24,
+    "longest": 74
+   },
+   "warm": {
+    "fcp": 32,
+    "lcp": 32,
+    "load": 24,
+    "glStart": 23,
+    "firstFrame": 232,
+    "tbt": 20,
+    "longest": 70
+   },
+   "trials": {
+    "cold": [
+     {
+      "fcp": 56,
+      "lcp": 56,
+      "load": 48,
+      "glStart": 44.5,
+      "firstFrame": 287.69999999925494,
+      "tbt": 25,
+      "longest": 75
+     },
+     {
+      "fcp": 52,
+      "lcp": 52,
+      "load": 38.900000002235174,
+      "glStart": 33.400000002235174,
+      "firstFrame": 265.1000000014901,
+      "tbt": 23,
+      "longest": 73
+     },
+     {
+      "fcp": 52,
+      "lcp": 52,
+      "load": 44.5,
+      "glStart": 38.100000001490116,
+      "firstFrame": 269.9000000022352,
+      "tbt": 24,
+      "longest": 74
+     },
+     {
+      "fcp": 44,
+      "lcp": 44,
+      "load": 43.29999999701977,
+      "glStart": 39.79999999701977,
+      "firstFrame": 274.0999999977648,
+      "tbt": 25,
+      "longest": 75
+     },
+     {
+      "fcp": 48,
+      "lcp": 48,
+      "load": 44.19999999925494,
+      "glStart": 40.899999998509884,
+      "firstFrame": 270,
+      "tbt": 24,
+      "longest": 74
+     }
+    ],
+    "warm": [
+     {
+      "fcp": 32,
+      "lcp": 32,
+      "load": 22.700000002980232,
+      "glStart": 22.200000002980232,
+      "firstFrame": 226.80000000074506,
+      "tbt": 21,
+      "longest": 71
+     },
+     {
+      "fcp": 32,
+      "lcp": 32,
+      "load": 23.899999998509884,
+      "glStart": 23.300000000745058,
+      "firstFrame": 232,
+      "tbt": 21,
+      "longest": 71
+     },
+     {
+      "fcp": 40,
+      "lcp": 40,
+      "load": 25.5,
+      "glStart": 25,
+      "firstFrame": 233.80000000074506,
+      "tbt": 20,
+      "longest": 70
+     },
+     {
+      "fcp": 32,
+      "lcp": 32,
+      "load": 22.300000000745058,
+      "glStart": 21.800000000745058,
+      "firstFrame": 230.10000000149012,
+      "tbt": 20,
+      "longest": 70
+     },
+     {
+      "fcp": 36,
+      "lcp": 36,
+      "load": 24.700000002980232,
+      "glStart": 24.100000001490116,
+      "firstFrame": 233.5,
+      "tbt": 20,
+      "longest": 70
+     }
+    ]
+   }
+  }
+ },
+ "render": {
+  "/": {
+   "resolution": {
+    "canvas": [
+     2880,
+     1800
+    ],
+    "css": [
+     1440,
+     900
+    ],
+    "dpr": 2,
+    "render": {
+     "outDpr": 2,
+     "sceneDpr": 1.5,
+     "cellPx": 19,
+     "cellCss": 9.5,
+     "atlasCell": 19,
+     "canvas": [
+      2880,
+      1800
+     ],
+     "scene": [
+      2160,
+      1350
+     ],
+     "rendered": 153,
+     "skipped": 0,
+     "offscreen": false,
+     "anchor": "hero",
+     "geometries": 18,
+     "textures": 11,
+     "programs": 23,
+     "mascotTop": 99.40081093613091,
+     "frameTop": 143.51437500000003,
+     "mascot": {
+      "expression": "happy",
+      "base": "happy",
+      "gesture": "wave",
+      "hue": "#8f82ff",
+      "arms": "open"
+     }
+    }
+   },
+   "idle": {
+    "frameMs": {
+     "n": 240,
+     "mean": 16.67,
+     "median": 16.7,
+     "p95": 16.7,
+     "max": 16.8,
+     "sd": 0.06
+    },
+    "over20ms": 0,
+    "loopsPerFrame": {
+     "n": 240,
+     "mean": 2,
+     "median": 2,
+     "p95": 2,
+     "max": 2,
+     "sd": 0
+    },
+    "drawCallsPerFrame": {
+     "n": 240,
+     "mean": 34,
+     "median": 34,
+     "p95": 34,
+     "max": 34,
+     "sd": 0
+    },
+    "framesWithGl": 1
+   },
+   "lens": {
+    "frameMs": {
+     "n": 240,
+     "mean": 16.67,
+     "median": 16.7,
+     "p95": 16.8,
+     "max": 16.8,
+     "sd": 0.06
+    },
+    "over20ms": 0,
+    "loopsPerFrame": {
+     "n": 240,
+     "mean": 2,
+     "median": 2,
+     "p95": 2,
+     "max": 2,
+     "sd": 0
+    },
+    "drawCallsPerFrame": {
+     "n": 240,
+     "mean": 34.86,
+     "median": 34,
+     "p95": 36,
+     "max": 36,
+     "sd": 0.98
+    },
+    "framesWithGl": 1
+   },
+   "scroll": {
+    "frameMs": {
+     "n": 360,
+     "mean": 16.67,
+     "median": 16.7,
+     "p95": 16.7,
+     "max": 16.8,
+     "sd": 0.06
+    },
+    "over20ms": 0,
+    "loopsPerFrame": {
+     "n": 360,
+     "mean": 2,
+     "median": 2,
+     "p95": 2,
+     "max": 2,
+     "sd": 0
+    },
+    "drawCallsPerFrame": {
+     "n": 360,
+     "mean": 30.21,
+     "median": 33,
+     "p95": 36,
+     "max": 36,
+     "sd": 5.61
+    },
+    "framesWithGl": 1
+   },
+   "fullScroll": {
+    "frameMs": {
+     "n": 540,
+     "mean": 16.67,
+     "median": 16.7,
+     "p95": 16.8,
+     "max": 16.8,
+     "sd": 0.06
+    },
+    "over20ms": 0,
+    "loopsPerFrame": {
+     "n": 540,
+     "mean": 2,
+     "median": 2,
+     "p95": 2,
+     "max": 2,
+     "sd": 0
+    },
+    "drawCallsPerFrame": {
+     "n": 535,
+     "mean": 28.6,
+     "median": 30,
+     "p95": 34,
+     "max": 36,
+     "sd": 6.6
+    },
+    "framesWithGl": 0.991,
+    "serialisedCostMs": {
+     "n": 628,
+     "mean": 1.38,
+     "median": 1.3,
+     "p95": 2.6,
+     "max": 3.9,
+     "sd": 0.68
+    },
+    "glMsPerSecond": 96.6
+   },
+   "serialisedCostMs": {
+    "n": 60,
+    "mean": 1.76,
+    "median": 1.6,
+    "p95": 3.9,
+    "max": 5.6,
+    "sd": 1.13
+   },
+   "resolutionAfter": {
+    "canvas": [
+     2880,
+     1800
+    ],
+    "css": [
+     1440,
+     900
+    ],
+    "dpr": 2,
+    "render": {
+     "outDpr": 2,
+     "sceneDpr": 1.5,
+     "cellPx": 19,
+     "cellCss": 9.5,
+     "atlasCell": 19,
+     "canvas": [
+      2880,
+      1800
+     ],
+     "scene": [
+      2160,
+      1350
+     ],
+     "rendered": 2141,
+     "skipped": 5,
+     "offscreen": false,
+     "anchor": "work",
+     "geometries": 18,
+     "textures": 11,
+     "programs": 23,
+     "mascotTop": -7.871483158336345,
+     "frameTop": 12.859375000000028,
+     "mascot": {
+      "expression": "curious",
+      "base": "excited",
+      "gesture": "none",
+      "hue": "#8f82ff",
+      "arms": "chin"
+     }
+    }
+   },
+   "dprTimelineAfterScroll": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "gpuTimerQuery": true,
+   "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)"
+  },
+  "/mascot": {
+   "resolution": {
+    "canvas": [
+     2880,
+     1800
+    ],
+    "css": [
+     1440,
+     900
+    ],
+    "dpr": 2,
+    "render": {
+     "outDpr": 2,
+     "sceneDpr": 1.5,
+     "cellPx": 19,
+     "cellCss": 9.5,
+     "atlasCell": 19,
+     "canvas": [
+      2880,
+      1800
+     ],
+     "scene": [
+      2160,
+      1350
+     ],
+     "rendered": 153,
+     "skipped": 0,
+     "offscreen": false,
+     "anchor": "intro",
+     "geometries": 18,
+     "textures": 11,
+     "programs": 23,
+     "mascotTop": 105.43433054557929,
+     "frameTop": 148.27562500000005,
+     "mascot": {
+      "expression": "happy",
+      "base": "happy",
+      "gesture": "wave",
+      "hue": "#8f82ff",
+      "arms": "open"
+     }
+    }
+   },
+   "idle": {
+    "frameMs": {
+     "n": 240,
+     "mean": 16.67,
+     "median": 16.7,
+     "p95": 16.8,
+     "max": 16.8,
+     "sd": 0.06
+    },
+    "over20ms": 0,
+    "loopsPerFrame": {
+     "n": 240,
+     "mean": 2,
+     "median": 2,
+     "p95": 2,
+     "max": 2,
+     "sd": 0
+    },
+    "drawCallsPerFrame": {
+     "n": 240,
+     "mean": 34,
+     "median": 34,
+     "p95": 34,
+     "max": 34,
+     "sd": 0
+    },
+    "framesWithGl": 1
+   },
+   "lens": {
+    "frameMs": {
+     "n": 240,
+     "mean": 16.67,
+     "median": 16.7,
+     "p95": 16.7,
+     "max": 16.8,
+     "sd": 0.06
+    },
+    "over20ms": 0,
+    "loopsPerFrame": {
+     "n": 240,
+     "mean": 2,
+     "median": 2,
+     "p95": 2,
+     "max": 2,
+     "sd": 0
+    },
+    "drawCallsPerFrame": {
+     "n": 240,
+     "mean": 34.86,
+     "median": 34,
+     "p95": 36,
+     "max": 36,
+     "sd": 0.99
+    },
+    "framesWithGl": 1
+   },
+   "scroll": {
+    "frameMs": {
+     "n": 360,
+     "mean": 16.67,
+     "median": 16.7,
+     "p95": 16.7,
+     "max": 16.8,
+     "sd": 0.06
+    },
+    "over20ms": 0,
+    "loopsPerFrame": {
+     "n": 360,
+     "mean": 2,
+     "median": 2,
+     "p95": 2,
+     "max": 2,
+     "sd": 0
+    },
+    "drawCallsPerFrame": {
+     "n": 152,
+     "mean": 25.02,
+     "median": 23,
+     "p95": 34,
+     "max": 34,
+     "sd": 5.89
+    },
+    "framesWithGl": 0.422
+   },
+   "fullScroll": {
+    "frameMs": {
+     "n": 540,
+     "mean": 16.67,
+     "median": 16.7,
+     "p95": 16.8,
+     "max": 16.8,
+     "sd": 0.06
+    },
+    "over20ms": 0,
+    "loopsPerFrame": {
+     "n": 540,
+     "mean": 2,
+     "median": 2,
+     "p95": 2,
+     "max": 4,
+     "sd": 0.09
+    },
+    "drawCallsPerFrame": {
+     "n": 98,
+     "mean": 22.6,
+     "median": 18,
+     "p95": 34,
+     "max": 34,
+     "sd": 7.72
+    },
+    "framesWithGl": 0.181,
+    "serialisedCostMs": {
+     "n": 97,
+     "mean": 1.35,
+     "median": 1.1,
+     "p95": 3.4,
+     "max": 3.9,
+     "sd": 0.82
+    },
+    "glMsPerSecond": 14.5
+   },
+   "serialisedCostMs": {
+    "n": 60,
+    "mean": 1.45,
+    "median": 0.9,
+    "p95": 3.3,
+    "max": 3.6,
+    "sd": 0.98
+   },
+   "resolutionAfter": {
+    "canvas": [
+     2880,
+     1800
+    ],
+    "css": [
+     1440,
+     900
+    ],
+    "dpr": 2,
+    "render": {
+     "outDpr": 2,
+     "sceneDpr": 1.5,
+     "cellPx": 19,
+     "cellCss": 9.5,
+     "atlasCell": 19,
+     "canvas": [
+      2880,
+      1800
+     ],
+     "scene": [
+      2160,
+      1350
+     ],
+     "rendered": 1386,
+     "skipped": 698,
+     "offscreen": false,
+     "anchor": "intro",
+     "geometries": 18,
+     "textures": 11,
+     "programs": 23,
+     "mascotTop": 96.28027829313135,
+     "frameTop": 148.275625,
+     "mascot": {
+      "expression": "happy",
+      "base": "happy",
+      "gesture": "none",
+      "hue": "#8f82ff",
+      "arms": "open"
+     }
+    }
+   },
+   "dprTimelineAfterScroll": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "gpuTimerQuery": true,
+   "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)"
+  }
+ }
+}

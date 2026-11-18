@@ -1,5 +1,7 @@
 # Rendering performance and glyph quality (November 2026)
 
+> The Auri redesign (revision 3) has its own before/after report: [auri-redesign/README.md](auri-redesign/README.md).
+
 This folder holds the before/after benchmarks and screenshots for the homepage rendering work. "Before" is commit `86e3397`, the production build at the start of this work. "After" is the commit that added this folder.
 
 ## Method

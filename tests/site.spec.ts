@@ -480,3 +480,101 @@ test('fast swipes and repeated pokes never launch Auri: at most one small hop, t
   expect(rest - highest).toBeLessThan(frameH * 0.2); // a hop, never a launch (it used to rise ~20 000 px)
   await expect.poll(async () => Math.abs((await top()).mascotTop - rest), { timeout: 4000 }).toBeLessThan(frameH * 0.06); // back down
 });
+
+/* ---------------------------------------------------------------- the new Auri: expressions, gestures, colours */
+type MascotState = { expression: string; base: string; gesture: string; hue: string; arms: string };
+const mascotState = (page: import('@playwright/test').Page) => page.evaluate(() => (window as unknown as { __adaiRender: { mascot: MascotState } }).__adaiRender.mascot);
+
+test('Meet Auri: every expression, gesture and colour control drives the character', async ({ page }) => {
+  test.setTimeout(90_000);
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+  await page.goto('/mascot?glyphdebug', { waitUntil: 'networkidle' });
+  await glReady(page);
+  const expressions = ['neutral', 'happy', 'curious', 'surprised', 'thinking', 'focused', 'talking', 'excited', 'confused', 'proud', 'sleepy'];
+  const arms: Record<string, string> = { neutral: 'rest', happy: 'open', curious: 'chin', surprised: 'chest', thinking: 'chin', focused: 'fists', talking: 'talk', excited: 'cheeks', confused: 'scratch', proud: 'hips', sleepy: 'droop' };
+  for (const e of expressions) {
+    await page.locator(`[data-expression="${e}"]`).click();
+    await expect(page.locator(`[data-expression="${e}"]`)).toHaveAttribute('aria-pressed', 'true');
+    await expect.poll(async () => (await mascotState(page)).expression, { timeout: 2000 }).toBe(e);
+    expect((await mascotState(page)).arms).toBe(arms[e]); // body language follows the expression
+  }
+  // A gesture plays without replacing the expression someone picked (Auri can look sleepy while waving).
+  for (const g of ['wave', 'point', 'think', 'cheer', 'present', 'shrug', 'nod']) {
+    await page.locator(`[data-gesture="${g}"]`).click();
+    await expect.poll(async () => (await mascotState(page)).gesture, { timeout: 2000 }).toBe(g);
+    expect((await mascotState(page)).expression).toBe('sleepy');
+  }
+  const accents: Record<string, string> = { signature: '#8f82ff', studio: '#ffa63f', agents: '#4fdd7e', automation: '#2fdbe6', products: '#ff6e68', research: '#b47dff' };
+  for (const [hue, hex] of Object.entries(accents)) {
+    await page.locator(`[data-set-hue="${hue}"]`).click();
+    await expect.poll(async () => (await mascotState(page)).hue, { timeout: 2000 }).toBe(hex);
+    await expect(page.locator(`[data-set-hue="${hue}"]`)).toHaveAttribute('aria-pressed', 'true');
+  }
+  expect(errors).toEqual([]);
+});
+
+test('Auri: emote symbols never count towards the bounds (framing, lens trigger, hop tests)', async ({ page }) => {
+  await page.goto('/mascot?glyphdebug', { waitUntil: 'networkidle' });
+  await glReady(page);
+  await page.locator('[data-expression="neutral"]').click();
+  await page.waitForTimeout(1500);
+  const top = () => page.evaluate(() => (window as unknown as { __adaiRender: { mascotTop: number } }).__adaiRender.mascotTop);
+  const before = await top();
+  await page.locator('[data-expression="surprised"]').click(); // pops "!!" above the head
+  await page.waitForTimeout(400);
+  expect(Math.abs((await top()) - before)).toBeLessThan(40); // only the antenna perking up, never the symbols
+});
+
+test('Auri: hovering the character earns one reaction, not a stream of them', async ({ page }) => {
+  await page.goto('/?glyphdebug', { waitUntil: 'networkidle' });
+  await glReady(page);
+  await page.waitForTimeout(1500);
+  const box = (await page.locator('.hero-mascot').boundingBox())!;
+  const seen: string[] = [];
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height * 0.42, { steps: 12 });
+  for (let i = 0; i < 20; i++) {
+    await page.mouse.move(box.x + box.width / 2 + (i % 2 ? 6 : -6), box.y + box.height * 0.42, { steps: 2 });
+    await page.waitForTimeout(150);
+    seen.push((await mascotState(page)).expression);
+  }
+  // Approaching makes Auri curious, resting on it makes it happy; it then settles back instead of looping.
+  expect(seen).toContain('happy');
+  const switches = seen.filter((e, i) => i > 0 && e !== seen[i - 1]).length;
+  expect(switches).toBeLessThanOrEqual(3);
+});
+
+/* ---------------------------------------------------------------- technical SEO */
+test('SEO: unique titles and descriptions, robots meta, WebPage JSON-LD, share-image alt text', async ({ page }) => {
+  const titles = new Map<string, string>(), descs = new Map<string, string>();
+  for (const path of routes) {
+    await page.goto(path, { waitUntil: 'domcontentloaded' });
+    const t = await page.title(), d = (await page.locator('meta[name="description"]').getAttribute('content'))!;
+    expect(titles.has(t), `duplicate title on ${path} and ${titles.get(t)}`).toBe(false);
+    expect(descs.has(d), `duplicate description on ${path} and ${descs.get(d)}`).toBe(false);
+    titles.set(t, path); descs.set(d, path);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /^index, follow/);
+    await expect(page.locator('meta[property="og:image:alt"]')).toHaveCount(1);
+    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', `https://adai.systems${path === '/' ? '' : path}`);
+    const ld = await page.locator('script[type="application/ld+json"]').evaluateAll((els) => els.map((e) => JSON.parse(e.textContent!)));
+    const webPage = ld.find((x) => /Page$/.test(x['@type']));
+    expect(webPage?.url).toBe(`https://adai.systems${path === '/' ? '' : path}`);
+    expect(JSON.stringify(ld)).not.toContain('www.adai.systems');
+  }
+  await page.goto('/nope');
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, follow');
+});
+
+test('SEO: llms.txt and robots.txt are served with canonical links only', async ({ request }) => {
+  const llms = await request.get('/llms.txt');
+  expect(llms.status()).toBe(200);
+  expect(llms.headers()['content-type']).toContain('text/plain');
+  const text = await llms.text();
+  expect(text.startsWith('# ADAI Systems')).toBe(true);
+  for (const path of routes.filter((p) => p !== '/')) expect(text).toContain(`(https://adai.systems${path})`);
+  expect(text).not.toContain('www.');
+  const robots = await (await request.get('/robots.txt')).text();
+  expect(robots).toContain('Sitemap: https://adai.systems/sitemap-index.xml');
+  expect(robots).not.toMatch(/User-agent: \*\s*\nDisallow: \/\s*$/m); // the site itself is never blocked for everyone
+});

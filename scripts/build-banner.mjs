@@ -8,7 +8,7 @@ const browser = await chromium.launch({ channel: 'chrome' });
 const page = await browser.newPage({ viewport: { width: 1600, height: 560 }, deviceScaleFactor: 1 });
 await page.setContent(`<!doctype html><html><head><style>
   @font-face { font-family: Mona; src: url(data:font/woff2;base64,${b64('node_modules/@fontsource-variable/mona-sans/files/mona-sans-latin-wdth-normal.woff2')}) format('woff2'); font-weight: 200 900; font-stretch: 75% 125%; }
-  body { margin: 0; width: 1600px; height: 560px; background: radial-gradient(60% 90% at 78% 50%, rgba(243,230,207,.10), transparent 70%), #06080b; color: #eceae4; font-family: Mona, sans-serif; overflow: hidden; position: relative; }
+  body { margin: 0; width: 1600px; height: 560px; background: radial-gradient(60% 90% at 78% 50%, rgba(143,130,255,.13), transparent 70%), #06080b; color: #eceae4; font-family: Mona, sans-serif; overflow: hidden; position: relative; }
   .grid { position: absolute; inset: 0; background-image: radial-gradient(rgba(236,234,228,.10) 1px, transparent 1.2px); background-size: 14px 14px; mask-image: radial-gradient(55% 80% at 78% 50%, #000, transparent 75%); }
   .copy { position: absolute; left: 96px; top: 100px; width: 820px; }
   .copy img { height: 96px; display: block; margin-bottom: 52px; }

@@ -1,0 +1,53 @@
+{
+ "base": "http://localhost:4331",
+ "date": "2026-11-18T01:53:39.366Z",
+ "dsf": 2,
+ "viewport": "1440x900",
+ "method": "EXT_disjoint_timer_query_webgl2 TIME_ELAPSED per WebGL frame",
+ "pages": {
+  "/": {
+   "resolution": [
+    2880,
+    1800
+   ],
+   "idleGpuMs": {
+    "n": 180,
+    "mean": 4.44,
+    "median": 4.52,
+    "p95": 7.19,
+    "max": 7.77,
+    "sd": 1.46
+   },
+   "lensGpuMs": {
+    "n": 180,
+    "mean": 4.39,
+    "median": 4.38,
+    "p95": 7.17,
+    "max": 7.74,
+    "sd": 1.39
+   }
+  },
+  "/mascot": {
+   "resolution": [
+    2880,
+    1800
+   ],
+   "idleGpuMs": {
+    "n": 179,
+    "mean": 4.39,
+    "median": 4.23,
+    "p95": 6.92,
+    "max": 7.79,
+    "sd": 1.42
+   },
+   "lensGpuMs": {
+    "n": 180,
+    "mean": 4.18,
+    "median": 3.88,
+    "p95": 6.86,
+    "max": 7.37,
+    "sd": 1.39
+   }
+  }
+ }
+}

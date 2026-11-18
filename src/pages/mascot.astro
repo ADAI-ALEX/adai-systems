@@ -5,19 +5,20 @@ import MascotAnchor from '@/components/MascotAnchor.astro';
 import Mark from '@/components/Mark.astro';
 import { breadcrumbLd } from '@/lib/seo';
 import { MASCOT } from '@/lib/mascot';
+import { AURI_ACCENTS } from '@/gl/mascot/palette';
 const expressionList = ['neutral', 'happy', 'curious', 'surprised', 'thinking', 'focused', 'talking', 'excited', 'confused', 'proud', 'sleepy'];
 const gestures = ['wave', 'point', 'think', 'cheer', 'present', 'shrug', 'nod'];
-const hues = [{ id: 'studio', label: 'Studio' }, { id: 'agents', label: 'Agents' }, { id: 'automation', label: 'Automation' }, { id: 'products', label: 'Apps' }, { id: 'research', label: 'Research' }];
+const hues = [{ id: 'signature', label: 'Signature' }, { id: 'studio', label: 'Studio' }, { id: 'agents', label: 'Agents' }, { id: 'automation', label: 'Automation' }, { id: 'products', label: 'Apps' }, { id: 'research', label: 'Research' }] as const;
 const traits = [
-  { t: 'Born from the ADAI mark', d: `The mark is a chat bubble with two round eyes. ${MASCOT.name} keeps those eyes, same spacing and same size within the face, and wears the speech bubble as a glowing emblem on the chest.` },
-  { t: 'A face that reads at any size', d: 'Two round eyes in a calm, centred visor. They blink, squint, smile, widen and look where you look, so the face still reads when it is only a few glyphs wide.' },
-  { t: 'Soft, not mechanical', d: 'Satin silicone for the head and hands, a soft-touch body, felt ear cushions. No joints, no panels, no screws. Everything moves on springs, so it follows through like something physical.' },
-  { t: 'One signature accent', d: 'A deep indigo on the antenna tip and the ear cushions. Everything else stays warm cream, so the accent reads as a signature rather than decoration.' },
-  { t: 'It changes colour with the work', d: 'The eyes, the chest bubble and the glow in the antenna take the colour of the kind of work on screen: amber for agents, aqua for automation, coral for apps, sky for research.' },
+  { t: 'Born from the ADAI mark', d: `The mark is a chat bubble with two eyes. ${MASCOT.name}'s face is a big black display with two luminous eyes, and the speech bubble, three dots and all, glows on the chest.` },
+  { t: 'A face that reads at any size', d: 'Designed eye shapes rather than two dots: soft ovals, smiling arcs, crescents, rings, closed curves and chevrons. They morph into each other, blink and look where you look, so the face still reads when it is only a few glyphs wide.' },
+  { t: 'Soft, not mechanical', d: 'Ivory plush with a fine fibre, a navy velvet collar and cuffs, chunky mitten hands. No joints, no panels, no screws. Arms, hands and antenna move on springs, so everything follows through like something physical.' },
+  { t: 'One signature accent', d: 'A lavender light in the antenna, the ear rings and the chest emblem. Everything else stays ivory and black, so the light reads as a signature rather than decoration.' },
+  { t: 'It changes colour with the work', d: 'Only the lights change: amber for studio, green for agents, cyan for automation, coral for apps, violet for research. The ivory plush and the face never do, so it is always the same character.' },
   { t: 'It is also made of letters', d: `Hover over ${MASCOT.name}, or drag a finger across it, and a small lens turns that part of the character into typographic glyphs from the ADAI ramp, ending in the ADAI mark itself.` },
 ];
 ---
-<Base title={`Meet ${MASCOT.name}`} path={MASCOT.path} description={`${MASCOT.name} is the ADAI Systems character: a soft, sculpted companion built in real-time 3D, with a typographic glyph renderer.`} mascot={{ mode: 'hero', pose: 'intro' }} jsonLd={[breadcrumbLd([{ name: 'Home', path: '/' }, { name: `Meet ${MASCOT.name}`, path: MASCOT.path }])]}>
+<Base title={`Meet ${MASCOT.name}`} path={MASCOT.path} description={`${MASCOT.name} is the ADAI Systems character: a soft, sculpted companion built in real-time 3D, with a typographic glyph renderer.`} ogImage="/og/mascot.png" mascot={{ mode: 'hero', pose: 'intro' }} jsonLd={[breadcrumbLd([{ name: 'Home', path: '/' }, { name: `Meet ${MASCOT.name}`, path: MASCOT.path }])]}>
   <section class="page-hero">
     <div class="wrap hero-grid">
       <div class="stack" style="--stack:1.25rem">
@@ -26,11 +27,11 @@ const traits = [
         <p class="lead">A soft companion grown out of the ADAI mark, drawn live in your browser. Try the controls: everything {MASCOT.name} does on this site comes from the same handful of expressions and gestures.</p>
         <div class="controls panel" data-controls>
           <p class="mono mute">Expression</p>
-          <div class="chips">{expressionList.map((e) => <button type="button" class="chip" data-expression={e}>{e}</button>)}</div>
+          <div class="chips">{expressionList.map((e) => <button type="button" class="chip" data-expression={e} aria-pressed="false">{e}</button>)}</div>
           <p class="mono mute">Gesture</p>
           <div class="chips">{gestures.map((g) => <button type="button" class="chip" data-gesture={g}>{g}</button>)}</div>
           <p class="mono mute">Colour of the work</p>
-          <div class="chips">{hues.map((h) => <button type="button" class="chip hue-chip" data-hue={h.id} data-set-hue={h.id}>{h.label}</button>)}</div>
+          <div class="chips">{hues.map((h) => <button type="button" class="chip hue-chip" data-set-hue={h.id} aria-pressed={h.id === 'signature' ? 'true' : 'false'} style={`--hue:${AURI_ACCENTS[h.id]}`}>{h.label}</button>)}</div>
           <p class="mono mute fine" data-gl-note>Needs WebGL. Without it, {MASCOT.name} cannot appear and these controls have nothing to move.</p>
         </div>
       </div>
@@ -86,10 +87,13 @@ const traits = [
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button');
     if (!b) return;
     if (b.dataset.expression) {
-      root.querySelectorAll('[data-expression]').forEach((x) => x.classList.toggle('is-on', x === b));
+      root.querySelectorAll('[data-expression]').forEach((x) => { x.classList.toggle('is-on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
       mascot({ expression: b.dataset.expression as ExpressionName, hold: 6 });
     }
     if (b.dataset.gesture) mascot({ gesture: b.dataset.gesture as GestureName });
-    if (b.dataset.setHue) mascot({ hue: b.dataset.setHue as HueName });
+    if (b.dataset.setHue) {
+      root.querySelectorAll('[data-set-hue]').forEach((x) => { x.classList.toggle('is-on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
+      mascot({ hue: b.dataset.setHue as HueName });
+    }
   });
 </script>

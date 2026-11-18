@@ -11,6 +11,8 @@ export async function boot(stage: HTMLElement, prefetch: Prefetch = {}) {
     mascot: (c: MascotCommand) => world?.command(c),
     /** Dev tool: export the live mascot as a GLB blockout (used by scripts/export-mascot-glb.mjs). */
     exportGlb: () => world?.exportGlb(),
+    /** Only with ?lab: deterministic stepping for character sheets (see World.lab). */
+    lab: world.lab(),
   };
   return world;
 }

@@ -1,6 +1,6 @@
 import { site } from '@/content/site';
 import type { Project } from '@/content/projects';
-import type { Service } from '@/content/services';
+import { services, type Service } from '@/content/services';
 
 export const absolute = (path: string) => new URL(path, site.url).toString().replace(/\/$/, '') || site.url;
 
@@ -15,6 +15,10 @@ export function organizationLd() {
     logo: `${site.url}/brand/adai-mark.svg`,
     description: site.description,
     foundingDate: '2024-12',
+    // "ADAI Systems is a technology studio operated by FitDawg Ltd." (site.operator)
+    parentOrganization: { '@type': 'Organization', name: 'FitDawg Ltd' },
+    contactPoint: { '@type': 'ContactPoint', email: site.email, contactType: 'customer enquiries' },
+    knowsAbout: services.map((s) => s.title),
   };
 }
 
@@ -25,6 +29,8 @@ export function websiteLd() {
     '@id': `${site.url}/#website`,
     url: site.url,
     name: site.name,
+    description: site.description,
+    inLanguage: 'en-GB',
     publisher: { '@id': `${site.url}/#organization` },
   };
 }
@@ -62,5 +68,23 @@ export function serviceLd(service: Service) {
     url: absolute(`/services/${service.path}`),
     provider: { '@id': `${site.url}/#organization` },
     areaServed: 'Worldwide',
+  };
+}
+
+/** The page itself, typed by what it is, linked to the site and the organisation. */
+export function webPageLd(o: { path: string; title: string; description: string; image: string }) {
+  const type = o.path === '/studio' ? 'AboutPage' : o.path === '/contact' ? 'ContactPage' : ['/work', '/services', '/research'].includes(o.path) ? 'CollectionPage' : 'WebPage';
+  const url = absolute(o.path);
+  return {
+    '@context': 'https://schema.org',
+    '@type': type,
+    '@id': `${url}#webpage`,
+    url,
+    name: o.title,
+    description: o.description,
+    inLanguage: 'en-GB',
+    isPartOf: { '@id': `${site.url}/#website` },
+    about: { '@id': `${site.url}/#organization` },
+    primaryImageOfPage: { '@type': 'ImageObject', url: absolute(o.image), width: 1200, height: 630 },
   };
 }

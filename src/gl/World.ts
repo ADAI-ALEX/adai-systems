@@ -2,7 +2,7 @@
  * The WebGL world: one renderer on one fixed canvas, one mascot, one glyph pipeline.
  *
  * Choreography is layout-driven. Each page section can contain an empty box marked
- * `data-mascot-anchor` with `data-pose`; Adi is framed into the most central visible box and glides to the
+ * `data-mascot-anchor` with `data-pose`; Auri is framed into the most central visible box and glides to the
  * next one as the visitor scrolls, changing pose, expression, gesture and hue on arrival. This keeps the
  * story responsive for free (the boxes are ordinary CSS) and keeps scroll fully native: nothing hijacks it.
  */
@@ -15,10 +15,12 @@ import type { ExpressionName, GestureName, HueName } from './mascot/rig';
 import { GlyphPipeline } from './passes/GlyphPipeline';
 import { loadGlyphFont } from './passes/glyphAtlas';
 import { motionAllowed } from '@/scripts/motion';
+import { AURI_ACCENTS, DEFAULT_HUE } from './mascot/palette';
 
-const HUES: Record<HueName, string> = { agents: '#f2b560', automation: '#5cd6c4', products: '#ff7d61', research: '#8db3ff', studio: '#f3e6cf' };
-const MASCOT_HEIGHT = 3.0; // rig units, measured floor (y = -0.08) to the top of the sprout bulb (y = 2.92)
-const MASCOT_CENTER_Y = 1.42;
+const HUES: Record<HueName, string> = AURI_ACCENTS;
+const hueOf = (name: string | undefined) => new THREE.Color(HUES[(name as HueName)] ?? HUES[DEFAULT_HUE]);
+const MASCOT_HEIGHT = 3.1; // rig units, from just under the hovering body (y ≈ -0.02) to the top of the antenna ball (y ≈ 3.07)
+const MASCOT_CENTER_Y = 1.5;
 /** Glyph lens radius = clamp(frame height / viewport height × SCALE, MIN, MAX), in viewport heights.
  *  Midway between the 0.24/0.06/0.165 lens and the 0.12/0.03/0.0825 one: 0.75 × the former, 1.5 × the
  *  latter, i.e. 0.5625 × the original (0.32, 0.08, 0.22). */
@@ -36,7 +38,7 @@ const easeOutBack = (x: number) => { const c = 1.9; x = clamp(x, 0, 1); return 1
 
 /**
  * Pick the mascot implementation from /mascot/manifest.json. An authored GLB is used when the manifest
- * says so and it loads; anything else falls back to the procedural Adi, so the site never breaks.
+ * says so and it loads; anything else falls back to the procedural Auri, so the site never breaks.
  */
 async function loadMascot(coarse: boolean, manifestPromise?: Promise<MascotManifest | null>): Promise<MascotRig> {
   try {
@@ -48,7 +50,7 @@ async function loadMascot(coarse: boolean, manifestPromise?: Promise<MascotManif
   } catch (err) {
     console.warn('[adai] authored mascot unavailable, using the procedural one', err);
   }
-  return new ProceduralMascot({ detail: coarse ? 0.6 : 0.85 });
+  return ProceduralMascot.create({ detail: coarse ? 0.6 : 0.85 });
 }
 
 type MascotManifest = { renderer?: string; src?: string } & Record<string, unknown>;
@@ -68,15 +70,17 @@ export class World {
   private mascot!: MascotRig;
   private pipeline!: GlyphPipeline;
   private clock = { elapsedTime: 0, last: performance.now(), getDelta() { const n = performance.now(); const d = (n - this.last) / 1000; this.last = n; this.elapsedTime += d; return d; } };
-  private rimLight = new THREE.PointLight('#f3e6cf', 30, 14, 1.4);
-  private key = new THREE.DirectionalLight('#fff1dd', 3.4);
+  private rimLight = new THREE.PointLight('#8f82ff', 30, 14, 1.4);
+  private key = new THREE.DirectionalLight('#fff6f0', 4.6);
+  /** A cool violet light from behind, like the glow around Auri in the reference. */
+  private backLight = new THREE.DirectionalLight('#6e5cff', 4.2);
   private anchors: Anchor[] = [];
   private active: Anchor | null = null;
   private frame = { cx: 0, cy: 0, h: 0, init: false };
   private pointer = { x: -1, y: -1, nx: 0, ny: 0, last: -100, speed: 0, inside: false, touched: false };
   private startleUntil = 0;
   private reactTarget: { x: number; y: number; until: number } | null = null;
-  private hue = new THREE.Color(HUES.studio);
+  private hue = new THREE.Color(HUES[DEFAULT_HUE]);
   private poseGlyph = 0;
   private poseAura = 0.8;
   private sweep = { t: -1, start: 0 };
@@ -94,6 +98,7 @@ export class World {
   private glyphDebug = new URLSearchParams(location.search).has('glyphdebug');
   private asleep = false;
   private wasNear = false;
+  private hover = { over: false, nextCheck: 0, cooldown: 0 };
   private turn = 0;
   /** Canvas (glyph) pixel density: the screen's own, never lowered by the watchdog. */
   private outDpr = 1;
@@ -112,8 +117,11 @@ export class World {
   private visible = 0;
   private raf = 0;
   private motion = motionAllowed();
-  /** ?poster renders Adi alone on transparency, for the static fallback image. */
+  /** ?poster renders Auri alone on transparency, for the static fallback image. */
   private posterMode = new URLSearchParams(location.search).has('poster');
+  /** ?lab: deterministic stepping for character sheets and visual tests (see `lab()`). */
+  private labMode = new URLSearchParams(location.search).has('lab');
+  private labLook: { x: number; y: number } | null = null;
   private raycaster = new THREE.Raycaster();
   private ro: ResizeObserver;
   private disposers: (() => void)[] = [];
@@ -135,7 +143,7 @@ export class World {
     const pmrem = new THREE.PMREMGenerator(this.renderer);
     this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     pmrem.dispose();
-    this.scene.environmentIntensity = 0.5;
+    this.scene.environmentIntensity = 0.38;
     performance.mark('adai:gl-environment');
     await yieldToMain();
 
@@ -150,15 +158,19 @@ export class World {
     sc.left = -2.2; sc.right = 2.2; sc.top = 2.2; sc.bottom = -2.2; sc.near = 0.5; sc.far = 20;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
-    const fill = new THREE.HemisphereLight('#c9d6ff', '#2a1d14', 0.3);
+    const fill = new THREE.HemisphereLight('#dcdcff', '#4a36a0', 0.42);
     this.rimLight.position.set(2.5, 3.2, -2.5);
-    this.scene.add(key, key.target, fill, this.rimLight);
+    this.backLight.position.set(-5, 1.5, -3.5);
+    this.scene.add(key, key.target, fill, this.rimLight, this.backLight);
 
     const coarse = matchMedia('(pointer: coarse)').matches;
     this.mascot = await loadMascot(coarse, prefetch.manifest);
     performance.mark('adai:gl-mascot');
     await yieldToMain();
     this.scene.add(this.mascot.object);
+    // Stills (?poster) are exported with transparency: the faint additive light halos only look right over the
+    // page, so they are left out of exported images.
+    if (this.posterMode) this.mascot.object.traverse((o) => { if (o.name.endsWith('_halo')) o.visible = false; });
     this.camera.position.set(0, 0, 11);
     this.camera.lookAt(0, 0, 0);
 
@@ -196,7 +208,7 @@ export class World {
         poseName,
         pose,
         facing: (el.dataset.facing === '1' ? 1 : -1) as 1 | -1,
-        hue: (el.dataset.hue as HueName) || pose.hue || (this.stage.dataset.hue as HueName) || 'studio',
+        hue: (el.dataset.hue as HueName) || pose.hue || (this.stage.dataset.hue as HueName) || DEFAULT_HUE,
       };
     });
   }
@@ -220,7 +232,7 @@ export class World {
     const p = a.pose;
     this.mascot.setBaseExpression(p.expression);
     this.mascot.setFacing(a.facing);
-    this.mascot.setHue(new THREE.Color(HUES[a.hue]));
+    this.mascot.setHue(hueOf(a.hue));
     this.poseGlyph = p.glyph ?? 0;
     this.poseAura = p.aura ?? 0.7;
     if (this.motion) {
@@ -235,11 +247,11 @@ export class World {
       const pose = getPose(cmd.pose);
       this.mascot.setBaseExpression(pose.expression);
       if (pose.gesture && this.motion) this.mascot.gesture(pose.gesture);
-      if (pose.hue) this.mascot.setHue(new THREE.Color(HUES[pose.hue]));
+      if (pose.hue) this.mascot.setHue(hueOf(pose.hue));
     }
     if (cmd.expression) this.mascot.setExpression(cmd.expression, cmd.hold ?? 1.4);
     if (cmd.gesture && this.motion) this.mascot.gesture(cmd.gesture);
-    if (cmd.hue) this.mascot.setHue(new THREE.Color(HUES[cmd.hue]));
+    if (cmd.hue) this.mascot.setHue(hueOf(cmd.hue));
     this.dirty = true;
   }
 
@@ -260,6 +272,13 @@ export class World {
       const near = this.isNearMascot(e.clientX, e.clientY, 1.4);
       if (near && !this.wasNear && this.pointer.speed < 4.5) this.mascot.react('notice');
       this.wasNear = near;
+      // Resting the cursor on Auri itself earns a brief happy look, at most once every 9 s (hit test throttled).
+      if (near && e.pointerType === 'mouse' && now > this.hover.nextCheck) {
+        this.hover.nextCheck = now + 0.12;
+        const over = this.pointer.speed < 1.5 && this.hitTest(e.clientX, e.clientY);
+        if (over && !this.hover.over && now > this.hover.cooldown) { this.mascot.react('hover'); this.hover.cooldown = now + 9; }
+        this.hover.over = over;
+      } else if (!near) this.hover.over = false;
       // A fast swipe near Auri startles it once, not on every pointer event of the swipe.
       if (this.pointer.speed > 4.5 && now > this.startleUntil && this.isNearMascot(e.clientX, e.clientY, 1.6)) {
         this.mascot.react('startle');
@@ -317,7 +336,7 @@ export class World {
     watchDpr();
     document.addEventListener('visibilitychange', vis);
     this.disposers.push(() => document.removeEventListener('visibilitychange', vis));
-    // Calls to action make Adi look and light up.
+    // Calls to action make Auri look and light up.
     document.querySelectorAll<HTMLElement>('[data-mascot-react]').forEach((el) => {
       const enter = () => {
         const r = el.getBoundingClientRect();
@@ -343,7 +362,7 @@ export class World {
     this.dirty = true;
   }
 
-  /** Any input wakes Adi up; a long quiet spell makes Adi doze off (motion permitting). */
+  /** Any input wakes Auri up; a long quiet spell makes Auri doze off (motion permitting). */
   private wake() {
     this.lastInput = performance.now() / 1000;
     if (this.asleep) {
@@ -354,7 +373,7 @@ export class World {
   }
 
   private checkSleep() {
-    if (!this.motion || this.asleep || this.posterMode) return;
+    if (!this.motion || this.asleep || this.posterMode || this.labMode) return;
     if (performance.now() / 1000 - this.lastInput > 28) {
       this.asleep = true;
       this.mascot.setBaseExpression('sleepy');
@@ -432,7 +451,7 @@ export class World {
     if (this.offscreen) { this.stats.skipped++; this.debugInfo(); return false; }
     this.stats.rendered++;
 
-    // Frame target: Adi stays glued to its anchor box (CSS sticky boxes give the 'parked' effect).
+    // Frame target: Auri stays glued to its anchor box (CSS sticky boxes give the 'parked' effect).
     let pop = 1;
     if (anchor) {
       const r = anchor.el.getBoundingClientRect();
@@ -490,6 +509,7 @@ export class World {
     }
     const idle = anchor?.pose.idleLook;
     if (idle && attention < 1) { lx = lx * attention + idle.x * (1 - attention) * 0.6; ly = ly * attention + idle.y * (1 - attention) * 0.6; }
+    if (this.labLook) { lx = this.labLook.x; ly = this.labLook.y; attention = 1; }
     this.checkSleep();
     this.mascot.update({ dt, time: now, look: { x: clamp(lx, -1, 1), y: clamp(ly, -1, 1) }, attention: Math.max(attention, idle ? 0.6 : 0), motion: this.motion });
 
@@ -497,7 +517,7 @@ export class World {
     this.rimLight.color.copy(this.hue);
     this.rimLight.position.x = 2.5 + clamp(lx, -1, 1) * -1.5;
 
-    // Story sweep: a band of glyphs runs down Adi on arrival at a new pose.
+    // Story sweep: a band of glyphs runs down Auri on arrival at a new pose.
     let sweep = -1;
     if (this.sweep.t >= 0) {
       const k = (now - this.sweep.start) / 0.9;
@@ -525,7 +545,7 @@ export class World {
   }
 
   private mascotTopPx() {
-    this.bounds.setFromObject(this.mascot.object);
+    this.bounds.setFromObject(this.mascot.boundsTarget ?? this.mascot.object);
     const v = this.projected.set((this.bounds.min.x + this.bounds.max.x) / 2, this.bounds.max.y, (this.bounds.min.z + this.bounds.max.z) / 2).project(this.camera);
     return (-v.y * 0.5 + 0.5) * innerHeight;
   }
@@ -541,6 +561,7 @@ export class World {
       geometries: m.geometries, textures: m.textures, programs: this.renderer.info.programs?.length ?? 0,
       // Auri's highest point on screen (CSS px) and how far above its resting frame that is, for the jump tests
       mascotTop: this.mascotTopPx(), frameTop: this.frame.cy - this.frame.h / 2,
+      mascot: this.mascot.debugState?.() ?? null,
     };
   }
 
@@ -556,7 +577,7 @@ export class World {
     // Near = within reach of the head (original rule) or anywhere over Auri's projected bounds.
     let over = false;
     if (px >= 0) {
-      this.bounds.setFromObject(this.mascot.object);
+      this.bounds.setFromObject(this.mascot.boundsTarget ?? this.mascot.object);
       const b = this.bounds, v = this.projected;
       let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
       for (let i = 0; i < 8; i++) {
@@ -655,11 +676,42 @@ export class World {
     cancelAnimationFrame(this.raf);
   }
 
+  /**
+   * ?lab only: a deterministic stepping API for character sheets and visual tests. The render loop is paused
+   * and time advances only through `step`, so a gesture can be captured at an exact moment.
+   */
+  lab() {
+    if (!this.labMode) return null;
+    const m = this.mascot as MascotRig & { lab?: boolean };
+    m.lab = true;
+    return {
+      pause: () => { this.stop(); },
+      resume: () => { this.start(); },
+      step: (seconds: number) => {
+        const n = Math.max(1, Math.round(seconds * 60));
+        for (let i = 0; i < n; i++) { this.clock.elapsedTime += 1 / 60; this.update(1 / 60, true); }
+      },
+      set: (o: { expression?: ExpressionName; gesture?: GestureName; hue?: HueName; turn?: number; look?: { x: number; y: number } | null; facing?: 1 | -1 }) => {
+        if (o.expression) { this.mascot.setBaseExpression(o.expression); this.mascot.setExpression(o.expression, 0); }
+        if (o.facing) this.mascot.setFacing(o.facing);
+        if (o.gesture) this.mascot.gesture(o.gesture);
+        if (o.hue) this.mascot.setHue(hueOf(o.hue));
+        if (o.turn !== undefined && this.active) this.active.pose = { ...this.active.pose, turn: o.turn };
+        if (o.look !== undefined) this.labLook = o.look;
+        this.pointer.x = -1; this.pointer.y = -1;
+      },
+    };
+  }
+
   /** Exports the current mascot (geometry and node names, no shaders) as a binary glTF, base64-encoded. */
   async exportGlb(): Promise<string> {
     const { GLTFExporter } = await import('three/examples/jsm/exporters/GLTFExporter.js');
     const clone = this.mascot.object.clone(true);
     clone.position.set(0, 0, 0); clone.rotation.set(0, 0, 0); clone.scale.setScalar(1);
+    // Sprites (emotes, light halos) are effects, not geometry: glTF has no equivalent.
+    const sprites: THREE.Object3D[] = [];
+    clone.traverse((o) => { if ((o as THREE.Sprite).isSprite) sprites.push(o); });
+    sprites.forEach((o) => o.removeFromParent());
     clone.traverse((o) => {
       const m = o as THREE.Mesh;
       if (!m.isMesh) return;

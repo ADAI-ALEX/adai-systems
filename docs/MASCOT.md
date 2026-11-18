@@ -1,109 +1,153 @@
 # Auri: the ADAI Systems character
 
 Auri is ADAI's real-time 3D companion. This document covers:
-- the character design and where it comes from;
-- the animation and expression system;
-- the asset pipeline;
-- the contract a future hand-authored model must follow to replace the procedural one without touching the website.
+- the character design and the reference it follows;
+- how the model is built (geometry, materials, face);
+- the animation system (expressions, gestures, reactions, idle life);
+- colour variants;
+- the tools that render character sheets from the live model;
+- the contract an authored model must follow to replace the procedural one without touching the website.
 
 Name: **Auri**, set once in `src/lib/mascot.ts`.
 
-## 1. Identity: from the mark to a character
+<p align="center"><img src="assets/auri/character-sheet.webp" alt="Auri's character sheet, rendered from the production model: a large hero pose, eleven expressions, seven gestures and six colour variants." width="100%"></p>
 
-The ADAI mark (`public/brand/adai-mark.svg`) is a circle containing a **speech bubble** with two **round eyes**. Auri keeps that face and that idea, and nothing is extruded or traced:
+## 1. Design (revision 3, November 2026)
 
-| Mark | Auri |
+The design follows Alex's reference sheet, "New Mascot Screenshot" (kept outside the repository). That sheet is the source of truth for Auri's proportions, face, materials and expression language. Its poster layout, labels and text are not used anywhere.
+
+| Part | Design |
 |---|---|
-| Two round eyes | Two glowing round eyes in the visor, at the **mark's proportions** (centres at ±25 % of the visor width, radius about 13 % of it). |
-| The bubble's rounded body | A calm, **centred** ink visor with the same soft rounded-rectangle shape. |
-| The speech bubble with its tail | A small **speech-bubble emblem on the chest**, lit from inside in the colour of the work. |
+| **Silhouette** | A floating companion: an oversized, soft capsule head (about half of Auri's height, 1.2 times as wide as it is tall), a compact rounded body, short soft arms, big mitten hands. No legs. |
+| **Head** | Ivory plush, rounder at the crown and fuller at the jaw. |
+| **Face display** | A large, glossy black display set into the head: a very rounded rectangle about 78 % of the head's width, sunk into a real recess with a rolled plush lip around it. |
+| **Eyes** | Luminous white strokes and shapes with a soft glow in the accent colour. They are designed shapes, not dots (see §3). The face has no mouth, except an animated one while talking. |
+| **Antenna** | A short metal stalk on a plush collar, slightly off-centre and leaning, with a glossy, glowing ball. It bends on a spring and reacts to mood. |
+| **Ear modules** | Deep indigo housings with a glowing light ring and a glossy dark cap, integrated into the sides of the head. |
+| **Body** | Ivory plush, fullest at the chest. A thick navy velvet collar where the head rests, and a glossy chest tile with the ADAI speech bubble (with its three dots) lit from inside. |
+| **Arms and hands** | Soft tapered arms without elbows (they bend along a curve), navy velvet cuffs, and chunky four-finger mittens with a thumb, able to make a fist, point, or spread. |
+| **Light** | A cool violet back light and an accent-coloured rim glow on the plush silhouette, as in the reference. |
 
-### Revision 2 (November 2026)
+Differences from the reference that were deliberate:
+- **The body is ivory with a navy collar**, as in the reference's expression sheet, not the navy top of its large hero illustration. The brief asks for an ivory body with a navy accent at the neck.
+- **Colour variants keep the shell ivory**: only the lights change. The reference's small variant thumbnails tint the whole head, but the brief asks for the ivory body and black face to stay constant.
+- **The fur is a shading effect**, not geometry (see §2), so it costs one shader rather than millions of hairs.
 
-Feedback: the bubble-tail bump on the head made the face look uneven, and the surface read as leather.
-- **Head:** now a smooth, evenly rounded cushion. The tail bump is gone. A touch of crown fullness and soft fullness under the chin keep it organic.
-- **Face:** the visor and eyes are now centred and symmetrical.
-- **Speech bubble:** moved to the chest emblem, a separate design detail rather than a distortion of the face.
-- **Materials:** all grain and bump textures are removed. The head and hands are satin silicone, the body is a soft-touch matte oat, and depth comes from lighting and a gentle baked colour variation instead of micro-texture.
-- **Signature accent:** a deep indigo (`AURI_ACCENT`, `#5a63f0`) on the antenna tip and the felt ear cushions. Everything else stays warm cream. The section hue still lights the eyes, the chest bubble and (while thinking) the antenna.
+## 2. How Auri is built (procedural, in `src/gl/mascot/`)
 
-### Design rules
-- **Soft, not mechanical.** No joints, panels, seams, screws, circuit patterns or segmented limbs.
-- **Small asymmetries:** the antenna grows off-centre and leans, the right ear cushion is 12 % bigger and tilted, and the crown is slightly fuller on one side.
-- **Readable at low resolution.** Big shapes, one dark visor against a light shell, glowing eyes.
-- **Colour carries meaning.** The section hue (amber agents, aqua automation, coral apps, sky research, cream studio) lights the eyes, the chest bubble, the rim light and the antenna glow. The indigo accent is constant: a signature, not a signal.
-- **Personality:** friendly, curious and quick, slightly playful without being childish.
-
-## 2. How Auri is built today (procedural)
-
-All code is in `src/gl/mascot/`.
+Auri is generated in code at start-up: no model, texture or image is downloaded (0 bytes of 3D assets).
 
 | File | What it does |
 |---|---|
-| `shapes.ts` | Sculpts every part from high-resolution spheres reshaped per direction (superellipsoids plus soft directional bulges). The visor is sampled from the same surface as the head, so it hugs it exactly. The chest emblem is an extruded, bevelled speech bubble bent to the body's curve. |
-| `materials.ts` | Satin silicone, soft-touch body, indigo felt cushions, the glossy indigo antenna tip and the emblem glass (`MeshPhysicalMaterial`: sheen, light clearcoat). No textures; `bakeWarmth()` adds a soft vertex-colour variation. |
-| `faceMaterial.ts` | The face: a signed-distance-field shader for the bubble visor, both eyes, lids, smile crescents, gaze, catch-lights, blush, the talking waveform and the typing dots. |
-| `expressions.ts` | Eleven expressions as parameter sets: neutral, happy, curious, surprised, thinking, focused, talking, excited, confused, sleepy, proud. |
-| `poses.ts` | Story poses used by page sections: expression + arrival gesture + hue + glyph styling + body turn. |
-| `ProceduralMascot.ts` | Assembles the rig and animates it. |
+| `shapes.ts` | All geometry. Soft parts are high-resolution spheres reshaped per direction (superellipsoids plus soft directional bulges). The head shell is carved by the face SDF: the display is pushed into a recess with a rolled lip. The glass is sampled from the same surface, sunk into the recess and slightly domed. The hand is one mesh with three morph targets (`fist`, `point`, `spread`); its fingers are capsules bent along their length. The arms are `ArmTube`s: a tapered tube along a cubic Bézier from shoulder to wrist, rebuilt each frame (about 270 vertices per arm). |
+| `materials.ts` | Plush (ivory), velvet (navy collar and cuffs), the ear housing and cap, the light materials, and the chest tile with its emblem drawn by shader. The plush fibre is a per-pixel normal from two octaves of value noise with analytic derivatives. It fades out as one noise cell approaches a pixel, so it never shimmers, and small renders get a clean sheen. The display's lip and groove are shaded per pixel from the same SDF that carved the geometry, so they stay crisp at any vertex count. An accent-tinted fresnel rim gives the reference's glowing plush edge. |
+| `faceMaterial.ts` | The face shader (see §3). |
+| `expressions.ts` | The eleven expressions, the emote and resting arm pose that go with each, and blending. |
+| `emotes.ts` | The small symbols beside the head (`?`, `!!`, thinking dots, a speech bubble, sparkles, `z z`). They are drawn once into a canvas atlas with vector paths and shown on four pooled sprites, outside the bounds used for framing. |
+| `palette.ts` | The accent colours (see §5). |
+| `poses.ts` | Story poses used by page sections: expression, arrival gesture, colour, glyph styling, turn. |
+| `ProceduralMascot.ts` | Assembles the rig and animates it (see §4). |
 | `rig.ts` | The `MascotRig` interface the website talks to. |
 | `GltfMascot.ts` | The same interface, for an authored GLB. |
 
-### Animation system (all frame-rate independent)
-- **Gaze leads.** Eyes (fast), then head (medium), then body (slow) follow the cursor, with clamps (head yaw ±31°, pitch ±19°). Micro-saccades run when the pointer is idle. A call to action under the pointer draws Auri's gaze to it.
-- **Blinking:** random intervals of 2.2 to 5.6 s, with an 18 % chance of a double blink.
-- **Idle life:**
-  - breathing, plus a slow sway and head drift;
-  - after 28 s with no input, Auri gets **sleepy** and wakes with a startle on the next input.
-- **Springs everywhere.** The hands and the sprout are damped springs, so every move has follow-through. A jump has gravity and squash-and-stretch on landing.
-- **Gestures:** keyframed hand targets layered over the springs: wave, point, think (hand to chin), cheer (both hands up and a hop), present (palm toward the content), shrug, nod.
-- **Reactions:**
-  - **Poke** (click on Auri): surprised, then happy, plus a hop and a boing of the sprout.
-  - **Startle:** a very fast pointer flick near Auri.
-  - **Notice:** the pointer arriving near Auri makes it curious.
-- **Story choreography** (`src/gl/World.ts`):
-  - Each page section can hold an empty box `data-mascot-anchor data-pose="…"`. Auri frames itself into the most central visible box.
-  - Auri glides over short distances, and pops out and back in over long ones, so it never sweeps across text.
-  - On arrival it changes pose, plays the gesture, shifts hue and runs a glyph sweep.
-  - The boxes are ordinary CSS, so the choreography is responsive by construction. Scrolling is never hijacked.
-- **Page events.** Any script can send `window.dispatchEvent(new CustomEvent('adai:mascot', { detail: { expression, gesture, pose, hue } }))`. The demos and the brief builder use this.
+Budget, measured from the live scene (`?glyphdebug`, `__adaiRender.mascot`):
+- 20 meshes, 7 of them shadow casters, and up to 4 visible sprites;
+- about 86k triangles at desktop detail and 59k on touch screens. Most are in the head shell, which needs them for a clean silhouette and recess;
+- 34 WebGL draw calls per frame for the whole canvas (character, shadow and glyph passes), against 23 for the previous Auri;
+- 23 shader programs in total, because materials share programs;
+- no texture downloads, only two small canvas textures (the glow and the emote atlas).
 
-### Reduced motion
-With `prefers-reduced-motion` set in the operating system:
-- no idle motion, gestures, springs, glide or glyph animation;
-- Auri holds a static pose and renders only when something changes.
+Before/after performance is in `docs/performance/auri-redesign/README.md`.
 
-## 3. The glyph renderer (Auri in letters)
+## 3. The face
 
-Code: `src/gl/passes/`.
-1. Auri renders into an HDR target with a transparent background, at the 3D resolution (1.5× on desktop, 1.25× on touch screens, lowered by the frame-time watchdog when needed).
-2. A reduction pass reads each glyph cell on exactly the grid the composite draws (in normalised screen coordinates, so the two passes line up at any pair of resolutions) and stores the cell's average colour and its **maximum** coverage. Any cell the silhouette touches counts as part of it.
-3. The composite decides **per cell**: either glyph or 3D, never a blend. Glyphs come from a ramp set in IBM Plex Mono (`· . : - ~ + = * o x % # @`), and the densest glyph is the ADAI mark itself.
+Everything on the display is a signed distance field in head-local units, so it is sharp at any size and transitions are true shape morphs.
 
-**Glyph sharpness.** The composite, and so every glyph, is drawn at the screen's own pixel density (up to 3×; 2× on very large canvases), which the watchdog never lowers. The glyph cell is a whole number of device pixels (9.5 CSS px, or 8 under 700 px wide, rounded: 19 px on a 2× screen, 10 px on a 1× screen, 24 px on a 3× phone), and the glyph atlas is drawn by the browser's own text renderer at exactly that size and read texel for texel. Each glyph is rasterised once at its final size, with no resampling. Before November 2026 the atlas was a 64 px bitmap shrunk into each cell without mipmaps, and the whole canvas (glyphs included) was rendered at 1.5× and stretched to the screen. The watchdog could also lower the resolution to 0.85×, which smeared the dots and turned the mark into a blob. That happened most on the homepage, which is where visitors arrive cold and scroll the most (see `docs/performance/README.md`). On 1× screens, cells under 14 px get a hairline stroke and a steeper edge on the mark, so it stays legible at 10 px.
+Each eye is a weighted blend of six designed shapes:
 
-**The lens.** While the cursor is over or near Auri, or while a finger drags across Auri on a touch screen (and briefly after a tap), a small circular glyph lens follows the pointer:
-- its radius is `clamp(frameHeight / viewportHeight × 0.18, 0.045, 0.12375)` of the viewport height (`LENS_*` in `World.ts`), so it scales with Auri but never covers the whole character. That is exactly midway between the two previous lenses (`0.24, 0.06, 0.165` and `0.12, 0.03, 0.0825`), and 0.5625 × the first version (`0.32, 0.08, 0.22`). The trigger distance and the interaction are unchanged;
-- it opens over about 0.22 s and closes over about 0.3 s, and its centre is damped so it trails the cursor softly;
-- only the area inside the lens turns into glyphs; the rest of Auri stays 3D;
-- glyphs are only drawn where the rendered silhouette is, so the effect never bleeds into the background.
+| Shape | Looks like | Used by |
+|---|---|---|
+| `dot` | a soft filled oval | neutral, focused (with a lid cut) |
+| `ring` | a tall O | surprised |
+| `arc` | ∩, a smiling eye | happy, talking, proud, one eye of confused |
+| `line` | ‿, a closed relaxed eye | thinking, sleepy (lower and heavier) |
+| `moon` | a crescent glancing sideways | curious, one eye of confused |
+| `chevron` | `>` and `<`, squeezed shut | excited |
 
-**Touch.** A touch that starts on Auri's rendered silhouette inside a mascot area belongs to Auri: `World.ts` cancels that touch's scrolling in a non-passive `touchstart` listener (attached only to the `[data-mascot-anchor]` boxes, and only when the 3D hit test lands on Auri), captures the pointer to the box, and drives the lens with the finger. `pointerup`, `pointercancel` and `lostpointercapture` all end the drag, so it cannot get stuck. A touch anywhere else, including the empty parts of a mascot area, scrolls the page as usual. With reduced motion there is no lens, so touches never block scrolling. `scripts/touch-probe.mjs` reproduces a finger drag on a phone viewport.
+On top of the shapes:
+- each eye has its own openness, size, offset and an angled **lid cut** (focused gets determined, inward-sloping lids);
+- **blinks** squash open eyes; closed shapes only dip;
+- **gaze**: the eyes lead the head;
+- a small **mouth** appears and moves in syllables only while talking;
+- a faint **blush** for happy, excited and proud.
 
-### Rendering accuracy (kept from revision 2)
+The glass has an inner rim shadow (it sits below the plush lip), a broad soft window reflection, a key glint and a fresnel sheen.
 
-An earlier version left slivers of the 3D model visible inside the glyph area. The causes were:
-- a deliberate 12 % "ghost" of the 3D render under the glyphs;
-- a coverage gate that let thin edge slivers (hands, silhouette edges) pass through;
-- a grid mismatch between the two passes that drifted by a few pixels across the screen;
-- partial cells cross-fading between the two layers.
+## 4. Animation
 
-All four are fixed, and the lens keeps those fixes: inside the lens every cell is either fully glyph or empty, so no 3D surface shows through. `?glyphdebug` paints any 3D pixel left uncovered in the lens core magenta. The automated test and `scripts/glyph-probe.mjs --metric [--dsf=2]` count **0** at every probed position (face left edge, centre and right edge, antenna, ear, body, both hands), at 1×, 2× and 3×, with the glyphs and the 3D at different resolutions.
+Animation is layered, so the layers never fight over a transform. This is what lets Auri look curious while pointing, or sleepy while waving:
 
-## 4. Asset pipeline (replaceable without touching the site)
+| Layer | Owns | Sources |
+|---|---|---|
+| Face | eyes, mouth, lights | the expression; blinks and gaze on top |
+| Head | yaw, pitch, roll | gaze + expression tilt/pitch + gesture additive (nod, think, shrug) + idle drift, summed and clamped |
+| Arms and hands | hand position, orientation, finger pose | the gesture (by envelope: rise, hold, settle), over the expression's resting arm pose, over rest; then springs |
+| Body | hover, lean, sway, hop, squash | float + breathing, the expression's lean, gesture and reaction hops |
+| Antenna | bend, perk | a damped spring driven by head motion and hops, plus the expression's perk |
+
+**Expressions** are complete moods: eye design, head tilt and pitch, lean, antenna perk, light brightness and pulse, body energy, a resting arm pose (for example chin in hand when thinking, fists on hips when proud, fists up when excited), and an emote. They blend over about 0.2 s.
+
+**Gestures** (wave, point, think, cheer, present, shrug, nod) are hand key poses on the side of the page content, with a little motion of their own, blended by envelope. A gesture may suggest a mood (a wave suggests happy), but never overrides an expression someone chose.
+
+**Reactions:**
+- **click or tap:** one of four playful responses (a surprised hop, a giggle, a wave back, a wiggle), never the same twice in a row. A hop only starts from rest and never stacks, so rapid clicks can't launch Auri;
+- **hover:** resting the cursor on Auri earns a brief happy look and an antenna twitch, at most once every 9 s;
+- **notice:** a cursor arriving near Auri makes it curious;
+- **startle:** a very fast flick near it.
+
+**Idle:**
+- gentle hovering, breathing, sway and blinking (with occasional double blinks);
+- every 14 to 26 s with nothing going on, one small behaviour: a glance, an antenna twitch, or a brief smile;
+- after 28 s without input, Auri gets sleepy, and wakes with a startle.
+
+**Reduced motion:** no idle motion, gestures, springs, emote animation or glyph animation. Auri holds its pose and renders only when something changes.
+
+**Cursor:** the eyes lead (fast), then the head (medium), then the body (slow), with clamps. A call to action under the pointer draws Auri's gaze. Story choreography and the page event API are unchanged: see `docs/ARCHITECTURE.md`.
+
+## 5. Colour variants
+
+Only the lights change (antenna ball and halo, ear rings and halos, chest emblem, the glow in the eyes, the plush rim, the collar sheen and the scene's rim light), so it is always recognisably the same Auri.
+
+| Variant | Hex | Where |
+|---|---|---|
+| Signature | `#8f82ff` | the default look: home hero, Meet Auri, most pages |
+| Studio | `#ffa63f` | Meet Auri control |
+| Agents | `#4fdd7e` | the agents chapter and service page |
+| Automation | `#2fdbe6` | the automation chapter and service page |
+| Apps | `#ff6e68` | the apps chapter and service page |
+| Research | `#b47dff` | the research chapter, service page and `/research` |
+
+These are Auri's own accent colours (`src/gl/mascot/palette.ts`). The site's interface colours for each kind of work are separate and unchanged (`src/styles/global.css`).
+
+## 6. The glyph renderer and the lens
+
+Unchanged in this revision; see `docs/ARCHITECTURE.md` and `docs/performance/README.md`. The lens still covers the new model exactly (0 uncovered 3D pixels at every probed position: face, antenna, ears, body, both hands). Emote sprites and light halos are part of the rendered silhouette, so they turn into glyphs inside the lens too.
+
+## 7. Rendering Auri for documents (`?lab`)
+
+`/mascot?poster&lab` adds `window.adai.lab`, a deterministic stepping API: the render loop pauses and time advances only through `step(seconds)`, so a gesture can be captured at an exact moment. It has no effect without `?lab`.
+
+```bash
+npm run dev
+node scripts/auri-lab.mjs http://localhost:4321 /tmp/auri --sheet          # every expression, gesture, colour, four angles, and the sheets (PNG)
+node scripts/to-webp.mjs 2400 0.88 /tmp/auri/*sheet.png /tmp/auri/expressions.png /tmp/auri/gestures.png /tmp/auri/colours.png  # the versions kept in docs/assets/auri
+npm run still                                                            # docs/assets/auri.{png,webp}
+```
+
+## 8. Asset pipeline (replaceable without touching the site)
 
 ```text
-public/mascot/manifest.json   { "renderer": "procedural" }  or  { "renderer": "gltf", "src": "/mascot/adi.glb", "faceShader": true }
+public/mascot/manifest.json   { "renderer": "procedural" }  or  { "renderer": "gltf", "src": "/mascot/auri.glb", "faceShader": true }
         │
         ▼
 World.loadMascot() ── gltf ok? ──► GltfMascot (authored)  ──┐
@@ -111,51 +155,20 @@ World.loadMascot() ── gltf ok? ──► GltfMascot (authored)  ──┐
         └────────────────────────► ProceduralMascot ────────┘
 ```
 
-**Scripts:**
-- `npm run mascot:glb`: exports the live procedural Auri as `assets-src/mascot/auri-blockout.glb` (2 MB), with named nodes per the contract below. It's the **starting blockout for Blender**: correct proportions and naming, ready to retopologise, UV, rig and animate.
-- `npm run still`: renders `docs/assets/auri.{png,webp}` from the site's own renderer, for the README and press use. The website itself never shows a flat image of Auri.
-
-Both scripts need the dev server (`npm run dev`) running.
+`npm run mascot:glb` exports the live procedural Auri as a GLB blockout (`assets-src/mascot/auri-blockout.glb`) with named nodes, ready to retopologise, UV, rig and animate in Blender.
 
 ### GLB contract
 
-To replace the procedural Auri, deliver a GLB with:
-
 | Kind | Required names | Notes |
 |---|---|---|
-| Nodes | `head` (look-at pivot), `body`, `hand_L`, `hand_R`; optional `sprout` | Y up, +Z forward, metres-like units. Floor at y=0, total height about 2.55, visual centre at y≈1.25 (or set `headCenterY` in the manifest). |
-| Mesh | `visor` | Its material is replaced by the procedural face shader (`faceShader: true`). The shader reads **object-space x/y in head units**: visor centre at the origin, width about 1.28. Keep the visor front-facing in that space. |
-| Morph targets | `blink_L`, `blink_R`, `smile`, `surprise`, `squint`, `think` | Optional. These are used if present, and only matter if you turn the face shader off and author the face instead. |
+| Nodes | `head` (look-at pivot), `body`, `hand_L`, `hand_R`; optional `sprout` (the antenna) | Y up, +Z forward. Total height about 3.1, visual centre at y ≈ 1.5, head centre at y ≈ 1.78 (or set `headCenterY` in the manifest). |
+| Mesh | `visor` | Its material is replaced by the procedural face shader (`faceShader: true`). The shader reads **object-space x/y in head units**: display centre at (0, -0.03), half-size 0.8 × 0.6. |
+| Morph targets | `blink_L`, `blink_R`, `smile`, `surprise`, `squint`, `think` | Optional; used only if the face shader is turned off. |
 | Clips | `idle_loop`, `wave`, `point`, `think`, `cheer`, `present`, `shrug`, `nod` | `idle_loop` plays continuously; the others play once on demand. |
-| Materials | `glow`, `core` | These take the section hue as emissive. |
+| Materials | `glow`, `core` | These take the accent colour as emissive. |
 
-**Budgets** (from research spec §4.1):
+Budgets for an authored model (research spec §4.1): ≤ 25k triangles desktop / 10k mobile, ≤ 60 bones, ≤ 8 morph targets, KTX2 textures, GLB ≤ 2.5 MB / 1.0 MB with meshopt.
 
-| | Desktop | Mobile |
-|---|---|---|
-| Triangles | ≤ 25k | ≤ 10k |
-| Bones | ≤ 60 | ≤ 60 |
-| Morph targets | ≤ 8 | ≤ 8 |
-| Textures | KTX2: ETC1S colour, UASTC normal | KTX2 |
-| GLB size (meshopt + KTX2) | ≤ 2.5 MB | ≤ 1.0 MB |
-| GPU texture memory | ≤ 24 MB | ≤ 8 MB |
-
-Optimise with `gltf-transform optimize --compress meshopt --texture-compress ktx2`.
-
-## 5. Producing the final hand-authored Auri (recommended plan)
-
-1. **Concept round.** Three to five sheets exploring proportions and materials around this design: the bubble head and the mark's eyes are fixed; the rest is open.
-   - Higgsfield: generation was **not** used. On 15 November 2026 its unlimited allowance reported `available: false` and the balance was 0.05 credits, so nothing was generated to avoid paid credits.
-   - If the allowance is activated, use `generate_image` for turnaround and expression sheets from written prompts only. Never use reference images of other mascots or of the studied site.
-2. **Blockout.** Start from `assets-src/mascot/auri-blockout.glb` in Blender. Proportions and names are already correct.
-3. **Sculpt and retopologise** to budget. Add subtle surface detail: soft creases where the head meets the body, a stitched seam on the plush, a slight dent in the cushions.
-4. **UV and textures:** a subtle colour variation on the silicone, and a plush fibre normal. Bake to KTX2.
-5. **Rig:** root, spine, neck, head, hands, and a two-bone sprout chain. Do not bake look-at; the site does it.
-6. **Animate** the clips in the contract. Keep them additive-friendly and avoid root motion.
-7. **Swap.** Drop `adi.glb` in `public/mascot/`, set the manifest, re-run `npm run still`, then run the tests.
-
-AI image-to-3D output (e.g. Higgsfield `generate_3d`) is a **blockout only**. It still needs steps 3 to 6.
-
-## 6. Decisions for Alex
-- Whether Auri appears on case-study pages (currently it doesn't, to keep them fast and focused).
-- Whether to commission a hand-authored Auri or keep the procedural one: it already meets the budgets.
+## 9. Decisions for Alex
+- Whether to show the navy "hoodie" body from the reference's large illustration instead of the ivory body. It's a material and geometry change in `materials.ts` and `shapes.ts`, and nothing else would need to change.
+- Whether Auri should appear on case-study pages (currently it doesn't, to keep them fast and focused).

@@ -1,0 +1,31 @@
+{
+ "base": "http://localhost:4331",
+ "date": "2026-11-18T01:54:09.913Z",
+ "dsf": 3,
+ "viewport": "390x844",
+ "method": "EXT_disjoint_timer_query_webgl2 TIME_ELAPSED per WebGL frame",
+ "pages": {
+  "/": {
+   "resolution": [
+    1170,
+    2532
+   ],
+   "idleGpuMs": {
+    "n": 179,
+    "mean": 3.26,
+    "median": 2.68,
+    "p95": 5.05,
+    "max": 5.51,
+    "sd": 1.11
+   },
+   "lensGpuMs": {
+    "n": 180,
+    "mean": 3.24,
+    "median": 2.69,
+    "p95": 5.05,
+    "max": 5.43,
+    "sd": 1.07
+   }
+  }
+ }
+}

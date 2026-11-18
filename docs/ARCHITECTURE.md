@@ -11,7 +11,7 @@
   Otherwise `html.gl-fallback` is set and every `MascotAnchor` collapses, so the layout closes up around the text. No flat image stands in for Auri.
 - **Start-up** (`World.init`) yields to the main thread between steps (environment map, mascot, glyph atlas, async shader compile), so no single task blocks input for long. See "Start-up" below for the order things load in.
 - **Frame:**
-  1. key light with a 1024² soft shadow that follows Auri's scale;
+  1. lights: a key light with a 1024² soft shadow that follows Auri's scale, a lavender hemisphere fill, a violet back light and a rim light in the accent colour;
   2. scene into a half-float target, at the 3D resolution;
   3. 16-tap cell reduction, on the composite's cell grid, storing average colour and max coverage;
   4. a per-cell noise pass (lens dither, aura field, glyph jitter);
@@ -60,16 +60,19 @@
   - under reduced motion they show their final state.
 - Motion follows the OS `prefers-reduced-motion` setting live; the site stores nothing in the browser.
 
-## SEO
+## SEO and AI discoverability
 
-- Static HTML, same URLs as the live site, and canonical URLs on www.
-- Sitemap (`@astrojs/sitemap`) and `robots.txt`.
-- Open Graph and Twitter cards, reusing the existing share cards.
-- JSON-LD:
-  - Organization and WebSite on every page;
+- Static HTML, same URLs as the previous site. Canonical URLs, `og:url` and every JSON-LD URL use the apex `https://adai.systems`; `www` 308-redirects to it (a Vercel domain setting).
+- Every page has a unique title and description (enforced by a test). Indexable pages carry `robots: index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1`; the 404 page is `noindex, follow`.
+- Open Graph and Twitter cards with alt text for the share image. Meet Auri has its own card, rendered from the live model.
+- JSON-LD, all built from `src/content/` (nothing that the pages don't say):
+  - Organization (with its parent company, contact email and the four services as `knowsAbout`) and WebSite on every page;
+  - a `WebPage` for every indexable page, typed as `AboutPage` (`/studio`), `ContactPage` (`/contact`) or `CollectionPage` (`/work`, `/services`, `/research`) where that fits;
   - BreadcrumbList on inner pages;
   - CreativeWork for case studies, Service for services, FAQPage for `/process`.
-- Descriptions come from content.
+- Sitemap (`@astrojs/sitemap`, apex URLs, 404 excluded) and `robots.txt`, which points to it.
+- **`robots.txt` in production is mostly Cloudflare's.** Cloudflare's managed robots.txt prepends a block that disallows model-training crawlers (GPTBot, ClaudeBot, Google-Extended, CCBot and others) and declares `Content-Signal: search=yes, ai-train=no, use=reference`. The repository's own rules (`Allow: /` and the sitemap) follow it. Search engines and AI search and retrieval agents (for example OAI-SearchBot, ChatGPT-User, PerplexityBot, Claude-SearchBot) are allowed. That block is managed in the Cloudflare dashboard, not here.
+- `/llms.txt` (`src/pages/llms.txt.ts`): a plain-text map of the studio, services, every project and the main pages, generated from the same content files as the site. It's a convenience for AI assistants; not every crawler reads it.
 
 ## Start-up
 
@@ -100,5 +103,5 @@ Without throttling the first frame is at about 0.27 s. Four things keep this smo
 | Budget | Spec | Actual |
 |---|---|---|
 | Initial JS | ≤ 300 KB br | About 3 KB gzipped of page scripts, plus Lenis 5 KB gzipped at idle |
-| WebGL chunk | Deferred ≤ 150 KB | 147 KB gzipped (three.js + world), after load and idle |
-| Hero-critical assets | ≤ 4 MB | Poster WebP 26 KB, fonts about 90 KB. Auri is procedural: 0 bytes of 3D assets downloaded. |
+| WebGL chunk | Deferred ≤ 150 KB | 182 KB gzip -9 for the whole preloaded set (three.js, world, Auri; was 169 KB measured the same way before the redesign), after load and idle. Over the spec's figure. |
+| Hero-critical assets | ≤ 4 MB | Fonts about 90 KB. Auri is procedural: 0 bytes of 3D assets downloaded. |
