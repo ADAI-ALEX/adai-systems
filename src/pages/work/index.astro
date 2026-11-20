@@ -4,16 +4,21 @@ import ProjectCard from '@/components/ProjectCard.astro';
 import MascotAnchor from '@/components/MascotAnchor.astro';
 import HireBand from '@/components/HireBand.astro';
 import { byDateDesc, counts, filters } from '@/content/projects';
+import { aegix } from '@/content/aegix';
 import { copy } from '@/content/site';
 import { breadcrumbLd } from '@/lib/seo';
 
-const archive = byDateDesc.filter((p) => p.kind !== 'studio');
+// Aegix (Nov 2026) is the newest project and has its own page, so it leads the archive.
+const archive = [aegix, ...byDateDesc.filter((p) => p.kind !== 'studio')];
+const total = counts.total + 1;
+const running = counts.running + (filters[1].test(aegix) ? 1 : 0);
+const openSource = counts.openSource + (aegix.openSource ? 1 : 0);
 const matches = (slug: string) => filters.filter((f) => f.test(archive.find((p) => p.slug === slug)!)).map((f) => f.id).join(' ');
 ---
 <Base
   title="Work"
   path="/work"
-  description={`Every project ADAI Systems has built since December 2024: ${counts.total} in total, including AI agents, automation, apps and research. Nothing hidden because it was paused or dropped.`}
+  description={`Every project ADAI Systems has built since December 2024: ${total} in total, including AI agents, automation, apps and research. Nothing hidden because it was paused or dropped.`}
   ogImage="/og/work.png"
   mascot={{ mode: 'hero', pose: 'work' }}
   jsonLd={[breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'Work', path: '/work' }])]}
@@ -21,7 +26,7 @@ const matches = (slug: string) => filters.filter((f) => f.test(archive.find((p) 
   <section class="page-hero">
     <div class="wrap hero-grid">
       <div class="stack" style="--stack:1.25rem">
-        <p class="eyebrow" data-reveal>{counts.total} projects · {counts.running} running · {counts.openSource} open source</p>
+        <p class="eyebrow" data-reveal>{total} projects · {running} running · {openSource} open source</p>
         <h1 data-reveal>{copy.archive.title}</h1>
         <p class="lead" data-reveal>{copy.archive.body}</p>
       </div>

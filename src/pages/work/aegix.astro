@@ -1,0 +1,464 @@
+---
+/**
+ * /work/aegix: the Aegix venture page. A bespoke page (not the shared case-study template) because Aegix is
+ * a concept with a roadmap rather than a finished build. Content lives in src/content/aegix.ts.
+ * Static routes win over work/[slug], and `aegix` is not in `projects`, so the two never collide.
+ */
+import Base from '@/layouts/Base.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import AegixMark from '@/components/aegix/AegixMark.astro';
+import { aegix, aegixPage as c } from '@/content/aegix';
+import { byDateDesc, getProject } from '@/content/projects';
+import { site } from '@/content/site';
+import { breadcrumbLd, projectLd } from '@/lib/seo';
+
+const hero = aegix.media![0];
+const related = c.portfolio.related.map((r) => ({ project: getProject(r.slug), why: r.why }));
+const older = byDateDesc.find((p) => p.kind !== 'studio');
+const mail = `mailto:${site.email}?subject=${encodeURIComponent(c.involve.subject)}`;
+const description =
+  'Aegix is an early-stage health-tech venture from ADAI Systems exploring a wearable band and care-team platform for monitoring high-risk patients.';
+
+/* Line icons, 24 × 24, drawn for this page. */
+const icon: Record<string, string> = {
+  band: '<rect x="8" y="5" width="8" height="14" rx="4"/><path d="M10 5V2.5M14 5V2.5M10 19v2.5M14 19v2.5"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/>',
+  platform: '<path d="M12 3.5l8.5 4.25L12 12 3.5 7.75z"/><path d="M3.5 12L12 16.25 20.5 12"/><path d="M3.5 16.25L12 20.5l8.5-4.25"/>',
+  dashboard: '<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9h18M8.5 9v11"/><path d="M11.5 16.5l2.5-2.5 2 1.5 3-3.5"/>',
+  alerts: '<path d="M6.5 16v-5a5.5 5.5 0 0111 0v5l1.8 1.8H4.7z"/><path d="M10 20.5a2 2 0 004 0"/>',
+  vitals: '<circle cx="12" cy="12" r="2.5"/><path d="M7.4 7.4a6.5 6.5 0 000 9.2M16.6 7.4a6.5 6.5 0 010 9.2M4.6 4.6a10.5 10.5 0 000 14.8M19.4 4.6a10.5 10.5 0 010 14.8"/>',
+  falls: '<path d="M12 3.2l7 2.6v5.4c0 4.6-3 8-7 9.6-4-1.6-7-5-7-9.6V5.8z"/><path d="M12 8v5M12 16.2v.3"/>',
+};
+const svg = (name: string) => `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${icon[name]}</svg>`;
+
+/* The "periodic vs continuous" illustration: scheduled checks at fixed hours across one day. */
+const hours = [0, 4, 8, 12, 16, 20, 24];
+const checks = [6, 10, 14, 18, 22];
+const x = (h: number) => 40 + (h / 24) * 720;
+---
+<Base
+  title={`${aegix.title}: ${c.headline.replace(/\.$/, '')}`}
+  path="/work/aegix"
+  description={description}
+  ogImage="/og/aegix.png"
+  hue="products"
+  bodyClass="aegix"
+  jsonLd={[
+    projectLd(aegix),
+    breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'Work', path: '/work' }, { name: aegix.title, path: '/work/aegix' }]),
+  ]}
+>
+  <article class="ae" data-hue="products">
+    <!-- 1. Hero -->
+    <header class="page-hero ae-hero">
+      <figure class="ae-hero-media">
+        <img
+          draggable="false"
+          src={hero.src}
+          alt={hero.alt}
+          width={hero.width}
+          height={hero.height}
+          decoding="async"
+          fetchpriority="high"
+        />
+        <figcaption class="concept-tag mono"><span class="dot" aria-hidden="true"></span>{c.conceptLabel}</figcaption>
+      </figure>
+      <div class="wrap ae-hero-copy">
+        <Breadcrumbs items={[{ name: 'Work', href: '/work' }, { name: aegix.title }]} />
+        <p class="wordmark display-text"><AegixMark size={44} /><span>Aegix</span></p>
+        <ul class="tags meta" aria-label="About Aegix">
+          <li class="pill pill--plain">Health technology</li>
+          <li class="pill pill--plain">Wearable monitoring</li>
+          <li class="pill stage-pill">Early-stage development</li>
+        </ul>
+        <h1>{c.headline}</h1>
+        <p class="lead">{c.lead}</p>
+        <div class="actions">
+          <a class="btn" href="#involved">Get involved <span class="arrow" aria-hidden="true">→</span></a>
+          <a class="btn btn--ghost" href="#roadmap">See the roadmap</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Where it stands -->
+    <section class="wrap ae-status" aria-labelledby="status-title">
+      <div class="status-panel" data-reveal>
+        <div class="status-head">
+          <h2 id="status-title" class="mono">Where Aegix stands · November 2026</h2>
+        </div>
+        <dl class="status-grid">
+          {c.stage.map((s) => <div><dt class="mono">{s.label}</dt><dd>{s.value}</dd></div>)}
+        </dl>
+        <div class="not-yet">
+          <p class="mono not-yet-label">Said plainly</p>
+          <ul>{c.notYet.map((n) => <li>{n}</li>)}</ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. The problem -->
+    <section class="section ae-problem" aria-labelledby="problem-title">
+      <div class="wrap">
+        <SectionHead id="problem-title" eyebrow="01 · The problem" title={c.problem.title} lead={c.problem.lead} />
+        <figure class="timeline panel" data-reveal>
+          <svg viewBox="0 0 800 210" role="img" aria-labelledby="tl-title tl-desc" focusable="false">
+            <title id="tl-title">Periodic checks compared with continuous visibility</title>
+            <desc id="tl-desc">An illustrative day. The top row shows five scheduled observations with long unobserved gaps between them. The bottom row shows the continuous visibility Aegix aims for. Not patient data.</desc>
+            <g class="axis">
+              {hours.map((h) => (
+                <g>
+                  <line x1={x(h)} x2={x(h)} y1="22" y2="170" />
+                  <text x={x(h)} y="196" text-anchor="middle">{String(h % 24).padStart(2, '0')}:00</text>
+                </g>
+              ))}
+            </g>
+            <text class="row-label" x="40" y="44">Periodic observations</text>
+            <rect class="gap" x={x(0)} y="58" width={x(24) - x(0)} height="26" rx="13" />
+            {checks.map((h) => <circle class="check" cx={x(h)} cy="71" r="7" />)}
+            <text class="row-label" x="40" y="122">Continuous visibility (the aim)</text>
+            <g class="stream">
+              {Array.from({ length: 97 }, (_, i) => <circle cx={x((i / 96) * 24)} cy="149" r="2.6" />)}
+            </g>
+          </svg>
+          <figcaption class="mono mute">Illustrative only. Not patient data.</figcaption>
+        </figure>
+        <ol class="problem-grid">
+          {c.problem.items.map((p, i) => (
+            <li class="problem-card" data-reveal style={`--reveal-delay:${i * 80}ms`}>
+              <span class="kicker-num">{String(i + 1).padStart(2, '0')}</span>
+              <h3>{p.title}</h3>
+              <p class="mute">{p.body}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+
+    <!-- 3. The concept -->
+    <section class="section ae-concept" aria-labelledby="concept-title">
+      <div class="wrap">
+        <div class="concept-split">
+          <SectionHead id="concept-title" eyebrow="02 · The Aegix concept" title={c.concept.title} lead={c.concept.lead}>
+            <ul class="concept-points">{c.concept.body.map((b) => <li>{b}</li>)}</ul>
+          </SectionHead>
+          <figure class="frame worn" data-reveal>
+            <img draggable="false" src="/work/aegix/aegix-band-worn-concept.webp" alt={c.concept.wornAlt} width="1376" height="768" loading="lazy" decoding="async" />
+            <figcaption class="concept-tag mono"><span class="dot" aria-hidden="true"></span>Concept image · not a real device</figcaption>
+          </figure>
+        </div>
+
+        <figure class="flow" aria-labelledby="flow-cap" data-reveal>
+          <ol class="flow-track">
+            {c.concept.flow.map((f, i) => (
+              <li class:list={['flow-node', `flow-node--${f.id}`]}>
+                <span class="flow-icon" set:html={svg(f.id)} />
+                <span class="mono flow-step">Step {i + 1}</span>
+                <strong>{f.title}</strong>
+                <span class="mute flow-body">{f.body}</span>
+                {i < c.concept.flow.length - 1 && <span class="flow-link" aria-hidden="true"><i></i></span>}
+              </li>
+            ))}
+          </ol>
+          <figcaption id="flow-cap" class="mono flow-note"><span class="dot" aria-hidden="true"></span>{c.concept.flowNote}</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 4. Core capabilities -->
+    <section class="section ae-caps" aria-labelledby="caps-title">
+      <div class="wrap">
+        <SectionHead id="caps-title" eyebrow="03 · Core capabilities" title="Three pillars, all still ahead." lead="What Aegix is designed to do. None of it is built yet, and each pillar says where it stands." />
+        <ul class="caps-grid">
+          {c.capabilities.map((cap, i) => (
+            <li class="cap" data-reveal style={`--reveal-delay:${i * 90}ms`}>
+              <span class="cap-icon" set:html={svg(cap.id === 'alerts' ? 'dashboard' : cap.id)} />
+              <h3>{cap.title}</h3>
+              <p class="mute">{cap.body}</p>
+              <p class="cap-state mono"><span class="mute">Status</span> {cap.state}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- 5. Intended deployment -->
+    <section class="section ae-deploy" aria-labelledby="deploy-title">
+      <div class="wrap">
+        <SectionHead id="deploy-title" eyebrow="04 · Intended deployment" title={c.deployment.title} lead={c.deployment.lead} />
+        <ul class="deploy-grid">
+          {c.deployment.items.map((d, i) => (
+            <li class="deploy" data-reveal style={`--reveal-delay:${i * 70}ms`}>
+              <span class="mono deploy-tag">Intended market</span>
+              <h3>{d.title}</h3>
+              <p class="mute">{d.body}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- 6. Roadmap -->
+    <section class="section ae-roadmap" id="roadmap" aria-labelledby="roadmap-title">
+      <div class="wrap">
+        <SectionHead id="roadmap-title" eyebrow="05 · Development roadmap" title="From first interviews to a funded company." lead="Six stages, in order. The software comes first; the band follows once the right team is in place." />
+        <ol class="road" data-road>
+          {c.roadmap.map((r, i) => (
+            <li class:list={['stage', i < 2 && 'is-current', i === 5 && 'is-ambition']} data-reveal>
+              <span class="stage-n mono" aria-hidden="true">{r.n}</span>
+              <div class="stage-body">
+                <p class="stage-state mono">{r.state}</p>
+                <h3><span class="sr-only">Stage {r.n}: </span>{r.title}</h3>
+                <p class="mute">{r.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <p class="road-note mono"><span class="dot" aria-hidden="true"></span>{c.roadmapNote}</p>
+      </div>
+    </section>
+
+    <!-- 7. Team -->
+    <section class="section ae-team" aria-labelledby="team-title">
+      <div class="wrap team-split">
+        <SectionHead id="team-title" eyebrow="06 · Team and ambition" title={c.team.title} lead={c.team.lead}>
+          <p class="team-body">{c.team.body}</p>
+          <a class="btn btn--hue join" href={mail}>Talk about joining <span class="arrow" aria-hidden="true">→</span></a>
+        </SectionHead>
+        <ul class="roles">
+          {c.team.areas.map((a, i) => (
+            <li class="role" data-reveal style={`--reveal-delay:${i * 60}ms`}>
+              <span class="role-seat mono" aria-hidden="true">Open seat</span>
+              <h3>{a.title}</h3>
+              <p class="mute">{a.body}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- 8. ADAI Systems portfolio -->
+    <section class="section--tight ae-portfolio" aria-labelledby="portfolio-title">
+      <div class="wrap">
+        <SectionHead id="portfolio-title" eyebrow="07 · ADAI Systems" title={c.portfolio.title} lead={c.portfolio.lead}>
+          <a class="link-arrow" href="/work">See all the work <span aria-hidden="true">→</span></a>
+        </SectionHead>
+        <div class="grid related">
+          {related.map(({ project, why }) => (
+            <div class="rel"><p class="mono mute why">{why}</p><ProjectCard project={project} /></div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. Get involved -->
+    <section class="section ae-involve" id="involved" aria-labelledby="involve-title">
+      <div class="wrap">
+        <div class="involve-panel" data-reveal>
+          <AegixMark size={56} class="involve-mark" />
+          <h2 id="involve-title">{c.involve.title}</h2>
+          <p class="lead">{c.involve.lead}</p>
+          <div class="actions">
+            <a class="btn" href={mail}>Email about Aegix <span class="arrow" aria-hidden="true">→</span></a>
+            <a class="btn btn--ghost" href={`mailto:${site.email}`}>{site.email}</a>
+          </div>
+          <p class="mono mute">{site.contactLine} Or use the <a href="/contact">contact page</a>.</p>
+        </div>
+      </div>
+    </section>
+
+    {older && (
+      <nav class="wrap pager" aria-label="Older projects">
+        <a href={`/work/${older.slug}`} class="pg"><span class="mono mute">← Older</span><strong>{older.title}</strong></a>
+        <a href="/work" class="pg next"><span class="mono mute">Archive</span><strong>All work</strong></a>
+      </nav>
+    )}
+  </article>
+</Base>
+
+<style>
+  .ae {
+    --ae-ivory: #efe9df;
+    --ae-signal: var(--coral);
+    --ae-panel: #0d1015;
+    --ae-hair: rgb(239 233 223 / 0.09);
+  }
+  .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--ae-signal); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ae-signal) 22%, transparent); flex: none; }
+
+  /* ---------- Hero ---------- */
+  .ae-hero { position: relative; isolation: isolate; display: grid; min-height: min(100svh, 52vw); align-items: center; padding-block: calc(var(--header-h) + 2rem) 4rem; overflow: hidden; }
+  .ae-hero-media { position: absolute; inset: 0; z-index: -1; margin: 0; background: #17181a; }
+  .ae-hero-media img { width: 100%; height: 100%; object-fit: cover; object-position: 72% 50%; }
+  /* Melt the render into the page: dark on the copy side and at the bottom edge. */
+  .ae-hero-media::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+    background:
+      linear-gradient(90deg, rgb(6 8 11 / 0.92) 0%, rgb(6 8 11 / 0.7) 26%, rgb(6 8 11 / 0.12) 52%, transparent 70%),
+      linear-gradient(180deg, rgb(6 8 11 / 0.55) 0%, transparent 18%, transparent 72%, var(--ink-0) 100%); }
+  .ae-hero-media .concept-tag { position: absolute; right: var(--gutter); bottom: 2rem; z-index: 1; }
+  .concept-tag { display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.45rem 0.8rem; border-radius: 999px; background: rgb(6 8 11 / 0.62); border: 1px solid var(--line-strong); color: var(--ae-ivory); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .ae-hero-copy { display: grid; gap: 1.35rem; justify-items: start; }
+  .ae-hero-copy > * { max-width: 40rem; }
+  .wordmark { display: inline-flex; align-items: center; gap: 0.9rem; margin-top: 0.5rem; color: var(--ae-ivory); font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.3rem); font-weight: 600; font-stretch: 125%; letter-spacing: 0.22em; text-transform: uppercase; line-height: 1; }
+  .meta { gap: 0.5rem; }
+  .meta .pill { background: rgb(6 8 11 / 0.45); }
+  .stage-pill { color: var(--ae-ivory); border-color: color-mix(in srgb, var(--ae-signal) 55%, transparent); }
+  .ae-hero h1 { font-size: clamp(2.6rem, 1.5rem + 4.3vw, 6.4rem); max-width: 11ch; color: var(--bone); }
+  .ae-hero .lead { max-width: 34ch; color: var(--bone-dim); }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+
+  @media (max-width: 899px) {
+    .ae-hero { min-height: 0; padding-top: var(--header-h); padding-bottom: 2.5rem; align-items: start; }
+    .ae-hero-media { position: relative; inset: auto; z-index: 0; aspect-ratio: 4 / 3; order: -1; margin-bottom: -3.5rem; }
+    .ae-hero-media img { object-position: 74% 50%; }
+    .ae-hero-media::after { background: linear-gradient(180deg, rgb(6 8 11 / 0.35) 0%, transparent 25%, transparent 55%, var(--ink-0) 100%); }
+    .ae-hero-media .concept-tag { top: 1rem; bottom: auto; right: 1rem; font-size: 0.62rem; letter-spacing: 0.08em; }
+    .ae-hero-copy { position: relative; }
+  }
+
+  /* ---------- Status panel ---------- */
+  .ae-status { position: relative; z-index: 1; margin-top: clamp(-2rem, -1rem - 2vw, -1rem); }
+  .status-panel { display: grid; gap: 0; border-radius: var(--radius-l); border: 1px solid var(--line); background: linear-gradient(180deg, rgb(255 255 255 / 0.035), rgb(255 255 255 / 0.01)), var(--ae-panel); overflow: hidden; }
+  .status-head { padding: 1rem clamp(1.1rem, 0.8rem + 1vw, 1.75rem); border-bottom: 1px solid var(--line); }
+  .status-head h2 { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ae-signal); line-height: 1.4; }
+  .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); margin: 0; }
+  .status-grid > div { padding: 1.25rem clamp(1.1rem, 0.8rem + 1vw, 1.75rem); border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); }
+  .status-grid dt { font-size: 0.72rem; color: var(--mute); margin-bottom: 0.35rem; }
+  .status-grid dd { margin: 0; font-size: var(--step-1); font-weight: 600; font-stretch: 112%; color: var(--ae-ivory); }
+  .not-yet { display: grid; gap: 0.85rem; padding: 1.25rem clamp(1.1rem, 0.8rem + 1vw, 1.75rem) 1.5rem; }
+  .not-yet-label { color: var(--mute); }
+  .not-yet ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.5rem 2rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); color: var(--bone-dim); }
+  .not-yet li { position: relative; padding-left: 1.25rem; }
+  .not-yet li::before { content: ''; position: absolute; left: 0; top: 0.72em; width: 0.6rem; height: 1px; background: var(--mute); }
+
+  /* ---------- Problem ---------- */
+  .timeline { margin: 0 0 clamp(1.5rem, 1rem + 2vw, 2.5rem); padding: clamp(1rem, 0.6rem + 1.5vw, 2rem); }
+  .timeline svg { width: 100%; height: auto; overflow: visible; }
+  .timeline .axis line { stroke: var(--ae-hair); stroke-width: 1; }
+  .timeline .axis text { fill: var(--mute); font: 12px var(--font-mono); }
+  .timeline .row-label { fill: var(--bone-dim); font: 500 14px var(--font-sans); }
+  .timeline .gap { fill: rgb(239 233 223 / 0.035); stroke: var(--line); stroke-dasharray: 3 5; }
+  .timeline .check { fill: var(--ink-0); stroke: var(--ae-ivory); stroke-width: 2; }
+  .timeline .stream circle { fill: var(--ae-signal); opacity: 0.85; }
+  .js .timeline .stream circle { opacity: 0; transition: opacity 600ms var(--ease-out); }
+  .js .timeline.is-in .stream circle { opacity: 0.85; }
+  .timeline figcaption { margin-top: 0.75rem; }
+  .problem-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); background: var(--line); border: 1px solid var(--line); border-radius: var(--radius-l); overflow: hidden; }
+  .problem-card { display: grid; gap: 0.75rem; align-content: start; padding: clamp(1.25rem, 1rem + 1vw, 2rem); background: var(--ink-0); }
+  .problem-card h3 { font-size: var(--step-1); }
+
+  /* ---------- Concept ---------- */
+  .concept-split { display: grid; gap: clamp(2rem, 1rem + 3vw, 4rem); align-items: center; grid-template-columns: 1fr; margin-bottom: clamp(3rem, 2rem + 3vw, 5rem); }
+  @media (min-width: 960px) { .concept-split { grid-template-columns: 0.9fr 1.1fr; } .concept-split :global(.section-head) { margin-bottom: 0; } }
+  .concept-points { margin: 0.5rem 0 0; padding: 0; list-style: none; display: grid; gap: 0.75rem; color: var(--bone-dim); max-width: 46ch; }
+  .concept-points li { position: relative; padding-left: 1.4rem; }
+  .concept-points li::before { content: ''; position: absolute; left: 0; top: 0.62em; width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid var(--ae-signal); }
+  .worn { margin: 0; aspect-ratio: 1376 / 768; }
+  .worn .concept-tag { position: absolute; left: 1rem; bottom: 1rem; font-size: 0.64rem; letter-spacing: 0.08em; }
+
+  .flow { margin: 0; padding: clamp(1.25rem, 0.8rem + 2vw, 2.5rem); border-radius: var(--radius-l); border: 1px solid var(--line); background:
+      radial-gradient(70% 120% at 50% 0%, rgb(255 125 97 / 0.06), transparent 70%),
+      repeating-linear-gradient(90deg, var(--ae-hair) 0 1px, transparent 1px 48px),
+      repeating-linear-gradient(0deg, var(--ae-hair) 0 1px, transparent 1px 48px),
+      var(--ae-panel); }
+  .flow-track { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .flow-node { position: relative; display: grid; gap: 0.5rem; align-content: start; padding: 1.25rem; border-radius: var(--radius-m); border: 1px solid var(--line-strong); background: rgb(6 8 11 / 0.82); }
+  .flow-icon { display: grid; place-items: center; width: 48px; height: 48px; margin-bottom: 0.4rem; border-radius: 14px; border: 1px solid var(--line-strong); color: var(--ae-ivory); background: linear-gradient(160deg, #1b1f26, #0b0e13); }
+  .flow-node--alerts .flow-icon { color: var(--ae-signal); border-color: color-mix(in srgb, var(--ae-signal) 45%, transparent); }
+  .flow-step { color: var(--mute); font-size: 0.7rem; }
+  .flow-node strong { font-size: var(--step-1); font-weight: 620; font-stretch: 112%; line-height: 1.15; }
+  .flow-body { font-size: 0.92rem; line-height: 1.5; }
+  /* Connector with a travelling signal. Static (no animation) when motion is reduced. */
+  .flow-link { position: absolute; top: 2.75rem; left: 100%; width: 1rem; height: 1px; background: var(--line-strong); overflow: visible; }
+  .flow-link i { position: absolute; top: -2px; left: 0; width: 5px; height: 5px; border-radius: 50%; background: var(--ae-signal); animation: ae-travel 2.4s var(--ease-in-out) infinite; }
+  .flow-node:nth-child(2) .flow-link i { animation-delay: 0.8s; }
+  .flow-node:nth-child(3) .flow-link i { animation-delay: 1.6s; }
+  @keyframes ae-travel { 0% { transform: translateX(-2px); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateX(calc(1rem - 3px)); opacity: 0; } }
+  .flow-note { display: inline-flex; align-items: center; gap: 0.6rem; margin-top: 1.25rem; color: var(--ae-ivory); }
+  @media (max-width: 899px) {
+    .flow-track { grid-template-columns: 1fr; gap: 1.5rem; }
+    .flow-link { top: 100%; left: 2.75rem; width: 1px; height: 1.5rem; }
+    .flow-link i { left: -2px; top: 0; animation-name: ae-travel-down; }
+    @keyframes ae-travel-down { 0% { transform: translateY(-2px); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateY(calc(1.5rem - 3px)); opacity: 0; } }
+  }
+
+  /* ---------- Capabilities ---------- */
+  .caps-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--gap, clamp(1rem, 0.6rem + 1.4vw, 2rem)); grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+  .cap { display: grid; grid-template-rows: auto auto 1fr auto; gap: 0.9rem; padding: clamp(1.25rem, 1rem + 1vw, 2rem); border-radius: var(--radius-l); border: 1px solid var(--line); background: linear-gradient(180deg, rgb(255 255 255 / 0.035), rgb(255 255 255 / 0.01)); }
+  .cap-icon { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; border: 1px solid var(--line-strong); color: var(--ae-ivory); }
+  .cap h3 { font-size: var(--step-2); }
+  .cap-state { padding-top: 0.9rem; border-top: 1px solid var(--line); color: var(--ae-signal); }
+  .cap-state .mute { margin-right: 0.5rem; }
+
+  /* ---------- Deployment ---------- */
+  .deploy-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius-l); overflow: hidden; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+  .deploy { display: grid; gap: 0.7rem; align-content: start; padding: clamp(1.25rem, 1rem + 1vw, 2rem); background: var(--ink-0); min-height: 13rem; }
+  .deploy-tag { color: var(--mute); font-size: 0.7rem; }
+  .deploy h3 { font-size: var(--step-1); max-width: 18ch; }
+
+  /* ---------- Roadmap ---------- */
+  .road { --rail: 2.25rem; position: relative; list-style: none; margin: 0; padding: 0; display: grid; }
+  .road::before { content: ''; position: absolute; left: calc(var(--rail) / 2); top: 0.5rem; bottom: 0.5rem; width: 1px; background: var(--line-strong); }
+  .road::after { content: ''; position: absolute; left: calc(var(--rail) / 2); top: 0.5rem; width: 1px; height: calc((100% - 1rem) * var(--road, 0)); background: var(--ae-signal); transition: height 200ms linear; }
+  .stage { position: relative; display: grid; grid-template-columns: var(--rail) 1fr; gap: clamp(1rem, 0.5rem + 2vw, 2.5rem); padding-block: clamp(1.25rem, 1rem + 1vw, 2rem); }
+  .stage + .stage { border-top: 1px solid var(--line); margin-left: calc(var(--rail) + clamp(1rem, 0.5rem + 2vw, 2.5rem)); padding-left: 0; grid-template-columns: 1fr; }
+  .stage + .stage .stage-n { position: absolute; left: calc(-1 * (var(--rail) + clamp(1rem, 0.5rem + 2vw, 2.5rem))); }
+  .stage-n { position: relative; z-index: 1; display: grid; place-items: center; width: var(--rail); height: var(--rail); border-radius: 50%; border: 1px solid var(--line-strong); background: var(--ink-0); color: var(--mute); font-size: 0.75rem; }
+  .is-current .stage-n { border-color: var(--ae-signal); color: var(--ae-ivory); box-shadow: 0 0 0 4px color-mix(in srgb, var(--ae-signal) 16%, transparent); }
+  .stage-body { display: grid; gap: 0.55rem; max-width: 62ch; }
+  .stage-state { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mute); }
+  .is-current .stage-state { color: var(--ae-signal); }
+  .is-ambition .stage-state { color: var(--ae-ivory); }
+  .stage h3 { font-size: var(--step-2); }
+  .road-note { display: flex; align-items: center; gap: 0.6rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--line); color: var(--bone-dim); line-height: 1.5; }
+
+  /* ---------- Team ---------- */
+  .team-split { display: grid; gap: clamp(2rem, 1rem + 3vw, 4rem); grid-template-columns: 1fr; align-items: start; }
+  @media (min-width: 960px) { .team-split { grid-template-columns: 0.95fr 1.05fr; } .team-split :global(.section-head) { position: sticky; top: calc(var(--header-h) + 2rem); margin-bottom: 0; } }
+  .team-body { color: var(--bone); max-width: 44ch; }
+  .join { justify-self: start; }
+  .roles { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
+  .role { position: relative; display: grid; gap: 0.4rem; padding: 1.25rem 1.4rem; border-radius: var(--radius-m); border: 1px dashed var(--line-strong); background: rgb(255 255 255 / 0.015); transition: border-color var(--dur-2), background-color var(--dur-2); }
+  .role:hover { border-color: color-mix(in srgb, var(--ae-signal) 60%, transparent); background: rgb(255 125 97 / 0.03); }
+  .role h3 { font-size: var(--step-1); padding-right: 6.5rem; }
+  .role-seat { position: absolute; top: 1.3rem; right: 1.3rem; font-size: 0.68rem; color: var(--ae-signal); }
+
+  /* ---------- Portfolio ---------- */
+  .related { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+  .rel { display: grid; grid-template-rows: auto 1fr; }
+  .why { margin-bottom: 0.6rem; min-height: 2.6em; }
+
+  /* ---------- Involve ---------- */
+  .involve-panel { position: relative; display: grid; gap: 1.25rem; justify-items: center; text-align: center; padding: clamp(2.5rem, 1.5rem + 5vw, 6rem) clamp(1.25rem, 1rem + 3vw, 4rem); border-radius: 40px; border: 1px solid var(--line); overflow: hidden;
+    background: radial-gradient(60% 80% at 50% 0%, rgb(255 125 97 / 0.09), transparent 70%), linear-gradient(180deg, rgb(255 255 255 / 0.03), transparent), var(--ae-panel); }
+  .involve-panel :global(.involve-mark) { color: var(--ae-ivory); }
+  .involve-panel h2 { font-size: var(--step-4); max-width: 14ch; }
+  .involve-panel .lead { max-width: 52ch; }
+  .involve-panel .actions { justify-content: center; }
+  .involve-panel a:not(.btn) { color: var(--bone); }
+
+  /* ---------- Pager ---------- */
+  .pager { display: flex; justify-content: space-between; gap: 1rem; padding-block: 0 1rem; }
+  .pg { display: grid; gap: 0.25rem; text-decoration: none; padding: 1rem 1.25rem; border-radius: var(--radius-m); border: 1px solid var(--line); min-width: 40%; }
+  .pg:hover { border-color: var(--bone); }
+  .pg.next { text-align: right; }
+  .pg strong { font-stretch: 112%; }
+</style>
+
+<script>
+  import { motionAllowed } from '@/scripts/motion';
+  /* The roadmap rail fills as the reader moves through it. Full and static when motion is reduced. */
+  const road = document.querySelector<HTMLElement>('[data-road]');
+  if (road) {
+    const set = (v: number) => road.style.setProperty('--road', v.toFixed(3));
+    const update = () => {
+      if (!motionAllowed()) return set(1);
+      const r = road.getBoundingClientRect();
+      const mid = innerHeight * 0.6;
+      set(Math.min(1, Math.max(0, (mid - r.top) / r.height)));
+    };
+    addEventListener('scroll', update, { passive: true });
+    addEventListener('resize', update);
+    addEventListener('adai:motion', update);
+    update();
+  }
+</script>

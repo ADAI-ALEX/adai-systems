@@ -14,7 +14,9 @@ export type Status =
   | "built"
   | "research"
   | "on-hold"
-  | "discontinued";
+  | "discontinued"
+  /** A venture at concept stage: nothing is built yet. */
+  | "early-stage";
 
 export type Kind = "studio" | "product" | "research" | "demo" | "tool";
 

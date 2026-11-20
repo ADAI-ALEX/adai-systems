@@ -7,12 +7,13 @@ import type { APIRoute } from 'astro';
 import { site, copy } from '@/content/site';
 import { services } from '@/content/services';
 import { projects } from '@/content/projects';
+import { aegix } from '@/content/aegix';
 import { MASCOT } from '@/lib/mascot';
 
 const url = (path: string) => `${site.url}${path === '/' ? '' : path}`;
 
 export const GET: APIRoute = () => {
-  const work = [...projects].sort((a, b) => b.start.localeCompare(a.start));
+  const work = [aegix, ...projects].sort((a, b) => b.start.localeCompare(a.start));
   const lines = [
     `# ${site.name}`,
     '',

@@ -1,0 +1,27 @@
+---
+/**
+ * The Aegix mark: the band's oval sensor module seen from above, crossed by an open eye.
+ * Protection (the enclosing pebble) and observation (the eye), with the pupil as the one point of signal.
+ * Decorative by default; pass `label` to expose it to assistive technology.
+ */
+interface Props { size?: number; label?: string; class?: string }
+const { size = 40, label, class: className } = Astro.props;
+---
+<svg
+  class:list={['aegix-mark', className]}
+  width={size}
+  height={size}
+  viewBox="0 0 48 48"
+  fill="none"
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+  focusable="false"
+>
+  <rect x="13" y="4.5" width="22" height="39" rx="11" stroke="currentColor" stroke-width="2.2" />
+  <path d="M4.5 24C10.5 15.5 17 11.8 24 11.8S37.5 15.5 43.5 24C37.5 32.5 31 36.2 24 36.2S10.5 32.5 4.5 24Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" />
+  <circle cx="24" cy="24" r="4" fill="var(--ae-signal, #ff7d61)" />
+</svg>
+<style>
+  .aegix-mark { flex: none; }
+</style>

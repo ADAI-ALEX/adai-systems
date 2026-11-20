@@ -608,3 +608,38 @@ test('Auri: arms keep their length (no stretching) and stay out of the head in e
   for (const g of ['wave', 'point', 'think', 'cheer', 'present', 'shrug', 'nod']) check(g, await sweep(`[data-gesture="${g}"]`, 2400));
   expect(bad).toEqual([]);
 });
+
+/* ---------------------------------------------------------------- Aegix */
+test('Aegix: the archive leads with its card, which links to the page and labels the concept', async ({ page }) => {
+  await page.goto('/work', { waitUntil: 'networkidle' });
+  const first = page.locator('[data-archive] .card').first();
+  await expect(first.locator('.card-title')).toHaveText('Aegix');
+  await expect(first.locator('.status')).toHaveText('Early stage');
+  await expect(first.locator('.concept')).toHaveText('Concept illustration');
+  await expect(first.locator('a')).toHaveAttribute('href', '/work/aegix');
+  await first.locator('a').click();
+  await expect(page).toHaveURL(/\/work\/aegix$/);
+  await expect(page.locator('h1')).toHaveText('A closer watch over patient wellbeing.');
+});
+
+test('Aegix: hero render loads, is labelled as a concept, and the page states what does not exist', async ({ page }) => {
+  await page.goto('/work/aegix', { waitUntil: 'networkidle' });
+  const hero = page.locator('.ae-hero-media img');
+  expect(await hero.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth)).toBe(1376);
+  await expect(page.locator('.ae-hero-media figcaption')).toContainText(/Wearable concept/i);
+  expect(await page.locator('.ae img').evaluateAll((imgs) => imgs.every((i) => (i as HTMLImageElement).alt.length > 20))).toBe(true);
+  await expect(page.locator('.not-yet li')).toHaveCount(6);
+  await expect(page.getByText('Proposed architecture. This is not a working system.')).toBeVisible();
+  for (const href of await page.locator('.ae a[href^="/"]').evaluateAll((as) => [...new Set(as.map((a) => a.getAttribute('href')!.split('#')[0]))])) {
+    expect((await page.request.get(href)).status(), href).toBe(200);
+  }
+  await expect(page.locator('a[href^="mailto:alex@adai.systems"]').first()).toBeVisible();
+});
+
+test('a11y /work/aegix: no serious or critical axe violations', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/work/aegix', { waitUntil: 'networkidle' });
+  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
+  const bad = results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
+  expect(bad.map((v) => `${v.id}: ${v.nodes.slice(0, 3).map((n) => n.target.join(' ')).join(' | ')}`)).toEqual([]);
+});
